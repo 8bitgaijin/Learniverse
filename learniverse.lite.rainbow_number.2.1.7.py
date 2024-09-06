@@ -1433,6 +1433,49 @@ def save_options():
         log_message(log_entry)
 
 class Cat:
+    """
+    A class to represent the player's cat character with jumping, movement, and particle effects.
+
+    Attributes:
+    -----------
+    image : Surface
+        The image representing the cat.
+    rect : Rect
+        The rectangle enclosing the cat for positioning and collision.
+    speed : int
+        The speed at which the cat moves horizontally.
+    gravity : int
+        The gravity applied to the cat during jumps and falls.
+    jump_speed : int
+        The speed applied to the cat when jumping.
+    vertical_speed : int
+        The current vertical speed of the cat (used for jumping and falling).
+    is_jumping : bool
+        Whether the cat is currently in the air.
+    can_double_jump : bool
+        Whether the cat can perform a double jump.
+    facing_left : bool
+        Whether the cat is facing left.
+    jump_angle : int
+        The rotation angle applied to the cat during jumps.
+    max_angle : int
+        The maximum rotation angle for the cat's jump.
+    particles : list
+        A list of particle objects emitted during jumps.
+
+    Methods:
+    --------
+    handle_input():
+        Handles player input for moving the cat.
+    apply_gravity(platforms=None):
+        Applies gravity to the cat and manages platform collisions.
+    jump():
+        Makes the cat jump and emits particles.
+    update(platforms=None):
+        Updates the cat's position, handles input, applies gravity, and manages jumping.
+    draw(screen):
+        Draws the cat and its particles on the provided screen.
+    """
     def __init__(self, image, x, y, speed, scale_factor):
         """
         Initialize the Cat object.
@@ -1586,6 +1629,25 @@ class Particle:
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
 
 class Piranha:
+    """
+    A class to represent a piranha that moves horizontally across the screen.
+
+    Attributes:
+    -----------
+    image : Surface
+        The image representing the piranha.
+    rect : Rect
+        The rectangle enclosing the piranha, used for positioning and collision detection.
+    speed : int
+        The speed at which the piranha moves horizontally across the screen.
+
+    Methods:
+    --------
+    update():
+        Updates the piranha's position, reversing its direction when it hits the screen edges.
+    draw(screen):
+        Draws the piranha on the given Pygame surface.
+    """
     def __init__(self, image, x, y, speed):
         """
         Initialize the Piranha object.
@@ -1620,6 +1682,23 @@ class Piranha:
         screen.blit(self.image, self.rect.topleft)
    
 class Platform:
+    """
+    A class to represent a platform that can move or stay stationary on the screen.
+
+    Attributes:
+    -----------
+    image : Surface
+        The scaled image representing the platform.
+    rect : Rect
+        The rectangle defining the platform's position and dimensions.
+
+    Methods:
+    --------
+    update(speed):
+        Updates the platform's vertical position based on the given falling speed.
+    draw(screen):
+        Draws the platform on the given Pygame surface.
+    """
     def __init__(self, image, x, y, width, height):
         """
         Initialize the Platform object.
