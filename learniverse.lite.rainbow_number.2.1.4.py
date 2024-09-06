@@ -15,9 +15,6 @@ import random
 import sys
 import time
 
-
-
-
 # Set the title of the window
 pygame.display.set_caption("Learniverse Lite: Rainbow Numbers")
 
@@ -141,7 +138,6 @@ try:
     pygame.init()
     pygame.mixer.init()
 except pygame.error as e:
-    # log_message(f"Error initializing Pygame: {e}")
     log_entry = create_log_message(f"Error initializing Pygame: {e}")
     log_message(log_entry)
     sys.exit(1)
@@ -174,7 +170,6 @@ def apply_theme(theme_name):
         screen_color = theme["screen_color"]
         current_theme = theme_name  # Update the global current_theme variable
     else:
-        # log_message(f"Theme {theme_name} not found. Defaulting to light theme.")
         log_entry = create_log_message(f"Theme {theme_name} not found. Defaulting to light theme.")
         log_message(log_entry)
         apply_theme("light")
@@ -259,12 +254,10 @@ def load_options():
         current_theme = options.get("current_theme", "light")  # Load the theme, default to "light" if not found
         
     except FileNotFoundError:
-        # log_message("Options file not found, using default settings.")
         log_entry = create_log_message("Options file not found, using default settings.")
         log_message(log_entry)
         current_theme = "light"
     except Exception as e:
-        # log_message(f"Error loading options: {e}")
         log_entry = create_log_message(f"Error loading options: {e}")
         log_message(log_entry)
     
@@ -424,7 +417,6 @@ def credit_roll():
         cat_direction = 1  # 1 for right, -1 for left
         cat_loaded = True
     except (FileNotFoundError, pygame.error) as e:
-        # log_message(f"Error loading cat sprite: {e}")
         log_entry = create_log_message(f"Error loading cat sprite: {e}")
         log_message(log_entry)
         cat_loaded = False
@@ -562,12 +554,10 @@ def select_random_background(folder_path):
         
         return image_path
     except FileNotFoundError as e:
-        # log_message(f"Error selecting background image: {e}")
         log_entry = create_log_message(f"Error selecting background image: {e}")
         log_message(log_entry)
         return None
     except Exception as e:
-        # log_message(f"Unexpected error selecting background image: {e}")
         log_entry = create_log_message(f"Unexpected error selecting background image: {e}")
         log_message(log_entry)
         return None
@@ -597,12 +587,10 @@ def draw_background(image_path):
             raise FileNotFoundError("No valid background image path provided.")
     except (pygame.error, FileNotFoundError) as e:
         # Handle the missing file case or Pygame error
-        # log_message(f"Error loading background image: {e}")
         log_entry = create_log_message(f"Error loading background image: {e}")
         log_message(log_entry)
         screen.fill(screen_color)  # Fallback to black if loading fails
     except Exception as e:
-        # log_message(f"Unexpected error while drawing background: {e}")
         log_entry = create_log_message(f"Unexpected error while drawing background: {e}")
         log_message(log_entry)
         screen.fill(screen_color)
@@ -724,13 +712,11 @@ def get_filtered_fonts():
                 # If the font renders successfully, add it to the filtered list
                 filtered_fonts.append(font_name)
             except Exception as e:
-                # log_message(f"Skipping font {font_name} due to error: {e}")
                 log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
                 log_message(log_entry)
     
     # Ensure we have at least one valid font, fallback to 'arial' if necessary
     if not filtered_fonts:
-        # log_message("No valid fonts found, falling back to 'arial'.")
         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
         log_message(log_entry)
         filtered_fonts = [fallback_font]
@@ -746,7 +732,6 @@ def options_menu():
     # Fallback to a default font if no valid fonts are found
     if not filtered_fonts:
         filtered_fonts = ["arial"]
-        # log_message("No valid fonts found. Falling back to 'arial'.")
         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
         log_message(log_entry)
 
@@ -904,7 +889,6 @@ def save_options():
         with open("options.json", "w") as file:
             json.dump(options, file)
     except Exception as e:
-        # log_message(f"Error saving options: {e}")
         log_entry = create_log_message(f"Error saving options: {e}")
         log_message(log_entry)
 
@@ -1077,7 +1061,6 @@ def bonus_game():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
         # Log the error if needed
-        # log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
         log_message(log_entry)
         return "main_menu"
@@ -1382,7 +1365,6 @@ def get_random_mp3(directory):
         mp3_files = [f for f in os.listdir(directory) if f.endswith('.mp3')]
         
         if not mp3_files:
-            # log_message(f"No MP3 files found in the directory.")
             log_entry = create_log_message("No MP3 files found in the directory.")
             log_message(log_entry)
             return None
@@ -1392,7 +1374,6 @@ def get_random_mp3(directory):
         return os.path.join(directory, random_mp3)
     
     except Exception as e:
-        # log_message(f"Error loading MP3 files from directory: {e}")
         log_entry = create_log_message(f"Error loading MP3 files from directory: {e}")
         log_message(log_entry)
         return None
@@ -1402,12 +1383,10 @@ def load_mp3(mp3):
         pygame.mixer.music.load(mp3)
         return True  # Indicate success
     except pygame.error as e:
-        # log_message(f"Failed to load {mp3}: {e}")
         log_entry = create_log_message(f"Failed to load {mp3}: {e}")
         log_message(log_entry)
         return False  # Indicate failure
     except Exception as e:
-        # log_message(f"Unexpected error loading {mp3}: {e}")
         log_entry = create_log_message(f"Unexpected error loading {mp3}: {e}")
         log_message(log_entry)
         return False  # Indicate failure
@@ -1420,11 +1399,9 @@ def play_mp3(volume=None):
         pygame.mixer.music.set_volume(music_volume)  # Set volume to current level
         pygame.mixer.music.play(-1)  # -1 loops the music indefinitely
     except pygame.error as e:
-        # log_message(f"Failed to play music: {e}")
         log_entry = create_log_message(f"Failed to play music: {e}")
         log_message(log_entry)
     except Exception as e:
-        # log_message(f"Unexpected error while playing music: {e}")
         log_entry = create_log_message(f"Unexpected error while playing music: {e}")
         log_message(log_entry)
         

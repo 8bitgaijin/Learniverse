@@ -1167,3 +1167,13 @@
 [2024-09-06 15:28:18] Error loading background image: No valid background image path provided.
 [2024-09-06 15:28:18] Error loading background image: No valid background image path provided.
 [2024-09-06 15:28:18] Error loading background image: No valid background image path provided.
+[2024-09-06 15:34:14] Skipping font codicon0035 due to error: No such file or directory: 'C:\Windows\Fonts\codicon-0.0.35.ttf'.
+[2024-09-06 15:34:14] Skipping font elusiveiconswebfont due to error: No such file or directory: 'C:\Windows\Fonts\elusiveicons-webfont.ttf'.
+[2024-09-06 15:34:14] Skipping font elusiveiconswebfont20 due to error: No such file or directory: 'C:\Windows\Fonts\elusiveicons-webfont-2.0.ttf'.
+[2024-09-06 15:34:14] Skipping font phosphor due to error: No such file or directory: 'C:\Windows\Fonts\phosphor.ttf'.
+[2024-09-06 15:34:14] Skipping font phosphor130 due to error: No such file or directory: 'C:\Windows\Fonts\phosphor-1.3.0.ttf'.
+[2024-09-06 15:34:28] Skipping font codicon0035 due to error: No such file or directory: 'C:\Windows\Fonts\codicon-0.0.35.ttf'.
+[2024-09-06 15:34:28] Skipping font elusiveiconswebfont due to error: No such file or directory: 'C:\Windows\Fonts\elusiveicons-webfont.ttf'.
+[2024-09-06 15:34:28] Skipping font elusiveiconswebfont20 due to error: No such file or directory: 'C:\Windows\Fonts\elusiveicons-webfont-2.0.ttf'.
+[2024-09-06 15:34:28] Skipping font phosphor due to error: No such file or directory: 'C:\Windows\Fonts\phosphor.ttf'.
+[2024-09-06 15:34:28] Skipping font phosphor130 due to error: No such file or directory: 'C:\Windows\Fonts\phosphor-1.3.0.ttf'.
