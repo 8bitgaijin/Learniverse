@@ -1432,88 +1432,6 @@ def save_options():
         log_entry = create_log_message(f"Error saving options: {e}")
         log_message(log_entry)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        
-class Particle:
-    """
-    A class to represent a particle for visual effects.
-
-    Attributes:
-    -----------
-    x : int
-        The x-coordinate of the particle.
-    y : int
-        The y-coordinate of the particle.
-    color : tuple
-        The RGB color of the particle.
-    size : int
-        The size (radius) of the particle.
-    lifetime : int
-        The lifetime of the particle in frames.
-    dx : int
-        The horizontal speed of the particle.
-    dy : int
-        The vertical speed of the particle.
-
-    Methods:
-    --------
-    update():
-        Updates the particle's position and decreases its lifetime.
-    draw(screen):
-        Draws the particle on the given screen.
-    """
-
-    def __init__(self, x, y, color):
-        self.x = x
-        self.y = y
-        self.size = random.randint(2, 8)
-        self.color = color
-        self.lifetime = random.randint(20, 50)
-        self.dx = random.randint(-2, 2)
-        self.dy = random.randint(-2, 2)
-
-    def update(self):
-        """Updates the particle's position and decreases its lifetime."""
-        self.x += self.dx
-        self.y += self.dy
-        self.lifetime -= 1
-
-    def draw(self, screen):
-        """Draws the particle on the given screen."""
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
-
 class Cat:
     def __init__(self, image, x, y, speed, scale_factor):
         """
@@ -1619,6 +1537,54 @@ class Cat:
         for particle in self.particles:
             particle.draw(screen)
 
+class Particle:
+    """
+    A class to represent a particle for visual effects.
+
+    Attributes:
+    -----------
+    x : int
+        The x-coordinate of the particle.
+    y : int
+        The y-coordinate of the particle.
+    color : tuple
+        The RGB color of the particle.
+    size : int
+        The size (radius) of the particle.
+    lifetime : int
+        The lifetime of the particle in frames.
+    dx : int
+        The horizontal speed of the particle.
+    dy : int
+        The vertical speed of the particle.
+
+    Methods:
+    --------
+    update():
+        Updates the particle's position and decreases its lifetime.
+    draw(screen):
+        Draws the particle on the given screen.
+    """
+
+    def __init__(self, x, y, color):
+        self.x = x
+        self.y = y
+        self.size = random.randint(2, 8)
+        self.color = color
+        self.lifetime = random.randint(20, 50)
+        self.dx = random.randint(-2, 2)
+        self.dy = random.randint(-2, 2)
+
+    def update(self):
+        """Updates the particle's position and decreases its lifetime."""
+        self.x += self.dx
+        self.y += self.dy
+        self.lifetime -= 1
+
+    def draw(self, screen):
+        """Draws the particle on the given screen."""
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.size)
+
 class Piranha:
     def __init__(self, image, x, y, speed):
         """
@@ -1690,9 +1656,6 @@ class Platform:
 def main():
     # Load user options first to apply settings like font and resolution
     load_options()
-    
-    # Apply the desired theme at the start
-    # apply_theme("light")
     
     # Initialize the font based on current settings
     global font  # Declare font as global to modify it
