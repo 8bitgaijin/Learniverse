@@ -306,13 +306,20 @@ def get_filtered_fonts():
     excluded_fonts = {
         'wingdings', 'wingdings2', 'wingdings3', 'webdings', 'bookshelfsymbol7', 
         'symbol', 'segoeuiemoji', 'segoeuisymbol', 'holomdl2assets', 'codicon', 
-        'fontawesome47webfont', 'fontawesome4webfont47', 'fontawesome5brandswebfont', 
-        'fontawesome5brandswebfont5154', 'fontawesome5regularwebfont', 'fontawesome5regularwebfont5154', 'fontawesome5solidwebfont', 
-        'fontawesome5solidwebfont5154', 'materialdesignicons5webfont', 'materialdesignicons5webfont5955', 
-        'materialdesignicons6webfont', 'materialdesignicons6webfont6996', 'remixicon', 'remixicon250', 
-        'opensymbol', 'widelatin', 'segmdl2', 'REFSPCL', 'segoemdl2assets', 'segoefluenticons',
-        'sansserifcollection', 'msreferencespecialty', 'msoutlook', 'miriammonoclmbookoblique',
-        'miriamclmbook', 'miriamclm', 'lucidasanstypewriterregular', 'lucidasanstypewriteroblique',
+        'fontawesome47webfont', 'fontawesome4webfont47', 
+        'fontawesome5brandswebfont', 
+        'fontawesome5brandswebfont5154', 'fontawesome5regularwebfont', 
+        'fontawesome5regularwebfont5154', 'fontawesome5solidwebfont', 
+        'fontawesome5solidwebfont5154', 'materialdesignicons5webfont', 
+        'materialdesignicons5webfont5955', 
+        'materialdesignicons6webfont', 'materialdesignicons6webfont6996', 
+        'remixicon', 'remixicon250', 
+        'opensymbol', 'widelatin', 'segmdl2', 'REFSPCL', 'segoemdl2assets', 
+        'segoefluenticons',
+        'sansserifcollection', 'msreferencespecialty', 'msoutlook', 
+        'miriammonoclmbookoblique',
+        'miriamclmbook', 'miriamclm', 'lucidasanstypewriterregular', 
+        'lucidasanstypewriteroblique',
         'goudystout', 'extra', 'dejavumathtexgyreregular', 'amiriquranregular'
     }
 
@@ -439,7 +446,8 @@ def decrease_volume(step=0.1):
 
 
 def draw_background(image_path):
-    """Load and draw the pre-selected background image scaled to fit the screen resolution."""
+    """Load and draw the pre-selected background image scaled to fit the screen 
+    resolution."""
     try:
         if image_path:
             # Load the selected background image
@@ -1872,8 +1880,6 @@ class Platform:
 
 
 # Main function that reads like a recipe
-
-
 def main():
     # Load user options first to apply settings like font and resolution
     load_options()
