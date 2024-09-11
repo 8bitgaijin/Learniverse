@@ -1,3 +1,23 @@
+###############################################################################
+### Single Responsibility Principle! Class/functions should do one thing.   ###
+###############################################################################
+
+
+###############################################################################
+### Avoid magic numbers! Use named constants for clarity in class Config.   ###
+###############################################################################
+
+
+###############################################################################
+### No global variables: Keep variables encapsulated in functions/classes.  ###
+###############################################################################
+
+
+###############################################################################
+### Follow PEP8: Stick to Python's official style guide.                    ###
+###############################################################################
+
+
 import datetime
 import os
 import pygame
@@ -6,9 +26,6 @@ import sys
 import time
 from typing import List, Union
 
-### Single Responsibility Principle! Each class/function should do one thing. ###
-
-### Avoid magic numbers! Use named constants for clarity. ###
 
 class Config:
     """A configuration class to store game settings."""
@@ -46,7 +63,8 @@ class WindowManager:
     def __init__(self, config: Config):
         """Initialize the window with settings from the Config class."""
         self.config = config  # Store reference to config
-        self.screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((config.SCREEN_WIDTH, 
+                                               config.SCREEN_HEIGHT))
         pygame.display.set_caption(config.SCREEN_TITLE)
         self.resolutions = [
             (640, 640),
@@ -72,7 +90,8 @@ class WindowManager:
         """Change the window resolution dynamically."""
         self.config.SCREEN_WIDTH = width
         self.config.SCREEN_HEIGHT = height
-        self.screen = pygame.display.set_mode((self.config.SCREEN_WIDTH, self.config.SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((self.config.SCREEN_WIDTH, 
+                                               self.config.SCREEN_HEIGHT))
         pygame.display.set_caption(self.config.SCREEN_TITLE)
 
     def increase_resolution(self):
@@ -99,7 +118,8 @@ class WindowManager:
 class FontManager:
     """Handles font settings for the entire game."""
 
-    def __init__(self, default_font: str = Config.DEFAULT_FONT_NAME, default_size: int = Config.DEFAULT_FONT_SIZE):
+    def __init__(self, default_font: str = Config.DEFAULT_FONT_NAME, 
+                 default_size: int = Config.DEFAULT_FONT_SIZE):
         """Initialize the font manager with a default font and size."""
         self.font_name = default_font
         self.font_size = default_size
@@ -117,11 +137,13 @@ class FontManager:
 class TextRenderer:
     """Handles rendering text to the screen."""
 
-    def __init__(self, font_manager: FontManager, color: tuple = Config.DEFAULT_TEXT_COLOR):
+    def __init__(self, font_manager: FontManager, 
+                 color: tuple = Config.DEFAULT_TEXT_COLOR):
         self.font_manager = font_manager
         self.color = color
         
-    def render_text(self, screen: pygame.Surface, text: str, x: int, y: int, centered: bool = False) -> None:
+    def render_text(self, screen: pygame.Surface, text: str, x: int, y: int, 
+                    centered: bool = False) -> None:
         """Render text at the specified position."""
         font = self.font_manager.get_font()  # Get the current font from FontManager
         text_surface = font.render(text, True, self.color)
@@ -137,7 +159,9 @@ class TextRenderer:
         text_rect.y = y
         screen.blit(text_surface, text_rect)
 
-    def render_text_with_alpha(self, screen: pygame.Surface, text: str, x: int, y: int, alpha: int, centered: bool = False) -> pygame.Surface:
+    def render_text_with_alpha(self, screen: pygame.Surface, text: str, x: int, 
+                               y: int, alpha: int, 
+                               centered: bool = False) -> pygame.Surface:
         """Render text at the specified position with alpha transparency."""
         font = self.font_manager.get_font()
         text_surface = font.render(text, True, self.color)
@@ -165,11 +189,13 @@ class Button:
         text: str, 
         text_renderer: TextRenderer, 
         action: callable = None, 
-        padding: int = Config.DEFAULT_BUTTON_PADDING,  # Use padding from Config
+        # Use padding from Config
+        padding: int = Config.DEFAULT_BUTTON_PADDING,  
         color: tuple = Config.DEFAULT_BUTTON_COLOR, 
         hover_color: tuple = Config.DEFAULT_BUTTON_HOVER_COLOR, 
         text_color: tuple = Config.DEFAULT_TEXT_COLOR,
-        border_radius: int = Config.DEFAULT_BUTTON_ROUNDING  # Add a border radius for rounded corners
+        # Add a border radius for rounded corners
+        border_radius: int = Config.DEFAULT_BUTTON_ROUNDING  
     ):
         """Initialize the button with dynamic sizing based on text."""
         self.text = text
@@ -187,15 +213,19 @@ class Button:
         text_width, text_height = font.size(text)
         
         # Set the rect based on the text size and padding
-        self.rect = pygame.Rect(x - (text_width // 2), y, text_width + self.padding * 2, text_height + self.padding * 2)
+        self.rect = pygame.Rect(x - (text_width // 2), y, 
+                                text_width + self.padding * 2, 
+                                text_height + self.padding * 2)
 
     def draw(self, screen: pygame.Surface):
         """Draw the button."""
         # Change color on hover
         if self.hovered:
-            pygame.draw.rect(screen, self.hover_color, self.rect, border_radius=self.border_radius)
+            pygame.draw.rect(screen, self.hover_color, self.rect, 
+                             border_radius=self.border_radius)
         else:
-            pygame.draw.rect(screen, self.color, self.rect, border_radius=self.border_radius)
+            pygame.draw.rect(screen, self.color, self.rect, 
+                             border_radius=self.border_radius)
 
         # Get the text dimensions to calculate proper centering
         font = self.text_renderer.font_manager.get_font()
@@ -206,7 +236,8 @@ class Button:
         y_offset = self.rect.centery - (text_height // 2)
 
         # Draw the text centered within the button
-        self.text_renderer.render_text(screen, self.text, x_offset, y_offset, centered=False)
+        self.text_renderer.render_text(screen, self.text, x_offset, y_offset, 
+                                       centered=False)
 
     def handle_event(self, event: pygame.event.Event):
         """Handle mouse events for the button."""
@@ -241,29 +272,25 @@ class ButtonManager:
         for button in self.buttons:
             button.draw(screen)
 
-    def update_button_positions(self, screen_width: int, screen_height: int):
-        """Update positions of all buttons (can be expanded to reposition dynamically)."""
-        for button in self.buttons:
-            # Example logic to update positions if necessary
-            pass
-
 
 class FadeEffect:
     """Handles fade-in, display, and fade-out effects with timing."""
 
-    def __init__(self, fade_in_duration: int, display_duration: int, fade_out_duration: int):
+    def __init__(self, fade_in_duration: int, display_duration: int, 
+                 fade_out_duration: int):
         """Initialize the fade effect with durations in milliseconds."""
         self.fade_in_duration = fade_in_duration
         self.display_duration = display_duration
         self.fade_out_duration = fade_out_duration
-
-        self.start_time = time.time() * 1000  # Store the start time in milliseconds
+        
+        # Store the start time in milliseconds
+        self.start_time = time.time() * 1000  
         self.total_duration = self.fade_in_duration + self.display_duration + self.fade_out_duration
 
     def update(self) -> int:
         """Update the fade effect and return the current alpha value."""
-        current_time = (time.time() * 1000) - self.start_time  # Get current time elapsed since start in ms
-
+        # Get current time elapsed since start in ms
+        current_time = (time.time() * 1000) - self.start_time  
         if current_time <= self.fade_in_duration:
             # Fade-in phase: calculate alpha based on fade-in progress
             alpha = (current_time / self.fade_in_duration) * 255
@@ -302,7 +329,8 @@ class GameState:
 
     def draw(self, screen: pygame.Surface) -> None:
         """Render the game state to the screen."""
-        screen.fill(Config.DEFAULT_BACKGROUND_COLOR)  # Use default background color
+        # Use default background color
+        screen.fill(Config.DEFAULT_BACKGROUND_COLOR)  
 
 
 class IntroState(GameState):
@@ -312,8 +340,10 @@ class IntroState(GameState):
         super().__init__("IntroState")
         self.text_renderer = text_renderer  # Use the text renderer
         # Create a fade effect for intro with durations in milliseconds
-        self.fade_effect = FadeEffect(fade_in_duration=2500, display_duration=5000, fade_out_duration=1000)
-        self.auto_transition_triggered = False  # Keep track if auto transition was triggered
+        self.fade_effect = FadeEffect(fade_in_duration=2500, 
+                                      display_duration=5000, fade_out_duration=1000)
+        # Keep track if auto transition was triggered
+        self.auto_transition_triggered = False  
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the intro state."""
@@ -335,14 +365,23 @@ class IntroState(GameState):
         alpha = self.fade_effect.update()  # Get the current alpha
 
         # Render text with the current alpha transparency
-        self.text_renderer.render_text_with_alpha(screen, "Developed by:", screen.get_width() // 2, screen.get_height() * 0.33, alpha, centered=True)
-        self.text_renderer.render_text_with_alpha(screen, "Alvadore Retro Technology", screen.get_width() // 2, screen.get_height() * 0.66, alpha, centered=True)
+        self.text_renderer.render_text_with_alpha(screen, 
+                                                  "Developed by:", 
+                                                  screen.get_width() // 2, 
+                                                  screen.get_height() * 0.33, 
+                                                  alpha, centered=True)
+        self.text_renderer.render_text_with_alpha(screen, 
+                                                  "Alvadore Retro Technology", 
+                                                  screen.get_width() // 2, 
+                                                  screen.get_height() * 0.66, 
+                                                  alpha, centered=True)
 
 
 class MainMenuState(GameState):
     """Main menu state for the game."""
 
-    def __init__(self, config: Config, text_renderer: TextRenderer, switch_to_options: callable):
+    def __init__(self, config: Config, text_renderer: TextRenderer, 
+                 switch_to_options: callable):
         """Initialize the main menu state."""
         super().__init__("MainMenuState")
         self.config = config  # Store the config for screen dimensions
@@ -389,12 +428,13 @@ class MainMenuState(GameState):
         # pygame.draw.line(screen, (255, 0, 0), (screen.get_width() * 0.75, 0), (screen.get_width() * 0.75, screen.get_height()), 5)
         
         # Render the main menu title
-        self.text_renderer.render_text(screen, "Main Menu", screen.get_width() // 2, screen.get_height() * 0.25, centered=True)
+        self.text_renderer.render_text(screen, "Main Menu", 
+                                       screen.get_width() // 2, 
+                                       screen.get_height() * 0.25, 
+                                       centered=True)
         
         # Delegate button drawing to the ButtonManager
         self.button_manager.draw(screen)
-
-
 
 
 class OptionsMenuState(GameState):
@@ -410,7 +450,8 @@ class OptionsMenuState(GameState):
         self.button_manager = ButtonManager()
 
         # Example list of available resolutions
-        self.resolutions = [(640, 640), (720, 720), (800, 800), (900, 900), (1024, 1024), (1080, 1080)]
+        self.resolutions = [(640, 640), (720, 720), (800, 800), (900, 900), 
+                            (1024, 1024), (1080, 1080)]
         
         # Find the closest match to the current window resolution
         current_width, current_height = self.window_manager.config.SCREEN_WIDTH, self.window_manager.config.SCREEN_HEIGHT
@@ -481,12 +522,6 @@ class OptionsMenuState(GameState):
         self.button_manager.draw(screen)
 
 
-
-
-
-
-
-
 class StateManager:
     """Manages switching between different game states."""
     
@@ -529,9 +564,6 @@ class StateManager:
     def draw(self, screen: pygame.Surface) -> None:
         """Delegate drawing to the current state."""
         self.current_state.draw(screen)
-
-
-
 
 
 class Game:
