@@ -22,6 +22,16 @@
 ### KISS (Keep It Simple, Stupid): Avoid overcomplicating the design.       ###
 ###############################################################################
 
+# DRY (Don't Repeat Yourself): Reuse code instead of duplicating it.
+# Use pure functions where possible: Avoid side effects.
+# Use docstrings: Document your functions and classes.
+# Modular code: Break functionality into manageable, reusable components.
+# Favor composition over inheritance: Compose objects rather than deeply inheriting behavior.
+# Encapsulation: Keep data and methods private where appropriate.
+# Test early, test often: Write test cases to ensure reliability.
+# Readable code: Use meaningful variable and function names.
+# Handle exceptions: Use error handling to prevent crashes.
+
 # Standard library imports
 import datetime
 import os
@@ -176,6 +186,7 @@ class WindowManager:
         """Return the screen surface."""
         return self.screen
 
+
 class Player(pygame.sprite.Sprite):
     """A player sprite that can move around."""
     def __init__(self, image_path, x, y):
@@ -189,7 +200,6 @@ class Player(pygame.sprite.Sprite):
         """Update the player's state, this will be called by InputManager."""
         pass  # Player-specific updates can go here (e.g., animations)
 
-        
 
 class InputManager:
     """Handles player input like keyboard, mouse, or controller events."""
@@ -245,8 +255,6 @@ class InputManager:
     def is_mouse_clicked(self) -> bool:
         """Return True if the mouse was clicked."""
         return self.mouse_click
-
-
 
 
 class FontManager:
@@ -608,7 +616,6 @@ class MainMenuState(GameState):
         self.button_manager.draw(screen)
 
 
-
 class OptionsMenuState(GameState):
     """Options menu state for adjusting game settings like resolution, font, text color, and background color."""
 
@@ -826,8 +833,6 @@ class GamePlayState(GameState):
         self.sprite_manager.draw_sprites(screen)  # Draw all sprites
 
 
-
-
 class StateManager:
     """Manages switching between different game states."""
     
@@ -887,9 +892,6 @@ class StateManager:
         self.switch_state("MAIN_MENU")
 
 
-
-
-
 class SpriteManager:
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
@@ -917,12 +919,6 @@ class SpriteManager:
     def check_collisions(self, player):
         """Check for collisions between player and NPCs."""
         return pygame.sprite.spritecollide(player, self.npc_group, False)
-
-
-
-
-
-
 
 
 class NPC(pygame.sprite.Sprite):
@@ -1070,8 +1066,6 @@ class Game:
     
         # Terminate the Python process
         sys.exit()
-
-
 
 
 # OOP approach: create a Game object and run it
