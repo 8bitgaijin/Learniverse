@@ -1,0 +1,8 @@
+Log file created on 2024-09-17 16:42:26
+2024-09-17 16:42:26 - INFO: Initializing game...
+2024-09-17 16:42:26 - INFO: StateManager initialized.
+2024-09-17 16:42:27 - INFO: MainMenuState initialized.
+2024-09-17 16:42:27 - INFO: Main menu background loaded successfully.
+2024-09-17 16:42:33 - INFO: MainMenuState initialized.
+2024-09-17 16:42:33 - INFO: Main menu background loaded successfully.
+2024-09-17 16:42:36 - INFO: User requested exit.
