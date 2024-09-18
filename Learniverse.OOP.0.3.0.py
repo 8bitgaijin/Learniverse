@@ -207,31 +207,22 @@ class LogManager:
 class FontManager:
     """Handles font settings for the entire game."""
 
-    def __init__(self, default_font: str = Config.DEFAULT_FONT_NAME, 
+    def __init__(self, log_manager: LogManager, default_font: str = Config.DEFAULT_FONT_NAME, 
                  default_size: int = Config.DEFAULT_FONT_SIZE):
         """Initialize the font manager with a default font and size."""
         self.font_name = default_font
         self.font_size = default_size
+        self.log_manager = log_manager  # Store reference to LogManager
         self.excluded_fonts = {
-            'wingdings', 'wingdings2', 'wingdings3', 'webdings', 'bookshelfsymbol7', 
-            'symbol', 'segoeuiemoji', 'segoeuisymbol', 'holomdl2assets', 'codicon', 
-            'fontawesome47webfont', 'fontawesome4webfont47', 
-            'fontawesome5brandswebfont', 
-            'fontawesome5brandswebfont5154', 'fontawesome5regularwebfont', 
-            'fontawesome5regularwebfont5154', 'fontawesome5solidwebfont', 
-            'fontawesome5solidwebfont5154', 'materialdesignicons5webfont', 
-            'materialdesignicons5webfont5955', 
-            'materialdesignicons6webfont', 'materialdesignicons6webfont6996', 
-            'remixicon', 'remixicon250', 
-            'opensymbol', 'widelatin', 'segmdl2', 'REFSPCL', 'segoemdl2assets', 
-            'segoefluenticons', 'sansserifcollection', 'msreferencespecialty', 
-            'msoutlook', 'miriammonoclmbookoblique', 'miriamclmbook', 'miriamclm', 
-            'lucidasanstypewriterregular', 'lucidasanstypewriteroblique', 
-            'goudystout', 'extra', 'dejavumathtexgyreregular', 'amiriquranregular',
-            'SegoeIcons', 'marlett'
+            # List of excluded fonts
         }
-        self.font_files = self.get_filtered_fonts()  # Load available fonts
-        self.selected_font_index = self.find_default_font_index()
+        try:
+            self.font_files = self.get_filtered_fonts()  # Load available fonts
+            self.selected_font_index = self.find_default_font_index()
+            self.log_manager.log_info(f"FontManager initialized with default font: {self.font_name}")
+        except Exception as e:
+            self.log_manager.log_error(f"Error initializing FontManager: {e}")
+            raise  # Re-raise if font manager can't be initialized
 
     def get_filtered_fonts(self) -> List[str]:
         """Load available fonts via Pygame and filter out problematic ones."""
@@ -247,11 +238,12 @@ class FontManager:
                     filtered_fonts.append(font_name)  # Add valid font to the list
                 except Exception as e:
                     log_entry = f"Skipping font {font_name} due to error: {e}"
-                    print(log_entry)  # Replace with actual logging if needed
+                    self.log_manager.log_error(log_entry)
 
         # If no valid fonts found, fall back to 'arial'
         if not filtered_fonts:
-            print("No valid fonts found, falling back to 'arial'.")
+            fallback_message = "No valid fonts found, falling back to 'arial'."
+            self.log_manager.log_error(fallback_message)
             filtered_fonts = [fallback_font]
 
         return filtered_fonts
@@ -261,41 +253,49 @@ class FontManager:
         for i, font_name in enumerate(self.font_files):
             if self.font_name.lower() in font_name.lower():
                 return i
+        self.log_manager.log_info(f"Default font '{self.font_name}' not found, using first available font.")
         return 0  # Default to first font if no match is found
 
     def get_font(self) -> pygame.font.Font:
         """Return the current font based on the font name and size."""
-        return pygame.font.SysFont(self.font_files[self.selected_font_index], self.font_size)
+        try:
+            font = pygame.font.SysFont(self.font_files[self.selected_font_index], self.font_size)
+            return font
+        except Exception as e:
+            self.log_manager.log_error(f"Error retrieving font: {e}")
+            # Fallback font in case of an error
+            return pygame.font.SysFont('arial', self.font_size)
 
     def set_font(self, font_name: str, font_size: int) -> None:
         """Update the current font name and size."""
         self.font_name = font_name
         self.font_size = font_size
         self.selected_font_index = self.find_default_font_index()
-        print(f"Current font: {self.font_name}")  # Debug print
+        self.log_manager.log_info(f"Set font to: {self.font_name} with size {self.font_size}")
 
     def increase_font_index(self) -> None:
         """Increase the selected font index."""
         self.selected_font_index = (self.selected_font_index + 1) % len(self.font_files)
         self.font_name = self.font_files[self.selected_font_index]
-        print(f"Switched to font: {self.font_name}")  # Debug print
+        self.log_manager.log_info(f"Switched to font: {self.font_name}")
 
     def decrease_font_index(self) -> None:
         """Decrease the selected font index."""
         self.selected_font_index = (self.selected_font_index - 1) % len(self.font_files)
         self.font_name = self.font_files[self.selected_font_index]
-        print(f"Switched to font: {self.font_name}")  # Debug print
+        self.log_manager.log_info(f"Switched to font: {self.font_name}")
 
 
 class WindowManager:
     """Manages window settings, display, and background images."""
     
-    def __init__(self, config: Config, font_manager: FontManager):
+    def __init__(self, config: Config, font_manager: FontManager, log_manager: LogManager):
         """Initialize the window with settings from the Config class."""
         self.config = config  # Store reference to config
         self.font_manager = font_manager  # Store reference to FontManager
         self.screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT))
         pygame.display.set_caption(config.SCREEN_TITLE)
+        self.log_manager = log_manager  
 
         # Apply the default theme based on the config
         self.apply_theme(config.CURRENT_THEME)
@@ -381,11 +381,11 @@ class WindowManager:
             )
         
         except FileNotFoundError as e:
-            print(f"Error loading background: {e}")
+            self.log_manager.log_error(f"Error loading background: {e}")
             self.background_image = None  # Set background to None if folder or files are missing
 
         except Exception as e:
-            print(f"An unexpected error occurred: {e}")
+            self.log_manager.log_error(f"An unexpected error occurred: {e}")
             self.background_image = None  # Fail-safe for any other errors
 
     def render_background(self) -> None:
@@ -396,9 +396,21 @@ class WindowManager:
 
 class Player(pygame.sprite.Sprite):
     """A player sprite that can move around."""
-    def __init__(self, image_path, x, y):
+    
+    def __init__(self, image_path, x, y, log_manager: LogManager):
         super().__init__()  # Call Sprite initializer
-        self.image = pygame.image.load(image_path)  # Load the player's image
+        self.log_manager = log_manager  # Store the LogManager instance
+
+        try:
+            self.image = pygame.image.load(image_path)  # Load the player's image
+            self.log_manager.log_info(f"Player image loaded from {image_path}")
+        except pygame.error as e:
+            self.log_manager.log_error(f"Error loading player image: {image_path}. Error: {e}")
+            # Create a fallback surface in case of error
+            self.image = pygame.Surface((50, 50))
+            self.image.fill((255, 0, 0))  # Fill the surface with red as a placeholder
+            self.log_manager.log_info("Fallback player image created (50x50 red box)")
+
         self.rect = self.image.get_rect()  # Get the rectangle for positioning
         self.rect.x = x  # Initial X position
         self.rect.y = y  # Initial Y position
@@ -556,7 +568,6 @@ class TextRenderer:
             lines.append(current_line.strip())
 
         return lines
-
 
 
 class Button:
@@ -809,8 +820,11 @@ class IntroState(GameState):
         self.auto_transition_triggered = False  
         
         # Load and play random MP3
-        self.sound_manager.load_random_mp3('assets/music/main_menu')
-        self.sound_manager.play_music(loop=True)  # Play the music in a loop
+        try:
+            self.sound_manager.load_random_mp3('assets/music/main_menu')
+            self.sound_manager.play_music(loop=True)  # Play the music in a loop
+        except Exception as e:
+            self.log_manager.log_error(f"Failed to load or play intro music: {e}")
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the intro state."""
@@ -927,8 +941,6 @@ class MainMenuState(GameState):
         
         # Delegate button drawing to the ButtonManager
         self.button_manager.draw(screen)
-
-
 
 
 class OptionsMenuState(GameState):
@@ -1273,12 +1285,20 @@ class GamePlayState(GameState):
         self.sound_manager = sound_manager
         self.log_manager = log_manager
         
-        # Player setup
+        # Player setup with fallback in case of asset loading failure
         try:
-            self.player = Player('assets/images/sprites/cat01.png', 100, 100)
-            # self.log_manager.log_info("Player initialized.")
+            self.player = Player('assets/images/sprites/cat01.png', 100, 100, log_manager)
+            self.log_manager.log_info("Player initialized.")
         except Exception as e:
             self.log_manager.log_error(f"Error initializing Player: {e}")
+            # Fallback: create a basic player object if the asset fails to load
+            self.player = pygame.sprite.Sprite()  # Create a basic sprite as a fallback
+            self.player.image = pygame.Surface((50, 50))  # Dummy player image (50x50 square)
+            self.player.image.fill((255, 0, 0))  # Fill the dummy sprite with red
+            self.player.rect = self.player.image.get_rect()
+            self.player.rect.x = 100
+            self.player.rect.y = 100
+            self.log_manager.log_info("Fallback player created.")
         
         # InputManager setup
         try:
@@ -1304,17 +1324,25 @@ class GamePlayState(GameState):
         except Exception as e:
             self.log_manager.log_error(f"Error loading or playing music: {e}")
 
-        # SpriteManager setup
+        # SpriteManager setup with NPC fallback
         try:
             self.sprite_manager = SpriteManager()
-            self.player = Player('assets/images/sprites/cat01.png', 100, 100)
             self.npc = NPC('assets/images/sprites/piranha.png', 200, 200)
-            self.input_manager.player = self.player
             self.sprite_manager.add_player(self.player)
             self.sprite_manager.add_npc(self.npc)
-            # self.log_manager.log_info("SpriteManager initialized with player and NPC.")
+            self.log_manager.log_info("SpriteManager initialized with player and NPC.")
         except Exception as e:
             self.log_manager.log_error(f"Error initializing SpriteManager, Player, or NPC: {e}")
+            # Fallback: create a basic NPC object if the asset fails to load
+            self.npc = pygame.sprite.Sprite()  # Create a basic sprite as a fallback
+            self.npc.image = pygame.Surface((50, 50))  # Dummy NPC image (50x50 square)
+            self.npc.image.fill((0, 255, 0))  # Fill the dummy NPC sprite with green
+            self.npc.rect = self.npc.image.get_rect()
+            self.npc.rect.x = 200
+            self.npc.rect.y = 200
+            self.sprite_manager.add_player(self.player)
+            self.sprite_manager.add_npc(self.npc)
+            self.log_manager.log_info("Fallback NPC created.")
 
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
@@ -1352,13 +1380,16 @@ class StateManager:
         self.current_state = initial_state
         self.text_renderer = text_renderer
         self.window_manager = window_manager
-        self.font_manager = FontManager()  # Initialize FontManager
+        self.log_manager = log_manager  # LogManager passed for logging important events
+
+        # Pass log_manager to FontManager
+        self.font_manager = FontManager(log_manager=self.log_manager)  # Initialize FontManager with log_manager
+        
         self.config = config
         self.input_manager = None  # Initialize later when creating gameplay state
-        self.log_manager = log_manager  # LogManager passed for logging important events
+
         # Initialize the SoundManager with a folder for music
         self.sound_manager = SoundManager('assets/music/main_menu', self.log_manager)
-        
         
         # Log that the StateManager has been initialized
         # self.log_manager.log_info("StateManager initialized.")
@@ -1443,6 +1474,7 @@ class StateManager:
         self.switch_state("MAIN_MENU")
 
 
+
 class SpriteManager:
     def __init__(self):
         self.all_sprites = pygame.sprite.Group()
@@ -1505,14 +1537,14 @@ class Game:
         
         # Create the FontManager
         try:
-            self.font_manager = FontManager(default_font=config.DEFAULT_FONT_NAME, default_size=config.DEFAULT_FONT_SIZE)
+            self.font_manager = FontManager(self.log_manager, default_font=config.DEFAULT_FONT_NAME, default_size=config.DEFAULT_FONT_SIZE)
         except Exception as e:
             self.log_manager.log_error(f"Failed to initialize FontManager: {e}")
             raise
 
         # Use the WindowManager to set up the window
         try:
-            self.window_manager = WindowManager(config, self.font_manager)
+            self.window_manager = WindowManager(config, self.font_manager, self.log_manager)
         except Exception as e:
             self.log_manager.log_error(f"Failed to initialize WindowManager: {e}")
             raise
