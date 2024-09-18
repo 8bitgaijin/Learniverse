@@ -37,6 +37,7 @@
 from datetime import datetime
 import os
 import random
+import sqlite3
 import sys
 import time
 
@@ -1366,11 +1367,29 @@ class GamePlayState(GameState):
         self.sprite_manager.draw_sprites(screen)  # Draw all sprites
 
 
+class Student():
+    # TODO: student class to keep track of student data
+    # name
+    def __init__(self):
+        pass
+
 class StudentSelectState(GameState):
     # TODO: Implement the logic for selecting a student
+    # Use database manager to check if database exists, if not, create it
+    # Need text "Student Selection" at top of screen y + 0.2
+    # Database should be here by now, so query for any students
+    # List students as buttons
+    # 
     def __init__(self):
         raise NotImplementedError("StudentSelectState is a placeholder for future implementation.")
 
+
+class DatabaseManager():
+    # TODO: Implement database logic
+    # Check for existing database, if not, create it
+    # STEAL CODE FROM LEARNIVERSE LITE RAINBWO NUMBERS
+    def __init__(self):
+        raise NotImplementedError("StudentSelectState is a placeholder for future implementation.")
 
 class StateManager:
     """Manages switching between different game states."""
@@ -1472,7 +1491,6 @@ class StateManager:
     def switch_to_main_menu(self) -> None:
         """Switch back to the main menu."""
         self.switch_state("MAIN_MENU")
-
 
 
 class SpriteManager:
