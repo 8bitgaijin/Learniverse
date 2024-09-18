@@ -32,8 +32,9 @@
 # Readable code: Use meaningful variable and function names.
 # Handle exceptions: Use error handling to prevent crashes.
 
+
 # Standard library imports
-import datetime
+from datetime import datetime
 import os
 import random
 import sys
@@ -143,6 +144,66 @@ class Config:
     }
 
 
+class LogManager:
+    """Manages creating and updating log files."""
+    
+    def __init__(self, log_file: str):
+        """
+        Initialize the LogManager with the path to the log file.
+        If the file doesn't exist, it will be created.
+        
+        :param log_file: The path to the log file
+        """
+        self.log_file = log_file
+        try:
+            # Ensure the log file exists
+            self._ensure_log_file()
+        except Exception as e:
+            print(f"Failed to initialize LogManager: {e}")
+            # Handle logging or exiting as needed
+
+    def _ensure_log_file(self) -> None:
+        """Check if the log file exists; if not, create it."""
+        try:
+            if not os.path.exists(self.log_file):
+                with open(self.log_file, 'w') as file:
+                    file.write(f"Log file created on {self._get_current_time()}\n")
+                    print(f"Created new log file: {self.log_file}")
+        except Exception as e:
+            print(f"Error ensuring log file existence: {e}")
+            # You can add error handling/logging here or raise the exception
+
+    def _get_current_time(self) -> str:
+        """Return the current date and time as a string."""
+        try:
+            return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        except Exception as e:
+            print(f"Error retrieving current time: {e}")
+            return "Unknown time"  # Return a fallback time if an error occurs
+
+    def log_message(self, message: str) -> None:
+        """
+        Write a log message to the log file, appending the current datetime.
+
+        :param message: The message to log
+        """
+        try:
+            with open(self.log_file, 'a') as file:
+                log_entry = f"{self._get_current_time()} - {message}\n"
+                file.write(log_entry)
+                print(f"Appended log message: {log_entry.strip()}")
+        except Exception as e:
+            print(f"Error writing log message: {e}")
+
+    def log_error(self, error_message: str) -> None:
+        """Write an error message to the log file."""
+        self.log_message(f"ERROR: {error_message}")
+
+    def log_info(self, info_message: str) -> None:
+        """Write an info message to the log file."""
+        self.log_message(f"INFO: {info_message}")
+        
+
 class FontManager:
     """Handles font settings for the entire game."""
 
@@ -225,7 +286,6 @@ class FontManager:
         self.font_name = self.font_files[self.selected_font_index]
         print(f"Switched to font: {self.font_name}")  # Debug print
 
-  
 
 class WindowManager:
     """Manages window settings, display, and background images."""
@@ -412,16 +472,34 @@ class TextRenderer:
 
     def render_text(self, screen: pygame.Surface, text: str, x: int, y: int, 
                     centered: bool = False, wrap_width: int = None, color: tuple = None) -> None:
-        """Render text at the specified position."""
-        # Always pull the current theme's text color from Config
-        color = color or Config.CURRENT_TEXT_COLOR
+        """Render text with a shadow at the specified position."""
+        # Always pull the current theme's text and shadow color from Config
+        color = color or Config.COLOR_THEMES[Config.CURRENT_THEME]['text_color']
+        shadow_color = Config.COLOR_THEMES[Config.CURRENT_THEME]['shadow_color']
+
+        # Render the shadow behind the text with an offset
+        shadow_offset_x = 2  # Horizontal offset for shadow
+        shadow_offset_y = 2  # Vertical offset for shadow
+        self._render_text_internal(screen, text, x + shadow_offset_x, y + shadow_offset_y, 
+                                   centered, wrap_width, alpha=None, color=shadow_color)
+
+        # Render the main text on top
         self._render_text_internal(screen, text, x, y, centered, wrap_width, alpha=None, color=color)
 
     def render_text_with_alpha(self, screen: pygame.Surface, text: str, x: int, 
                                y: int, alpha: int, centered: bool = False, 
                                wrap_width: int = None, color: tuple = None) -> None:
-        """Render text at the specified position with alpha transparency and optional word wrap."""
-        color = color or Config.CURRENT_TEXT_COLOR
+        """Render text with alpha transparency and a shadow."""
+        color = color or Config.COLOR_THEMES[Config.CURRENT_THEME]['text_color']
+        shadow_color = Config.COLOR_THEMES[Config.CURRENT_THEME]['shadow_color']
+
+        # Render the shadow behind the text with an offset
+        shadow_offset_x = 2
+        shadow_offset_y = 2
+        self._render_text_internal(screen, text, x + shadow_offset_x, y + shadow_offset_y, 
+                                   centered, wrap_width, alpha=alpha, color=shadow_color)
+
+        # Render the main text on top with transparency
         self._render_text_internal(screen, text, x, y, centered, wrap_width, alpha=alpha, color=color)
 
     def _render_text_internal(self, screen: pygame.Surface, text: str, x: int, 
@@ -429,9 +507,6 @@ class TextRenderer:
                               alpha: int, color: tuple) -> None:
         """Internal method to render text with optional alpha transparency and word wrap."""
         font = self.font_manager.get_font()
-
-        # Use passed color or fallback to default color
-        color = color or self.default_color
 
         # Word wrap the text if wrap_width is provided
         if wrap_width:
@@ -481,6 +556,7 @@ class TextRenderer:
             lines.append(current_line.strip())
 
         return lines
+
 
 
 class Button:
@@ -614,13 +690,14 @@ class FadeEffect:
 class SoundManager:
     """Handles loading and playing sound effects and background music."""
     
-    def __init__(self, music_folder: str):
+    def __init__(self, music_folder: str, log_manager: LogManager):
         """Initialize the SoundManager with a folder containing MP3 files."""
         pygame.mixer.init()  # Initialize the mixer for playing sounds
         self.music_folder = music_folder
         self.current_music = None  # To track the currently playing music
         self.volume = 0.5  # Default volume (50%)
         pygame.mixer.music.set_volume(self.volume)
+        self.log_manager = log_manager  # For logging errors
 
     def load_random_mp3(self, folder_path: str = None) -> None:
         """Load a random MP3 file from the specified music folder, or use the default folder."""
@@ -630,39 +707,54 @@ class SoundManager:
 
         # Stop current music to prevent overlap
         self.stop_music()
-        
-        mp3_files = [f for f in os.listdir(folder_path) if f.endswith('.mp3')]
-        if mp3_files:
-            random_file = random.choice(mp3_files)
-            self.current_music = os.path.join(folder_path, random_file)
-            print(f"Loaded {random_file}")
-        else:
-            print("No MP3 files found in the directory.")
+
+        try:
+            mp3_files = [f for f in os.listdir(folder_path) if f.endswith('.mp3')]
+            if mp3_files:
+                random_file = random.choice(mp3_files)
+                self.current_music = os.path.join(folder_path, random_file)
+                print(f"Loaded {random_file}")
+            else:
+                self.log_manager.log_error(f"No MP3 files found in the directory: {folder_path}")
+        except Exception as e:
+            self.log_manager.log_error(f"Error loading MP3 files from {folder_path}: {e}")
 
     def play_music(self, loop: bool = True) -> None:
         """Play the loaded MP3 file. Optionally loop the music."""
         if self.current_music:
-            loop_flag = -1 if loop else 0  # Loop indefinitely if loop=True
-            pygame.mixer.music.load(self.current_music)
-            pygame.mixer.music.play(loop_flag)
-            print(f"Playing {self.current_music}")
+            try:
+                loop_flag = -1 if loop else 0  # Loop indefinitely if loop=True
+                pygame.mixer.music.load(self.current_music)
+                pygame.mixer.music.play(loop_flag)
+                print(f"Playing {self.current_music}")
+            except Exception as e:
+                self.log_manager.log_error(f"Error playing music {self.current_music}: {e}")
         else:
-            print("No music loaded to play.")
+            self.log_manager.log_error("No music loaded to play.")
 
     def stop_music(self) -> None:
         """Stop the currently playing music."""
-        pygame.mixer.music.stop()
-        print("Music stopped.")
+        try:
+            pygame.mixer.music.stop()
+            print("Music stopped.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error stopping music: {e}")
 
     def pause_music(self) -> None:
         """Pause the currently playing music."""
-        pygame.mixer.music.pause()
-        print("Music paused.")
+        try:
+            pygame.mixer.music.pause()
+            print("Music paused.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error pausing music: {e}")
 
     def resume_music(self) -> None:
         """Resume the paused music."""
-        pygame.mixer.music.unpause()
-        print("Music resumed.")
+        try:
+            pygame.mixer.music.unpause()
+            print("Music resumed.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error resuming music: {e}")
 
     def increase_volume(self) -> None:
         """Increase the music volume by 10%, maxing at 100%."""
@@ -759,16 +851,24 @@ class MainMenuState(GameState):
 
     def __init__(self, config: Config, text_renderer: TextRenderer, 
                  switch_to_options: callable, switch_to_gameplay: callable,
-                 window_manager: WindowManager):
+                 window_manager: WindowManager, log_manager: LogManager):
         """Initialize the main menu state."""
         super().__init__("MainMenuState")
         self.config = config  # Store the config for screen dimensions
         self.text_renderer = text_renderer
         self.button_manager = ButtonManager()
         self.window_manager = window_manager  # Reference to WindowManager
-        
+        self.log_manager = log_manager  # Use the existing LogManager
+
+        # Log the initialization of MainMenuState
+        # self.log_manager.log_info("MainMenuState initialized.")
+
         # Load a random background from the assets folder
-        self.window_manager.load_background('assets/images/main_menu')
+        try:
+            self.window_manager.load_background('assets/images/main_menu')
+            # self.log_manager.log_info("Main menu background loaded successfully.")
+        except FileNotFoundError as e:
+            self.log_manager.log_error(f"Failed to load main menu background: {e}")
 
         # Create the "Start" button and add it to the button manager
         self.start_button = Button(
@@ -776,7 +876,7 @@ class MainMenuState(GameState):
             y=self.config.SCREEN_HEIGHT * 0.4,
             text="Start Game",
             text_renderer=text_renderer,
-            action=switch_to_gameplay  # Directly call the function, no lambda needed
+            action=switch_to_gameplay  # No log manager here
         )
 
         # Create the "Options" button and add it to the button manager
@@ -785,7 +885,7 @@ class MainMenuState(GameState):
             y=self.config.SCREEN_HEIGHT * 0.6,  # Y position
             text="Options",  # Text for the button
             text_renderer=text_renderer,  # TextRenderer object
-            action=switch_to_options  # Button action to switch to options
+            action=switch_to_options  # No log manager here
         )
 
         # Add the buttons to the ButtonManager
@@ -802,6 +902,7 @@ class MainMenuState(GameState):
         """Handle events specific to the main menu."""
         for event in events:
             if event.type == pygame.QUIT:
+                # self.log_manager.log_info("User exited from the main menu.")
                 return "EXIT"
 
         # Delegate button events to the ButtonManager
@@ -828,6 +929,8 @@ class MainMenuState(GameState):
         self.button_manager.draw(screen)
 
 
+
+
 class OptionsMenuState(GameState):
     """Options menu state for adjusting game settings like resolution, font, text color, and background color."""
 
@@ -846,7 +949,11 @@ class OptionsMenuState(GameState):
         self.switch_to_options = switch_to_options
         
         # Load a random background from the assets/images/options folder
-        self.window_manager.load_background('assets/images/options')
+        try:
+            self.window_manager.load_background('assets/images/options')
+        except Exception as e:
+            self.log_manager.log_error(f"Failed to load background: {e}")
+
         
         # Define positions for resolution and font and theme rows
         self.resolution_row_y = self.window_manager.config.SCREEN_HEIGHT * 0.15
@@ -1042,11 +1149,12 @@ class OptionsMenuState(GameState):
 class CreditRollState(GameState):
     """Credit roll state for displaying credits with fade-in and fade-out effects, one at a time."""
 
-    def __init__(self, text_renderer: TextRenderer, return_to_options: callable):
+    def __init__(self, text_renderer: TextRenderer, return_to_options: callable, log_manager: LogManager):
         super().__init__("CreditRollState")
-        self.text_renderer = text_renderer  # Use the text renderer
-        self.return_to_options = return_to_options  # Callable to return to options menu
-        
+        self.text_renderer = text_renderer
+        self.return_to_options = return_to_options
+        self.log_manager = log_manager
+
         # Create a fade effect for credits with durations in milliseconds
         self.fade_effect = FadeEffect(fade_in_duration=2000, 
                                       display_duration=2000, fade_out_duration=2000)
@@ -1055,44 +1163,51 @@ class CreditRollState(GameState):
 
         # Credits content
         self.credits = [
-        "Developed by: Alvadore Retro Technology",
-        "Chief Executive Officer: William Alexander Martins",
-        "Chief Financial Officer: Mary Evangeline Martins",
-        "Chief Information Officer: Shane William Martins",
-        "Chief Operations Officer: Ethan Hunter Martins",
-        "Chief Technology Officer: Jeffrey Matthew Neff Esq.",
-        "Made possible by: Supporters like you!",
-        "Special thanks to: Guido van Rossum",
-        "Special thanks to: Richard Stallman",
-        "Special thanks to: the Blender team",
-        "Special thanks to: the ChatGPT team",
-        "Special thanks to: the Krita team",
-        "Special thanks to: the PyInstaller team",
-        "Special thanks to: the Pygame team",
-        "Pygame is licensed under LGPL version 2.1",
-        "Special thanks to: the Raspberry Pi team",
-        "Special thanks to: the Stable Diffusion team",
-        "Special thanks to: the Suno team",
-        "Special thanks to: the Ubuntu team"
+            "Developed by: Alvadore Retro Technology",
+            "Chief Executive Officer: William Alexander Martins",
+            "Chief Financial Officer: Mary Evangeline Martins",
+            "Chief Information Officer: Shane William Martins",
+            "Chief Operations Officer: Ethan Hunter Martins",
+            "Chief Technology Officer: Jeffrey Matthew Neff Esq.",
+            "Made possible by: Supporters like you!",
+            "Special thanks to: Guido van Rossum",
+            "Special thanks to: Richard Stallman",
+            "Special thanks to: the Blender team",
+            "Special thanks to: the ChatGPT team",
+            "Special thanks to: the Krita team",
+            "Special thanks to: the PyInstaller team",
+            "Special thanks to: the Pygame team",
+            "Pygame is licensed under LGPL version 2.1",
+            "Special thanks to: the Raspberry Pi team",
+            "Special thanks to: the Stable Diffusion team",
+            "Special thanks to: the Suno team",
+            "Special thanks to: the Ubuntu team",
+            "Extra special thanks to: Mr. Lauber"
         ]
-        
-        # Load the NPC sprite (cat01.png)
-        self.cat_sprite = pygame.image.load("assets/images/sprites/cat01.png").convert_alpha()
-        self.cat_rect = self.cat_sprite.get_rect()
-        
-        # Set the initial position at the bottom of the screen using Config class
-        self.cat_rect.y = Config.SCREEN_HEIGHT - self.cat_rect.height
-        self.cat_speed = 5  # Speed of the cat
 
-        # Set direction for sprite movement (1 = moving right, -1 = moving left)
-        self.cat_direction = 1  
-
+        # Check if the cat sprite file exists
+        cat_sprite_path = "assets/images/sprites/cat01.png"
+        self.cat_sprite = None  # Initialize to None by default
+        if os.path.exists(cat_sprite_path):
+            try:
+                self.cat_sprite = pygame.image.load(cat_sprite_path).convert_alpha()
+                self.cat_rect = self.cat_sprite.get_rect()
+                self.cat_rect.y = Config.SCREEN_HEIGHT - self.cat_rect.height
+                self.cat_speed = 5  # Speed of the cat
+                self.cat_direction = 1  # Moving right initially
+                self.is_flipped = False  # Track if the sprite is flipped
+                self.log_manager.log_info(f"Cat sprite loaded and will be displayed.")
+            except pygame.error as e:
+                self.log_manager.log_error(f"Error loading cat sprite: {e}")
+                self.cat_sprite = None  # Set to None if loading fails
+        else:
+            self.log_manager.log_error(f"Cat sprite missing at {cat_sprite_path}")
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the credit roll state."""
         for event in events:
             if event.type == pygame.QUIT:
-                return "EXIT"  # Signal to exit the game
+                return "EXIT"
             if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
                 self.advance_to_next_credit()
 
@@ -1108,22 +1223,24 @@ class CreditRollState(GameState):
         """Update the credit roll state logic by updating the fade effect."""
         if self.fade_effect.is_finished() and not self.auto_transition_triggered:
             self.advance_to_next_credit()  # Automatically transition to next credit after fade effect finishes
-            
-        # Move the cat sprite
-        self.cat_rect.x += self.cat_speed * self.cat_direction
 
-        # Check if the cat sprite hits the edges and "bounce" (reverse direction)
-        if self.cat_rect.left <= 0 or self.cat_rect.right >= Config.SCREEN_WIDTH:
-            self.cat_direction *= -1  # Flip direction
-            self.cat_sprite = pygame.transform.flip(self.cat_sprite, True, False)  # Flip the sprite image horizontally
+        # Update the cat's position if the sprite is loaded
+        if self.cat_sprite:
+            self.cat_rect.x += self.cat_speed * self.cat_direction
 
+            # Check if the cat sprite hits the edges of the screen and reverse direction
+            if self.cat_rect.left <= 0 or self.cat_rect.right >= Config.SCREEN_WIDTH:
+                self.cat_direction *= -1  # Flip direction
+                self.cat_sprite = pygame.transform.flip(self.cat_sprite, True, False)  # Flip horizontally
+                self.is_flipped = not self.is_flipped  # Toggle the flip state
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the current credit with fade-in, display, and fade-out effects."""
         super().draw(screen)  # Fill with default background color
 
+        # Render the credits text
         if self.current_credit_index < len(self.credits):
-            alpha = self.fade_effect.update()  # Get the current alpha
+            alpha = self.fade_effect.update()  # Get the current alpha for fading
 
             # Calculate a wrap width (e.g., 90% of the screen width)
             wrap_width = int(screen.get_width() * 0.9)
@@ -1138,47 +1255,67 @@ class CreditRollState(GameState):
                 centered=True,
                 wrap_width=wrap_width  # Pass the wrap width for word wrapping
             )
-        
-        # Draw the cat sprite at the current position
-        screen.blit(self.cat_sprite, self.cat_rect)
+
+        # Draw the cat sprite at the bottom of the screen if it was successfully loaded
+        if self.cat_sprite:
+            screen.blit(self.cat_sprite, self.cat_rect)
 
 
 class GamePlayState(GameState):
     """The actual game of the game, handling player and NPC logic, sprite updates, and collision detection."""
 
-    def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, input_manager: InputManager, sound_manager: SoundManager):
+    def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, input_manager: InputManager, sound_manager: SoundManager, log_manager: LogManager):
         """Initialize the game play state."""
         super().__init__("GamePlayState")
         self.text_renderer = text_renderer
         self.window_manager = window_manager
         self.input_manager = input_manager
         self.sound_manager = sound_manager
+        self.log_manager = log_manager
         
-        # Stop the previous music (main menu music)
-        self.sound_manager.stop_music()
-
-        # Clear any loaded music to avoid re-playing old tracks
-        self.sound_manager.current_music = None
-
-        # Load and play new music from 'assets/music/bonus'
-        print("Loading gameplay music from 'assets/music/bonus'...")  # Debugging print
-        self.sound_manager.load_random_mp3('assets/music/bonus')
-        self.sound_manager.play_music(loop=True)  # Play the new music in a loop
-
-        # Initialize the SpriteManager
-        self.sprite_manager = SpriteManager()
-
-        # Create player and NPCs
-        self.player = Player('assets/images/sprites/cat01.png', 100, 100)
-        self.npc = NPC('assets/images/sprites/piranha.png', 200, 200)
+        # Player setup
+        try:
+            self.player = Player('assets/images/sprites/cat01.png', 100, 100)
+            # self.log_manager.log_info("Player initialized.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error initializing Player: {e}")
         
-        # Link player to input manager
-        self.input_manager.player = self.player
+        # InputManager setup
+        try:
+            self.input_manager = InputManager(self.player)
+            # self.log_manager.log_info("InputManager initialized.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error initializing InputManager: {e}")
+        
+        # SoundManager setup
+        try:
+            self.sound_manager.stop_music()
+            self.sound_manager.current_music = None
+            # self.log_manager.log_info("Stopped previous music and cleared current music.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error stopping music or clearing current music: {e}")
 
+        # Load and play new music
+        try:
+            # self.log_manager.log_info("Loading gameplay music from 'assets/music/bonus'...")
+            self.sound_manager.load_random_mp3('assets/music/bonus')
+            self.sound_manager.play_music(loop=True)  # Play the new music in a loop
+            # self.log_manager.log_info("Gameplay music started.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error loading or playing music: {e}")
 
-        # Add them to the sprite manager
-        self.sprite_manager.add_player(self.player)
-        self.sprite_manager.add_npc(self.npc)
+        # SpriteManager setup
+        try:
+            self.sprite_manager = SpriteManager()
+            self.player = Player('assets/images/sprites/cat01.png', 100, 100)
+            self.npc = NPC('assets/images/sprites/piranha.png', 200, 200)
+            self.input_manager.player = self.player
+            self.sprite_manager.add_player(self.player)
+            self.sprite_manager.add_npc(self.npc)
+            # self.log_manager.log_info("SpriteManager initialized with player and NPC.")
+        except Exception as e:
+            self.log_manager.log_error(f"Error initializing SpriteManager, Player, or NPC: {e}")
+
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to gameplay."""
@@ -1201,10 +1338,16 @@ class GamePlayState(GameState):
         self.sprite_manager.draw_sprites(screen)  # Draw all sprites
 
 
+class StudentSelectState(GameState):
+    # TODO: Implement the logic for selecting a student
+    def __init__(self):
+        raise NotImplementedError("StudentSelectState is a placeholder for future implementation.")
+
+
 class StateManager:
     """Manages switching between different game states."""
     
-    def __init__(self, initial_state: GameState, text_renderer: TextRenderer, window_manager: WindowManager, config: Config):
+    def __init__(self, initial_state: GameState, text_renderer: TextRenderer, window_manager: WindowManager, config: Config, log_manager: LogManager):
         """Initialize with the first state."""
         self.current_state = initial_state
         self.text_renderer = text_renderer
@@ -1212,26 +1355,63 @@ class StateManager:
         self.font_manager = FontManager()  # Initialize FontManager
         self.config = config
         self.input_manager = None  # Initialize later when creating gameplay state
+        self.log_manager = log_manager  # LogManager passed for logging important events
         # Initialize the SoundManager with a folder for music
-        self.sound_manager = SoundManager('assets/music/main_menu')
+        self.sound_manager = SoundManager('assets/music/main_menu', self.log_manager)
+        
+        
+        # Log that the StateManager has been initialized
+        # self.log_manager.log_info("StateManager initialized.")
 
     def switch_state(self, new_state_name: str) -> None:
         """Switch to a new game state based on the state name."""
-        if new_state_name == "MAIN_MENU":
-            self.current_state = MainMenuState(self.config, self.text_renderer, self.switch_to_options, self.switch_to_gameplay, self.window_manager)
-        elif new_state_name == "GAMEPLAY":
-            player = Player('assets/images/sprites/cat01.png', 100, 100)  # Create the player
-            self.input_manager = InputManager(player)  # Create InputManager for the player
-            self.current_state = GamePlayState(self.text_renderer, self.window_manager, self.input_manager, self.sound_manager)
-        elif new_state_name == "OPTIONS_MENU":
-            self.current_state = OptionsMenuState(self.window_manager, self.text_renderer, self.font_manager, self.sound_manager, self.switch_to_main_menu, self.switch_to_credits, self.switch_to_options)
-        elif new_state_name == "CREDITS":
-            self.current_state = CreditRollState(self.text_renderer, self.switch_to_options)
+        try:
+            # self.log_manager.log_info(f"Switching to state: {new_state_name}")
+            
+            if new_state_name == "MAIN_MENU":
+                self.current_state = MainMenuState(self.config, self.text_renderer, 
+                                                   self.switch_to_options, 
+                                                   self.switch_to_gameplay, 
+                                                   self.window_manager, 
+                                                   self.log_manager)  # Pass log_manager
+                # self.log_manager.log_info("Switched to MainMenuState.")
+                
+            elif new_state_name == "GAMEPLAY":
+                self.current_state = GamePlayState(self.text_renderer, 
+                                                   self.window_manager, 
+                                                   self.input_manager, 
+                                                   self.sound_manager, 
+                                                   self.log_manager)  # Pass log_manager
+                
+            elif new_state_name == "OPTIONS_MENU":
+                self.current_state = OptionsMenuState(self.window_manager, 
+                                                      self.text_renderer, 
+                                                      self.font_manager, 
+                                                      self.sound_manager, 
+                                                      self.switch_to_main_menu, 
+                                                      self.switch_to_credits, 
+                                                      self.switch_to_options)
+                # self.log_manager.log_info("Switched to OptionsMenuState.")
+                
+            elif new_state_name == "CREDITS":
+                self.current_state = CreditRollState(self.text_renderer, 
+                                                     self.switch_to_options,
+                                                     self.log_manager)
+                # self.log_manager.log_info("Switched to CreditRollState.")
+                
+            else:
+                raise ValueError(f"Unknown state: {new_state_name}")
+        
+        except FileNotFoundError as e:
+            self.log_manager.log_error(f"Asset loading error: {e}")
+        except Exception as e:
+            self.log_manager.log_error(f"Error switching state: {e}")
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Delegate event handling to the current state."""
         result = self.current_state.handle_events(events)
         if result == "EXIT":
+            self.log_manager.log_info("User requested exit.")
             return "EXIT"
         if result:
             self.switch_state(result)
@@ -1248,10 +1428,7 @@ class StateManager:
 
     def switch_to_gameplay(self) -> None:
         """Switch to the gameplay state."""
-        player = Player('assets/images/sprites/cat01.png', 100, 100)  # Create the player
-        self.input_manager = InputManager(player)  # Create InputManager for the player
-        # Directly switch to GamePlayState without calling switch_state()
-        self.current_state = GamePlayState(self.text_renderer, self.window_manager, self.input_manager, self.sound_manager)
+        self.switch_state("GAMEPLAY")
         
     def switch_to_options(self) -> None:
         """Switch to the options menu."""
@@ -1310,43 +1487,55 @@ class NPC(pygame.sprite.Sprite):
         self.rect.x += move[0]
         self.rect.y += move[1]
         
-    
-class LogManger:
-    """Manages creating, updating log files."""
-
 
 class Game:
     """Main class responsible for the game loop and rendering."""
 
     def __init__(self, config: Config):
-        """Initialize the game window and game settings."""
-        pygame.init()
+        # Set up the log manager
+        self.log_manager = LogManager("game_log.txt")
+        
+        # Initialize Pygame
+        try:
+            self.log_manager.log_info("Initializing game...")
+            pygame.init()
+        except Exception as e:
+            self.log_manager.log_error(f"Pygame failed to initialize: {e}")
+            raise  # Re-raise the error to stop execution
+        
+        # Create the FontManager
+        try:
+            self.font_manager = FontManager(default_font=config.DEFAULT_FONT_NAME, default_size=config.DEFAULT_FONT_SIZE)
+        except Exception as e:
+            self.log_manager.log_error(f"Failed to initialize FontManager: {e}")
+            raise
 
-        # Create the FontManager to manage the current font settings
-        self.font_manager = FontManager(default_font=config.DEFAULT_FONT_NAME, default_size=config.DEFAULT_FONT_SIZE)
-
-        # Use the WindowManager to set up the window and pass FontManager
-        self.window_manager = WindowManager(config, self.font_manager)
+        # Use the WindowManager to set up the window
+        try:
+            self.window_manager = WindowManager(config, self.font_manager)
+        except Exception as e:
+            self.log_manager.log_error(f"Failed to initialize WindowManager: {e}")
+            raise
 
         # Create a TextRenderer to handle all text drawing
         self.text_renderer = TextRenderer(self.font_manager)
 
         # Initialize the InputManager
-        self.input_manager = None  # Will be set in GamePlayState
+        self.input_manager = None  
         
         # Create an instance of SoundManager and pass the music folder path
-        self.sound_manager = SoundManager('assets/music/main_menu')
+        self.sound_manager = SoundManager('assets/music/main_menu', self.log_manager)
 
         # Set up the clock for consistent frame rate
         self.clock = pygame.time.Clock()
 
-        # Initialize the state manager with the intro state and pass the sound manager
+        # Initialize the state manager with the intro state and pass the log_manager as well
         self.state_manager = StateManager(IntroState(self.text_renderer, 
                                                      self.sound_manager), 
                                           self.text_renderer, 
                                           self.window_manager, 
-                                          config)
-
+                                          config,  # Pass the config
+                                          self.log_manager)  # Pass the log_manager
 
         # Flag to control the game loop
         self.running = True
