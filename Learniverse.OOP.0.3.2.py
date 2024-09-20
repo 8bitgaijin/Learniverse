@@ -216,7 +216,7 @@ class FontManager:
         self.log_manager = log_manager  # Store reference to LogManager
         self.excluded_fonts = {
             'wingdings', 'wingdings2', 'wingdings3', 'webdings', 'bookshelfsymbol7', 
-            'symbol', 'segoeuiemoji', 'segoeuisymbol', 'holomdl2assets', 'codicon', 
+            'symbol', 'segoeuiemoji', 'segoeuisymbol', 'holomdl2assets', 
             'fontawesome47webfont', 'fontawesome4webfont47', 
             'fontawesome5brandswebfont', 
             'fontawesome5brandswebfont5154', 'fontawesome5regularwebfont', 
@@ -1222,7 +1222,7 @@ class CreditRollState(GameState):
                 self.cat_speed = 5  # Speed of the cat
                 self.cat_direction = 1  # Moving right initially
                 self.is_flipped = False  # Track if the sprite is flipped
-                self.log_manager.log_info(f"Cat sprite loaded and will be displayed.")
+                # self.log_manager.log_info(f"Cat sprite loaded and will be displayed.")
             except pygame.error as e:
                 self.log_manager.log_error(f"Error loading cat sprite: {e}")
                 self.cat_sprite = None  # Set to None if loading fails
@@ -1383,12 +1383,23 @@ class GamePlayState(GameState):
 class DatabaseManager:
     """Manages the database of students."""
     
-    def __init__(self, db_path: str = "students.db"):
+    def __init__(self, db_path: str = "students.db", log_manager: LogManager = None):
         """Initialize the DatabaseManager and ensure the database exists."""
         self.db_path = db_path
-        self.connection = sqlite3.connect(self.db_path)
-        self.cursor = self.connection.cursor()
-        self._initialize_database()
+        self.log_manager = log_manager
+        try:
+            self.connection = sqlite3.connect(self.db_path)
+            self.cursor = self.connection.cursor()
+            self._initialize_database()
+            if self.log_manager:
+                self.log_manager.log_info(f"DatabaseManager initialized with database: {self.db_path}")
+        except sqlite3.Error as e:
+            error_message = f"Failed to connect to database: {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
+            raise
 
     def _initialize_database(self):
         """Create the students table if it doesn't exist."""
@@ -1401,27 +1412,46 @@ class DatabaseManager:
                 )
             ''')
             self.connection.commit()
+            if self.log_manager:
+                self.log_manager.log_info("Students table initialized successfully.")
         except sqlite3.Error as e:
-            print(f"Database initialization error: {e}")
-            # Log error to LogManager if needed
+            error_message = f"Database initialization error: {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
 
     def add_student(self, name: str) -> int:
         """Add a new student to the database and return their ID."""
         try:
             self.cursor.execute("INSERT INTO students (name) VALUES (?)", (name,))
             self.connection.commit()
-            return self.cursor.lastrowid
+            student_id = self.cursor.lastrowid
+            if self.log_manager:
+                self.log_manager.log_info(f"Student '{name}' added with ID: {student_id}")
+            return student_id
         except sqlite3.Error as e:
-            print(f"Error adding student: {e}")
+            error_message = f"Error adding student '{name}': {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
             return -1
 
     def get_students(self) -> list:
         """Retrieve a list of students from the database."""
         try:
             self.cursor.execute("SELECT * FROM students")
-            return self.cursor.fetchall()
+            students = self.cursor.fetchall()
+            if self.log_manager:
+                self.log_manager.log_info(f"Retrieved {len(students)} students from database.")
+            return students
         except sqlite3.Error as e:
-            print(f"Error retrieving students: {e}")
+            error_message = f"Error retrieving students: {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
             return []
 
     def update_student_score(self, student_id: int, new_score: int):
@@ -1429,12 +1459,28 @@ class DatabaseManager:
         try:
             self.cursor.execute("UPDATE students SET score = ? WHERE id = ?", (new_score, student_id))
             self.connection.commit()
+            if self.log_manager:
+                self.log_manager.log_info(f"Updated student ID {student_id} score to {new_score}.")
         except sqlite3.Error as e:
-            print(f"Error updating student score: {e}")
-    
+            error_message = f"Error updating student score for ID {student_id}: {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
+
     def close(self):
         """Close the database connection."""
-        self.connection.close()
+        try:
+            self.connection.close()
+            if self.log_manager:
+                self.log_manager.log_info("Database connection closed.")
+        except sqlite3.Error as e:
+            error_message = f"Error closing the database connection: {e}"
+            if self.log_manager:
+                self.log_manager.log_error(error_message)
+            else:
+                print(error_message)
+
 
 
 class Student:
@@ -1461,12 +1507,17 @@ class Student:
 class StudentSelectState(GameState):
     """State for selecting a student."""
     
-    def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, log_manager: LogManager):
+    def __init__(self, 
+                 text_renderer: TextRenderer, 
+                 window_manager: WindowManager, 
+                 log_manager: LogManager,
+                 database_manager: DatabaseManager):
         """Initialize the student selection state."""
         super().__init__("StudentSelectState")
         self.text_renderer = text_renderer
         self.window_manager = window_manager
         self.log_manager = log_manager
+        self.database_manager = database_manager
 
         # Log the initialization of StudentSelectState
         self.log_manager.log_info("StudentSelectState initialized.")
@@ -1484,8 +1535,8 @@ class StudentSelectState(GameState):
 
     def update(self) -> None:
         """Update student selection logic."""
-        # TODO: Add logic to update the state, such as fetching students from a database
-        pass
+        # Example of fetching students from the database
+        self.students = self.database_manager.get_students()
 
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the student selection screen."""
@@ -1494,22 +1545,52 @@ class StudentSelectState(GameState):
         # Display the title
         self.text_renderer.render_text(screen, "Student Selection", screen.get_width() // 2, screen.get_height() * 0.2, centered=True)
         
-        # TODO: Display list of students as buttons or selectable items
+        # Display the list of students
+        y_position = screen.get_height() * 0.3
+        for student in self.students:
+            self.text_renderer.render_text(screen, student.name, screen.get_width() // 2, y_position, centered=True)
+            y_position += 30  # Adjust spacing as needed
 
+
+class GreetStudentState(GameState):
+    """State to dynamically greet student. Comes after student selection state,
+       but before we check for a streak."""
+    
+    def __init__(self):
+        # TODO
+        pass
+
+
+class CheckStreakState(GameState):
+    """State to check on whether student is on a daily streak. Comes after 
+       student greeting and before Day of the Week state"""
+    
+    def __init__(self):
+        # TODO
+        pass
 
 
 class StateManager:
     """Manages switching between different game states."""
     
-    def __init__(self, initial_state: GameState, text_renderer: TextRenderer, window_manager: WindowManager, config: Config, log_manager: LogManager):
+    def __init__(self, 
+                 initial_state: GameState, 
+                 text_renderer: TextRenderer, 
+                 window_manager: WindowManager, 
+                 config: Config, 
+                 log_manager: LogManager,
+                 font_manager: FontManager,
+                 database_manager: DatabaseManager):
         """Initialize with the first state."""
         self.current_state = initial_state
         self.text_renderer = text_renderer
         self.window_manager = window_manager
-        self.log_manager = log_manager  # LogManager passed for logging important events
+        self.log_manager = log_manager
+        self.font_manager = font_manager
+        self.database_manager = database_manager
 
         # Pass log_manager to FontManager
-        self.font_manager = FontManager(log_manager=self.log_manager)  # Initialize FontManager with log_manager
+        # self.font_manager = FontManager(log_manager=self.log_manager)  # Initialize FontManager with log_manager
         
         self.config = config
         self.input_manager = None  # Initialize later when creating gameplay state
@@ -1528,7 +1609,7 @@ class StateManager:
             if new_state_name == "MAIN_MENU":
                 self.current_state = MainMenuState(self.config, self.text_renderer, 
                                                    self.switch_to_options, 
-                                                   self.switch_to_student_select,  # Updated to point to StudentSelectState
+                                                   self.switch_to_student_select,
                                                    self.window_manager, 
                                                    self.log_manager)  # Pass log_manager
                 # self.log_manager.log_info("Switched to MainMenuState.")
@@ -1536,7 +1617,8 @@ class StateManager:
             elif new_state_name == "STUDENT_SELECT":  # New case for student selection
                 self.current_state = StudentSelectState(self.text_renderer, 
                                                         self.window_manager, 
-                                                        self.log_manager)
+                                                        self.log_manager,
+                                                        self.database_manager)
                 
             elif new_state_name == "GAMEPLAY":
                 self.current_state = GamePlayState(self.text_renderer, 
@@ -1606,7 +1688,7 @@ class StateManager:
 
     def switch_to_student_select(self) -> None:
         """Switch to the student selection state."""
-        self.switch_state("STUDENT_SELECT")  # New method to switch to StudentSelectState
+        self.switch_state("STUDENT_SELECT")
 
 
 
@@ -1660,7 +1742,7 @@ class Game:
 
     def __init__(self, config: Config):
         # Set up the log manager
-        self.log_manager = LogManager("game_log.txt")
+        self.log_manager = LogManager("error_log.txt")
         
         # Initialize Pygame
         try:
@@ -1668,6 +1750,15 @@ class Game:
             pygame.init()
         except Exception as e:
             self.log_manager.log_error(f"Pygame failed to initialize: {e}")
+            raise  # Re-raise the error to stop execution
+        
+        # Initialize the DatabaseManager with a local path
+        try:
+            self.log_manager.log_info("Initializing database manager...")
+            self.database_manager = DatabaseManager(db_path="learniverse.db")  # Use local path for database
+            self.log_manager.log_info("Database manager initialized successfully.")
+        except Exception as e:
+            self.log_manager.log_error(f"Failed to initialize DatabaseManager: {e}")
             raise  # Re-raise the error to stop execution
         
         # Create the FontManager
@@ -1702,7 +1793,9 @@ class Game:
                                           self.text_renderer, 
                                           self.window_manager, 
                                           config,  # Pass the config
-                                          self.log_manager)  # Pass the log_manager
+                                          self.log_manager,
+                                          self.font_manager,
+                                          self.database_manager)  # Pass the log_manager
 
         # Flag to control the game loop
         self.running = True
