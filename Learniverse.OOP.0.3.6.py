@@ -1031,7 +1031,9 @@ class OptionsMenuState(GameState):
     def __init__(self, window_manager: WindowManager, text_renderer: TextRenderer, 
                  font_manager: FontManager, sound_manager: SoundManager,
                  switch_to_main_menu: callable, 
-                 switch_to_credits: callable, switch_to_options: callable):
+                 switch_to_credits: callable, 
+                 switch_to_options: callable,
+                 button_manager: ButtonManager):  # Use the shared ButtonManager
         """Initialize the options menu state."""
         super().__init__("OptionsMenuState")
         self.window_manager = window_manager
@@ -1042,21 +1044,20 @@ class OptionsMenuState(GameState):
         self.switch_to_credits = switch_to_credits
         self.switch_to_options = switch_to_options
         
+        # Use the shared ButtonManager
+        self.button_manager = button_manager  # Assign the passed ButtonManager instance
+        
         # Load a random background from the assets/images/options folder
         try:
             self.window_manager.load_background('assets/images/options')
         except Exception as e:
             self.log_manager.log_error(f"Failed to load background: {e}")
 
-        
         # Define positions for resolution and font and theme rows
         self.resolution_row_y = self.window_manager.config.SCREEN_HEIGHT * 0.15
         self.font_row_y = self.window_manager.config.SCREEN_HEIGHT * 0.3  # Position for font selection
         self.theme_row_y = self.window_manager.config.SCREEN_HEIGHT * 0.45  # Position for theme selection
         self.volume_row_y = self.window_manager.config.SCREEN_HEIGHT * 0.6  # Position for music volume control
-
-
-        self.button_manager = ButtonManager()
 
         # Resolutions available
         self.resolutions = [
@@ -1079,54 +1080,99 @@ class OptionsMenuState(GameState):
             0
         )
         
+        # Create buttons
+        self.create_buttons()
+
+    def create_buttons(self):
+        """Create and add all buttons to the ButtonManager."""
+        # Clear existing buttons before adding new ones to prevent duplication
+        self.button_manager.buttons.clear()
+    
+        screen_width = self.window_manager.config.SCREEN_WIDTH
+    
+        # Calculate button width for alignment and consistency
+        button_width = screen_width * 0.1  # Assuming buttons should be 10% of screen width, adjust as needed
+    
         # Create volume buttons
         self.left_volume_button = Button(
-            x=0, y=self.volume_row_y, text="<", text_renderer=text_renderer, 
+            x=int(screen_width * 0.05 - button_width // 2), 
+            y=self.volume_row_y, 
+            text="<", 
+            text_renderer=self.text_renderer, 
             action=self.decrease_volume
         )
         self.right_volume_button = Button(
-            x=0, y=self.volume_row_y, text=">", text_renderer=text_renderer, 
+            x=int(screen_width * 0.95 - button_width // 2), 
+            y=self.volume_row_y, 
+            text=">", 
+            text_renderer=self.text_renderer, 
             action=self.increase_volume
         )
         
         # Create buttons for resolution changing
         self.left_res_button = Button(
-            x=0, y=self.resolution_row_y, text="<", text_renderer=text_renderer, 
+            x=int(screen_width * 0.05 - button_width // 2), 
+            y=self.resolution_row_y, 
+            text="<", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.window_manager.decrease_resolution(), self.switch_to_options()]
         )
         self.right_res_button = Button(
-            x=0, y=self.resolution_row_y, text=">", text_renderer=text_renderer, 
+            x=int(screen_width * 0.95 - button_width // 2), 
+            y=self.resolution_row_y, 
+            text=">", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.window_manager.increase_resolution(), self.switch_to_options()]
         )
-
+    
         # Create font buttons
         self.left_font_button = Button(
-            x=0, y=self.font_row_y, text="<", text_renderer=text_renderer, 
+            x=int(screen_width * 0.05 - button_width // 2), 
+            y=self.font_row_y, 
+            text="<", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.font_manager.decrease_font_index(), self.apply_font_change()]
         )
         self.right_font_button = Button(
-            x=0, y=self.font_row_y, text=">", text_renderer=text_renderer, 
+            x=int(screen_width * 0.95 - button_width // 2), 
+            y=self.font_row_y, 
+            text=">", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.font_manager.increase_font_index(), self.apply_font_change()]
         )
         
         # Create theme buttons for cycling through themes
         self.left_theme_button = Button(
-            x=0, y=self.theme_row_y, text="<", text_renderer=text_renderer, 
+            x=int(screen_width * 0.05 - button_width // 2), 
+            y=self.theme_row_y, 
+            text="<", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.decrease_theme(), self.apply_theme_change()]
         )
         self.right_theme_button = Button(
-            x=0, y=self.theme_row_y, text=">", text_renderer=text_renderer, 
+            x=int(screen_width * 0.95 - button_width // 2), 
+            y=self.theme_row_y, 
+            text=">", 
+            text_renderer=self.text_renderer, 
             action=lambda: [self.increase_theme(), self.apply_theme_change()]
         )
-
+    
         # Create main menu and credits buttons
         self.main_menu_button = Button(
-            x=0, y=0, text="Main Menu", text_renderer=text_renderer, action=self.switch_to_main_menu
+            x=int(screen_width * 0.5 - button_width // 2), 
+            y=self.window_manager.config.SCREEN_HEIGHT * 0.88, 
+            text="Main Menu", 
+            text_renderer=self.text_renderer, 
+            action=self.switch_to_main_menu
         )
         self.credits_button = Button(
-            x=0, y=0, text="Credits", text_renderer=text_renderer, action=self.switch_to_credits
+            x=int(screen_width * 0.5 - button_width // 2), 
+            y=self.window_manager.config.SCREEN_HEIGHT * 0.75, 
+            text="Credits", 
+            text_renderer=self.text_renderer, 
+            action=self.switch_to_credits
         )
-
+    
         # Add all buttons to the ButtonManager
         self.button_manager.add_button(self.left_volume_button)
         self.button_manager.add_button(self.right_volume_button)
@@ -1138,6 +1184,7 @@ class OptionsMenuState(GameState):
         self.button_manager.add_button(self.credits_button)
         self.button_manager.add_button(self.left_theme_button)
         self.button_manager.add_button(self.right_theme_button)
+
         
     def apply_theme_change(self):
         """Apply the selected theme and immediately update the display."""
@@ -1206,7 +1253,6 @@ class OptionsMenuState(GameState):
         self.left_volume_button.rect.x = int(screen_width * 0.05 - self.left_volume_button.rect.width // 2)
         self.right_volume_button.rect.x = int(screen_width * 0.95 - self.right_volume_button.rect.width // 2)
 
-
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the options menu."""
         screen.fill(self.window_manager.config.CURRENT_BACKGROUND_COLOR)
@@ -1238,6 +1284,7 @@ class OptionsMenuState(GameState):
 
         # Draw the buttons via ButtonManager
         self.button_manager.draw(screen)
+
 
 
 class CreditRollState(GameState):
@@ -1661,12 +1708,12 @@ class StudentSelectState(GameState):
     TITLE_Y_RATIO = 0.01               # 1% from the top for the title
     STUDENT_LIST_START_Y_RATIO = 0.1   # 10% from the top for the student list
     STUDENT_NAME_SPACING_RATIO = 0.11  # 11% of screen height between student names
-    INPUT_BOX_WIDTH_RATIO = 0.3        # 30% of screen width for input box
-    INPUT_BOX_HEIGHT_RATIO = 0.05      # 5% of screen height for input box
+    INPUT_BOX_WIDTH_RATIO = 0.39        # 30% of screen width for input box
+    INPUT_BOX_HEIGHT_RATIO = 0.09      # 5% of screen height for input box
     INPUT_BOX_Y_RATIO = 0.75           # 75% from the top for input box
-    INPUT_BOX_MARGIN_RATIO = 0.005     # 0.5% of screen width for margin inside input box
+    INPUT_BOX_MARGIN_RATIO = 0.01     # 0.5% of screen width for margin inside input box
     LABEL_WIDTH_RATIO = 0.15           # 15% of screen width for the label
-    LABEL_PADDING_RATIO = 0.45         # 45% of screen width for padding between label and input box
+    LABEL_PADDING_RATIO = 0.4         # 45% of screen width for padding between label and input box
 
     def __init__(self, 
                  text_renderer: TextRenderer, 
@@ -1811,25 +1858,36 @@ class StudentSelectState(GameState):
             centered=True
         )
         
-        # Display the "Student Name:" label on the same row as the input box
+        # Display the "Add Student:" label on the same row as the input box
         self.text_renderer.render_text(
             screen,
-            "Student Name:",
+            "Add Student:",
             self.label_x,  # Left position for the label
             self.input_box_y + (self.input_box_height // 2) - (self.text_renderer.font_manager.get_font().get_height() // 2)  # Center vertically in the input box row
         )
         
         # Display the input box
         pygame.draw.rect(screen, (255, 255, 255), self.input_box, 2 if self.input_active else 1)
+        
+        # Get the font and calculate the y-offset for vertical centering
+        font = self.text_renderer.font_manager.get_font()
+        text_surface = font.render(self.input_text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect()
+        
+        # Center the text vertically in the input box
+        text_y_offset = (self.input_box_height - text_rect.height) // 2
+        
+        # Draw the text inside the input box with the calculated offset
         self.text_renderer.render_text(
             screen,
             self.input_text,
             self.input_box.x + self.input_box_margin,
-            self.input_box.y + self.input_box_margin
+            self.input_box.y + text_y_offset  # Adjust the text's y position to center it
         )
         
         # Draw all buttons using the button manager
         self.button_manager.draw(screen)
+
 
 
 
@@ -1931,7 +1989,8 @@ class StateManager:
                                                       self.sound_manager, 
                                                       self.switch_to_main_menu, 
                                                       self.switch_to_credits, 
-                                                      self.switch_to_options)
+                                                      self.switch_to_options,
+                                                      self.button_manager)
                 # self.log_manager.log_info("Switched to OptionsMenuState.")
                 
             elif new_state_name == "CREDITS":
