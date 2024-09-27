@@ -1650,13 +1650,13 @@ class StudentSelectState(GameState):
     STUDENT_NAME_SPACING_RATIO = 0.08  # 8% of screen height between student names
     INPUT_BOX_WIDTH_RATIO = 0.3    # 30% of screen width for input box
     INPUT_BOX_HEIGHT_RATIO = 0.05  # 5% of screen height for input box
-    INPUT_BOX_Y_RATIO = 0.75        # 60% from the top for input box
+    INPUT_BOX_Y_RATIO = 0.75       # 75% from the top for input box
     INPUT_BOX_MARGIN_RATIO = 0.005 # 0.5% of screen width for margin inside input box
     LABEL_WIDTH_RATIO = 0.15       # 15% of screen width for the label
-    LABEL_PADDING_RATIO = 0.45     # 2% of screen width for padding between label and input box
+    LABEL_PADDING_RATIO = 0.45     # 45% of screen width for padding between label and input box
     ADD_BUTTON_WIDTH_RATIO = 0.2   # 20% of screen width for add button
     ADD_BUTTON_HEIGHT_RATIO = 0.07 # 7% of screen height for add button
-    ADD_BUTTON_Y_RATIO = 0.85       # 70% from the top for add button
+    ADD_BUTTON_Y_RATIO = 0.85      # 85% from the top for add button
 
     def __init__(self, 
                  text_renderer: TextRenderer, 
@@ -1744,6 +1744,27 @@ class StudentSelectState(GameState):
         # Add the button to the button manager
         self.button_manager.add_button(add_student_button)
 
+    def create_student_buttons(self):
+        """Create buttons for each student and add them to the ButtonManager."""
+        y_position = int(self.screen.get_height() * self.STUDENT_LIST_START_Y_RATIO)
+        screen_width = self.screen.get_width()
+
+        for student_name in self.students:
+            # Create a button for each student name
+            student_button = Button(
+                x=screen_width // 2,
+                y=y_position,
+                text=student_name,
+                text_renderer=self.text_renderer,
+                action=lambda name=student_name: print(f"selected student: {name}")  # Action to print student name
+            )
+
+            # Add the student button to the button manager
+            self.button_manager.add_button(student_button)
+
+            # Adjust spacing for the next button
+            y_position += int(self.screen.get_height() * self.STUDENT_NAME_SPACING_RATIO)
+
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the student selection state."""
         for event in events:
@@ -1781,6 +1802,10 @@ class StudentSelectState(GameState):
         # Assuming the first element in the tuple is student_id and the second is name
         self.students = [student[1] for student in student_tuples]
 
+        # Clear existing buttons and recreate them
+        self.button_manager.buttons.clear()
+        self.create_student_buttons()
+
     def add_student(self) -> None:
         """Add a new student to the database."""
         if self.input_text.strip():
@@ -1801,18 +1826,6 @@ class StudentSelectState(GameState):
             centered=True
         )
         
-        # Display the list of students
-        y_position = int(screen.get_height() * self.STUDENT_LIST_START_Y_RATIO)
-        for student_name in self.students:
-            self.text_renderer.render_text(
-                screen,
-                student_name,
-                screen.get_width() // 2,
-                y_position,
-                centered=True
-            )
-            y_position += int(screen.get_height() * self.STUDENT_NAME_SPACING_RATIO)  # Adjust spacing with a ratio
-        
         # Display the "Student Name:" label on the same row as the input box
         self.text_renderer.render_text(
             screen,
@@ -1832,6 +1845,7 @@ class StudentSelectState(GameState):
         
         # Draw all buttons using the button manager
         self.button_manager.draw(screen)
+
 
 
 
