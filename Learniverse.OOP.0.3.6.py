@@ -938,6 +938,7 @@ class MainMenuState(GameState):
                  text_renderer: TextRenderer, 
                  switch_to_options: callable, 
                  switch_to_student_select: callable,
+                 switch_to_learniverse_explanation: callable,
                  window_manager: WindowManager, 
                  log_manager: LogManager,
                  button_manager: ButtonManager):
@@ -956,9 +957,9 @@ class MainMenuState(GameState):
             self.log_manager.log_error(f"Failed to load main menu background: {e}")
 
         # Create the buttons for the main menu
-        self.create_buttons(switch_to_student_select, switch_to_options)
+        self.create_buttons(switch_to_student_select, switch_to_options, switch_to_learniverse_explanation)
 
-    def create_buttons(self, switch_to_student_select: callable, switch_to_options: callable):
+    def create_buttons(self, switch_to_student_select: callable, switch_to_options: callable, switch_to_learniverse_explanation: callable):
         """Create and add buttons to the ButtonManager."""
         # Clear existing buttons before adding new ones to prevent duplication
         self.button_manager.buttons.clear()
@@ -980,16 +981,27 @@ class MainMenuState(GameState):
             text_renderer=self.text_renderer,  # TextRenderer object
             action=switch_to_options  # Keep this as switching to the options menu
         )
+        
+        # Create the "Learniverse?" button and set it to switch to LearniverseExplanationState
+        self.learniverse_button = Button(
+            x=self.config.SCREEN_WIDTH // 2,  # X position
+            y=self.config.SCREEN_HEIGHT * 0.75,  # Y position, below the "Options" button
+            text="Learniverse?",  # Text for the button
+            text_renderer=self.text_renderer,  # TextRenderer object
+            action=switch_to_learniverse_explanation  # Switch to the LearniverseExplanationState
+        )
 
         # Add the buttons to the ButtonManager
         self.button_manager.add_button(self.start_button)
         self.button_manager.add_button(self.options_button)
+        self.button_manager.add_button(self.learniverse_button)
 
     def update_button_position(self):
         """Update the button positions dynamically based on screen size."""
         screen_width = self.config.SCREEN_WIDTH
         self.start_button.rect.x = int(screen_width // 2 - self.start_button.rect.width // 2)
         self.options_button.rect.x = int(screen_width // 2 - self.options_button.rect.width // 2)
+        self.learniverse_button.rect.x = int(screen_width // 2 - self.learniverse_button.rect.width // 2)  # Update Learniverse button position
 
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the main menu."""
@@ -1022,6 +1034,53 @@ class MainMenuState(GameState):
         
         # Delegate button drawing to the ButtonManager
         self.button_manager.draw(screen)
+
+
+class LearniverseExplanationState(GameState):
+    """State to display an explanation of what Learniverse is."""
+
+    def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, log_manager: LogManager):
+        """Initialize the Learniverse explanation state."""
+        super().__init__("LearniverseExplanationState")
+        self.text_renderer = text_renderer
+        self.window_manager = window_manager
+        self.log_manager = log_manager
+
+        # Log the initialization of LearniverseExplanationState
+        self.log_manager.log_info("LearniverseExplanationState initialized.")
+
+    def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
+        """Handle events specific to the Learniverse explanation state."""
+        for event in events:
+            if event.type == pygame.QUIT:
+                return "EXIT"
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return "MAIN_MENU"  # Return to the main menu on pressing Escape
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the Learniverse explanation screen."""
+        super().draw(screen)
+
+        # Render a simple explanation for now
+        self.text_renderer.render_text(
+            screen, 
+            "What is Learniverse?", 
+            screen.get_width() // 2, 
+            screen.get_height() * 0.2, 
+            centered=True
+        )
+        explanation_text = (
+            "Learniverse is an educational game designed to make learning fun! "
+            "It helps students practice math skills through interactive gameplay."
+        )
+        self.text_renderer.render_text(
+            screen, 
+            explanation_text, 
+            screen.get_width() // 2, 
+            screen.get_height() * 0.4, 
+            centered=True,
+            wrap_width=int(screen.get_width() * 0.8)  # Wrap text if it exceeds 80% of screen width
+        )
 
 
 
@@ -1284,7 +1343,6 @@ class OptionsMenuState(GameState):
 
         # Draw the buttons via ButtonManager
         self.button_manager.draw(screen)
-
 
 
 class CreditRollState(GameState):
@@ -1677,17 +1735,6 @@ class DatabaseManager:
                 print(error_message)
 
 
-
-
-
-
-
-
-
-
-
-
-
 class Student:
     """Represents a student and their related data."""
     
@@ -1889,15 +1936,6 @@ class StudentSelectState(GameState):
         self.button_manager.draw(screen)
 
 
-
-
-
-
-
-
-
-
-
 class GreetStudentState(GameState):
     """State to dynamically greet student. Comes after student selection state,
        but before we check for a streak."""
@@ -1918,7 +1956,7 @@ class CheckStreakState(GameState):
 
 class StateManager:
     """Manages switching between different game states."""
-    
+
     def __init__(self, 
                  initial_state: GameState, 
                  text_renderer: TextRenderer, 
@@ -1929,7 +1967,7 @@ class StateManager:
                  database_manager: DatabaseManager,
                  screen: pygame.Surface,  # Move screen before sound_manager
                  sound_manager: SoundManager,
-                 button_manager: ButtonManager()):  # Default value parameters go last
+                 button_manager: ButtonManager):  # Default value parameters go last
         """Initialize with the first state."""
         self.current_state = initial_state
         self.text_renderer = text_renderer
@@ -1940,48 +1978,37 @@ class StateManager:
         self.sound_manager = sound_manager
         self.screen = screen
         self.button_manager = button_manager
-
-        # Pass log_manager to FontManager
-        # self.font_manager = FontManager(log_manager=self.log_manager)  # Initialize FontManager with log_manager
-        
         self.config = config
         self.input_manager = None  # Initialize later when creating gameplay state
-
-        # Initialize the SoundManager with a folder for music
-        # self.sound_manager = SoundManager('assets/music/main_menu', self.log_manager)
-        
-        # Log that the StateManager has been initialized
-        # self.log_manager.log_info("StateManager initialized.")
 
     def switch_state(self, new_state_name: str) -> None:
         """Switch to a new game state based on the state name."""
         try:
-            # self.log_manager.log_info(f"Switching to state: {new_state_name}")
-            
             if new_state_name == "MAIN_MENU":
-                self.current_state = MainMenuState(self.config, self.text_renderer, 
-                                                   self.switch_to_options, 
-                                                   self.switch_to_student_select,
-                                                   self.window_manager, 
-                                                   self.log_manager,
-                                                   self.button_manager)  
-                # self.log_manager.log_info("Switched to MainMenuState.")
-                
-            elif new_state_name == "STUDENT_SELECT":  # New case for student selection
+                self.current_state = MainMenuState(self.config, 
+                                   self.text_renderer, 
+                                   self.switch_to_options, 
+                                   self.switch_to_student_select,
+                                   self.switch_to_learniverse_explanation,  # Pass the method here
+                                   self.window_manager, 
+                                   self.log_manager,
+                                   self.button_manager)
+
+            elif new_state_name == "STUDENT_SELECT":
                 self.current_state = StudentSelectState(self.text_renderer, 
                                                         self.window_manager, 
                                                         self.log_manager,
                                                         self.database_manager,
                                                         screen=self.screen,
                                                         button_manager=self.button_manager)
-                
+
             elif new_state_name == "GAMEPLAY":
                 self.current_state = GamePlayState(self.text_renderer, 
                                                    self.window_manager, 
                                                    self.input_manager, 
                                                    self.sound_manager, 
-                                                   self.log_manager)  # Pass log_manager
-                
+                                                   self.log_manager)  
+
             elif new_state_name == "OPTIONS_MENU":
                 self.current_state = OptionsMenuState(self.window_manager, 
                                                       self.text_renderer, 
@@ -1991,14 +2018,17 @@ class StateManager:
                                                       self.switch_to_credits, 
                                                       self.switch_to_options,
                                                       self.button_manager)
-                # self.log_manager.log_info("Switched to OptionsMenuState.")
-                
+
             elif new_state_name == "CREDITS":
                 self.current_state = CreditRollState(self.text_renderer, 
                                                      self.switch_to_options,
                                                      self.log_manager)
-                # self.log_manager.log_info("Switched to CreditRollState.")
                 
+            elif new_state_name == "LEARNIVERSE_EXPLANATION":
+                self.current_state = LearniverseExplanationState(self.text_renderer, 
+                                                                 self.window_manager, 
+                                                                 self.log_manager)
+
             else:
                 raise ValueError(f"Unknown state: {new_state_name}")
         
@@ -2045,6 +2075,10 @@ class StateManager:
     def switch_to_student_select(self) -> None:
         """Switch to the student selection state."""
         self.switch_state("STUDENT_SELECT")
+
+    def switch_to_learniverse_explanation(self) -> None:
+        """Switch to the Learniverse explanation state."""
+        self.switch_state("LEARNIVERSE_EXPLANATION")
 
 
 
