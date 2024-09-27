@@ -1037,7 +1037,7 @@ class MainMenuState(GameState):
 
 
 class LearniverseExplanationState(GameState):
-    """State to display an explanation of what Learniverse is."""
+    """State to display an explanation of what Learniverse is, in a slide show format."""
 
     def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, log_manager: LogManager):
         """Initialize the Learniverse explanation state."""
@@ -1049,39 +1049,62 @@ class LearniverseExplanationState(GameState):
         # Log the initialization of LearniverseExplanationState
         self.log_manager.log_info("LearniverseExplanationState initialized.")
 
+        # Define the slides with short chunks of information
+        self.slides = [
+            "What is Learniverse?",
+            "Learniverse is an educational game designed to make learning fun!",
+            "It helps students practice math skills through interactive gameplay.",
+            "By integrating game elements, Learniverse aims to reduce the stress often associated with math.",
+            "Students can choose their own pace and level, making learning personalized.",
+            "The game provides instant feedback and rewards for progress.",
+            "Learniverse covers fundamental math concepts that align with educational standards.",
+            "Our goal is to turn learning into an engaging and enjoyable experience."
+        ]
+        self.current_slide = 0  # Index to track the current slide being displayed
+
     def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
         """Handle events specific to the Learniverse explanation state."""
         for event in events:
             if event.type == pygame.QUIT:
-                return "EXIT"
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-                return "MAIN_MENU"  # Return to the main menu on pressing Escape
+                return "EXIT"  # Exit the game on quit event
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return self.advance_slide()  # Go to the next slide on key press or mouse click
+
+    def advance_slide(self) -> Union[str, None]:
+        """Advance to the next slide or return to the main menu if at the end."""
+        self.current_slide += 1
+        if self.current_slide >= len(self.slides):
+            return "MAIN_MENU"  # Return to main menu if all slides are done
+        return None  # Continue in the current state
 
     def draw(self, screen: pygame.Surface) -> None:
-        """Draw the Learniverse explanation screen."""
+        """Draw the current slide of the Learniverse explanation screen."""
         super().draw(screen)
 
-        # Render a simple explanation for now
-        self.text_renderer.render_text(
-            screen, 
-            "What is Learniverse?", 
-            screen.get_width() // 2, 
-            screen.get_height() * 0.2, 
-            centered=True
-        )
-        explanation_text = (
-            "Learniverse is an educational game designed to make learning fun! "
-            "It helps students practice math skills through interactive gameplay."
-        )
-        self.text_renderer.render_text(
-            screen, 
-            explanation_text, 
-            screen.get_width() // 2, 
-            screen.get_height() * 0.4, 
-            centered=True,
-            wrap_width=int(screen.get_width() * 0.8)  # Wrap text if it exceeds 80% of screen width
-        )
+        # Clear the screen
+        screen.fill(self.window_manager.config.CURRENT_BACKGROUND_COLOR)
 
+        # Render the current slide
+        slide_text = self.slides[self.current_slide]
+        
+        # If it's the first slide, display it as a title
+        if self.current_slide == 0:
+            self.text_renderer.render_text(
+                screen, 
+                slide_text, 
+                screen.get_width() // 2, 
+                screen.get_height() * 0.1, 
+                centered=True
+            )
+        else:
+            self.text_renderer.render_text(
+                screen, 
+                slide_text, 
+                screen.get_width() // 2, 
+                screen.get_height() * 0.2, 
+                centered=True,
+                wrap_width=int(screen.get_width() * 0.95)  # Wrap text if it exceeds 80% of screen width
+            )
 
 
 class OptionsMenuState(GameState):
