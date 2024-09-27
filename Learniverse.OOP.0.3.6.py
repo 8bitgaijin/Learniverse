@@ -1791,7 +1791,8 @@ class StudentSelectState(GameState):
                  log_manager: LogManager,
                  database_manager: DatabaseManager,
                  screen: pygame.Surface,
-                 button_manager: ButtonManager):  # Pass button_manager from Game
+                 button_manager: ButtonManager,
+                 switch_to_greet_student: callable):  # Pass the method here
         """Initialize the student selection state."""
         super().__init__("StudentSelectState")
         self.text_renderer = text_renderer
@@ -1799,7 +1800,9 @@ class StudentSelectState(GameState):
         self.log_manager = log_manager
         self.database_manager = database_manager
         self.screen = screen
-        self.button_manager = button_manager  # Use the passed button manager
+        self.button_manager = button_manager
+        self.switch_to_greet_student = switch_to_greet_student  # Store the method
+
 
         # Log the initialization of StudentSelectState
         self.log_manager.log_info("StudentSelectState initialized.")
@@ -1850,7 +1853,7 @@ class StudentSelectState(GameState):
         """Create buttons for each student and add them to the ButtonManager."""
         y_position = int(self.screen.get_height() * self.STUDENT_LIST_START_Y_RATIO)
         screen_width = self.screen.get_width()
-
+    
         for student_name in self.students:
             # Create a button for each student name
             student_button = Button(
@@ -1858,12 +1861,15 @@ class StudentSelectState(GameState):
                 y=y_position,
                 text=student_name,
                 text_renderer=self.text_renderer,
-                action=lambda name=student_name: print(f"selected student: {name}")  # Action to print student name
+                action=lambda name=student_name: self.switch_to_greet_student(name)
             )
-
+    
+            # Correct late binding issue using default argument trick
+            student_button.action = lambda name=student_name: self.switch_to_greet_student(name)
+    
             # Add the student button to the button manager
             self.button_manager.add_button(student_button)
-
+    
             # Adjust spacing for the next button
             y_position += int(self.screen.get_height() * self.STUDENT_NAME_SPACING_RATIO)
 
@@ -1957,15 +1963,45 @@ class StudentSelectState(GameState):
         
         # Draw all buttons using the button manager
         self.button_manager.draw(screen)
+        
+        
 
 
 class GreetStudentState(GameState):
-    """State to dynamically greet student. Comes after student selection state,
-       but before we check for a streak."""
-    
-    def __init__(self):
-        # TODO
-        pass
+    """State to dynamically greet student. Comes after student selection state."""
+
+    def __init__(self, text_renderer: TextRenderer, window_manager: WindowManager, log_manager: LogManager, student_name: str):
+        super().__init__("GreetStudentState")
+        self.text_renderer = text_renderer
+        self.window_manager = window_manager
+        self.log_manager = log_manager
+        self.student_name = student_name
+
+        # Log the greeting message
+        self.log_manager.log_info(f"Greeting student: {self.student_name}")
+
+    def handle_events(self, events: List[pygame.event.Event]) -> Union[str, None]:
+        """Handle events specific to the GreetStudent state."""
+        for event in events:
+            if event.type == pygame.QUIT:
+                return "EXIT"
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return "MAIN_MENU"  # Return to main menu on any key press or mouse click
+
+    def draw(self, screen: pygame.Surface) -> None:
+        """Draw the greet student screen."""
+        super().draw(screen)
+        # Display a greeting message
+        greeting_text = f"Hello, {self.student_name}!"
+        self.text_renderer.render_text(
+            screen, 
+            greeting_text, 
+            screen.get_width() // 2, 
+            screen.get_height() // 2, 
+            centered=True
+        )
+
+
 
 
 class CheckStreakState(GameState):
@@ -2004,7 +2040,7 @@ class StateManager:
         self.config = config
         self.input_manager = None  # Initialize later when creating gameplay state
 
-    def switch_state(self, new_state_name: str) -> None:
+    def switch_state(self, new_state_name: str, *args) -> None:
         """Switch to a new game state based on the state name."""
         try:
             if new_state_name == "MAIN_MENU":
@@ -2023,7 +2059,8 @@ class StateManager:
                                                         self.log_manager,
                                                         self.database_manager,
                                                         screen=self.screen,
-                                                        button_manager=self.button_manager)
+                                                        button_manager=self.button_manager,
+                                                        switch_to_greet_student=self.switch_to_greet_student)
 
             elif new_state_name == "GAMEPLAY":
                 self.current_state = GamePlayState(self.text_renderer, 
@@ -2051,6 +2088,13 @@ class StateManager:
                 self.current_state = LearniverseExplanationState(self.text_renderer, 
                                                                  self.window_manager, 
                                                                  self.log_manager)
+                
+            elif new_state_name == "GREET_STUDENT":
+                student_name = args[0] if args else "Student"
+                self.current_state = GreetStudentState(self.text_renderer, 
+                                                       self.window_manager, 
+                                                       self.log_manager,
+                                                       student_name=student_name)
 
             else:
                 raise ValueError(f"Unknown state: {new_state_name}")
@@ -2102,6 +2146,11 @@ class StateManager:
     def switch_to_learniverse_explanation(self) -> None:
         """Switch to the Learniverse explanation state."""
         self.switch_state("LEARNIVERSE_EXPLANATION")
+        
+    def switch_to_greet_student(self, student_name: str) -> None:
+        """Switch to the GreetStudentState with the selected student name."""
+        self.switch_state("GREET_STUDENT", student_name)
+
 
 
 
@@ -2210,6 +2259,20 @@ class Game:
         self.clock = pygame.time.Clock()
 
         # Initialize the state manager with the intro state and pass the log_manager as well
+        # self.state_manager = StateManager(
+        #     initial_state=IntroState(self.text_renderer, self.sound_manager), 
+        #     text_renderer=self.text_renderer, 
+        #     window_manager=self.window_manager, 
+        #     config=config,
+        #     log_manager=self.log_manager,
+        #     font_manager=self.font_manager,
+        #     database_manager=self.database_manager,
+        #     screen=self.screen,  # Pass the screen object here
+        #     sound_manager=self.sound_manager,  # Pass the sound_manager only once
+        #     button_manager=self.button_manager
+        # )
+        
+        # In the Game class initialization, create the StateManager
         self.state_manager = StateManager(
             initial_state=IntroState(self.text_renderer, self.sound_manager), 
             text_renderer=self.text_renderer, 
@@ -2222,6 +2285,9 @@ class Game:
             sound_manager=self.sound_manager,  # Pass the sound_manager only once
             button_manager=self.button_manager
         )
+        
+        # Now add the method to StateManager
+        self.state_manager.switch_to_greet_student = self.state_manager.switch_to_greet_student
 
         # Flag to control the game loop
         self.running = True
