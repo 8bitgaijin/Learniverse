@@ -5,10 +5,11 @@ Learniverse
 """
 
 import ctypes
-import datetime
+from datetime import datetime, timedelta
 import json
 import os
 import pygame
+import pyttsx3
 import random
 import sqlite3
 import sys
@@ -176,7 +177,7 @@ def create_log_message(message):
     Returns:
         str: The log message formatted with a timestamp.
     """
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     return f"[{timestamp}] {message}"
 
 
@@ -328,7 +329,7 @@ def check_database_initialization():
 
 
 def _initialize_tables(cursor, connection):
-    """Initialize the required tables: students, lessons, sessions, session_lessons."""
+    """Initialize the required tables: students, lessons, sessions, session_lessons, and student_lesson_progress."""
     try:
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS students (
@@ -338,44 +339,64 @@ def _initialize_tables(cursor, connection):
                 email TEXT UNIQUE
             )
         ''')
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS lessons (
                 lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
-                description TEXT,
-                student_level INTEGER,
-                avg_time_per_question REAL DEFAULT 0.0
+                description TEXT
             )
         ''')
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
                 session_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL,
-                start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                start_time TIMESTAMP,  -- No DEFAULT here
                 end_time TIMESTAMP,
                 total_time REAL,
+                total_questions INTEGER,
+                total_correct INTEGER,
+                avg_time_per_question REAL,
                 FOREIGN KEY (student_id) REFERENCES students(id)
             )
         ''')
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS session_lessons (
                 session_lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 session_id INTEGER NOT NULL,
                 lesson_id INTEGER NOT NULL,
+                start_time TIMESTAMP,
+                end_time TIMESTAMP,
+                total_time REAL,
                 questions_asked INTEGER,
                 questions_correct INTEGER,
+                avg_time_per_question REAL,
                 percent_correct REAL,
                 FOREIGN KEY (session_id) REFERENCES sessions(session_id),
                 FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
             )
         ''')
 
+        # New table for tracking individual student levels per lesson
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS student_lesson_progress (
+                student_lesson_progress_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id INTEGER NOT NULL,
+                lesson_id INTEGER NOT NULL,
+                student_level INTEGER DEFAULT 1,
+                FOREIGN KEY (student_id) REFERENCES students(id),
+                FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
+            )
+        ''')
+
         # Insert Rainbow Cats as a default lesson if it doesn't exist
         cursor.execute('''
-            INSERT OR IGNORE INTO lessons (title, description, student_level)
-            VALUES ('Rainbow Cats', 'A math game to master mental arithmetic', 1)
+            INSERT OR IGNORE INTO lessons (title, description)
+            VALUES ('Rainbow Cats', 'A math game to master mental arithmetic')
         ''')
-        
+
         connection.commit()
         log_entry = create_log_message("Database tables initialized successfully, including 'Rainbow Cats' lesson.")
         log_message(log_entry)
@@ -383,6 +404,7 @@ def _initialize_tables(cursor, connection):
         log_entry = create_log_message(f"Error initializing tables: {e}")
         log_message(log_entry)
         connection.rollback()
+
 
 def add_student(name, age=None, email=None):
     """Add a new student to the database and return their ID."""
@@ -424,21 +446,33 @@ def get_students():
         return []
 
 
-def add_session_lesson(session_id, lesson_id, questions_asked, questions_correct, percent_correct):
-    """Add a new record to the session_lessons table and return its ID."""
+def add_session_lesson(session_id, lesson_id, start_time, end_time, total_questions, questions_correct):
+    """Add a new record to the session_lessons table with detailed lesson data and return its ID."""
     try:
         connection = sqlite3.connect('learniverse.db')
         cursor = connection.cursor()
+
+        # Calculate total time and average time per question
+        total_time = round(end_time - start_time, 1)
+        avg_time_per_question = total_time / total_questions if total_questions > 0 else 0
+        percent_correct = (questions_correct / total_questions) * 100 if total_questions > 0 else 0
+
+        # Insert the lesson record into session_lessons
         cursor.execute('''
-            INSERT INTO session_lessons (session_id, lesson_id, questions_asked, questions_correct, percent_correct)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (session_id, lesson_id, questions_asked, questions_correct, percent_correct))
+            INSERT INTO session_lessons (session_id, lesson_id, start_time, end_time, total_time, 
+                                         questions_asked, questions_correct, avg_time_per_question, percent_correct)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (session_id, lesson_id, start_time, end_time, total_time, total_questions, 
+              questions_correct, avg_time_per_question, percent_correct))
+
         connection.commit()
         session_lesson_id = cursor.lastrowid
+
         log_entry = create_log_message(f"Session lesson record added with ID: {session_lesson_id}")
         log_message(log_entry)
         cursor.close()
         connection.close()
+
         return session_lesson_id
     except sqlite3.Error as e:
         log_entry = create_log_message(f"Error adding session lesson record: {e}")
@@ -481,11 +515,14 @@ def start_new_session(student_name):
         else:
             student_id = student_id[0]
 
-        # Insert a new session for the student
+        # Get local time
+        local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Insert a new session for the student with local time
         cursor.execute('''
             INSERT INTO sessions (student_id, start_time)
-            VALUES (?, CURRENT_TIMESTAMP)
-        ''', (student_id,))
+            VALUES (?, ?)
+        ''', (student_id, local_time))
         connection.commit()
 
         # Get the ID of the newly created session
@@ -506,30 +543,34 @@ def start_new_session(student_name):
         return -1
 
 
-def update_session_end_time(session_id, session_start_time):
+def update_session_end_time(session_id, session_start_time, total_questions, total_correct):
     """
-    Update the session with the end time and calculate the total time spent.
+    Update the session with the end time, total questions, correct answers, and average time per question.
     """
     try:
         connection = sqlite3.connect('learniverse.db')
         cursor = connection.cursor()
 
-        # Get the end time as the current time
-        session_end_time = time.time()
+        # Get the end time as the local time
+        session_end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         # Calculate the total time spent in the session (in seconds)
-        total_time = round(session_end_time - session_start_time, 1)
+        total_time = round(time.time() - session_start_time, 1)
+        avg_time_per_question = total_time / total_questions if total_questions > 0 else 0
 
-        # Update the session in the database with the end time and total time
+        # Update the session in the database with the local end time, total time, and performance metrics
         cursor.execute('''
             UPDATE sessions
-            SET end_time = CURRENT_TIMESTAMP, total_time = ?
+            SET end_time = ?, total_time = ?, total_questions = ?, 
+                total_correct = ?, avg_time_per_question = ?
             WHERE session_id = ?
-        ''', (total_time, session_id))
+        ''', (session_end_time, total_time, total_questions, total_correct, avg_time_per_question, session_id))
+        
         connection.commit()
 
         # Log the update
-        log_entry = create_log_message(f"Session {session_id} ended. Total time: {total_time} seconds.")
+        log_entry = create_log_message(f"Session {session_id} ended. Total time: {total_time} seconds, "
+                                       f"Total questions: {total_questions}, Total correct: {total_correct}.")
         log_message(log_entry)
 
         cursor.close()
@@ -540,6 +581,147 @@ def update_session_end_time(session_id, session_start_time):
         log_message(log_entry)
 
 
+def end_session(session_id, total_questions, total_correct, overall_avg_time):
+    """Update session with end time, total questions, correct answers, and avg time."""
+    try:
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
+
+        # Get the local end time
+        session_end_time_local = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Retrieve the start_time from the database
+        cursor.execute("SELECT start_time FROM sessions WHERE session_id = ?", (session_id,))
+        result = cursor.fetchone()
+
+        if result is None:
+            log_entry = create_log_message(f"Session ID {session_id} not found.")
+            log_message(log_entry)
+            cursor.close()
+            connection.close()
+            return  # Or handle as appropriate
+
+        start_time_str = result[0]
+
+        # Parse the start_time string to a datetime object
+        try:
+            # Assuming the format is 'YYYY-MM-DD HH:MM:SS'
+            start_time_dt = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+            session_start_time = start_time_dt.timestamp()
+        except ValueError as ve:
+            log_entry = create_log_message(f"Invalid start_time format for session {session_id}: {ve}")
+            log_message(log_entry)
+            cursor.close()
+            connection.close()
+            return  # Or handle as appropriate
+
+        # Calculate total time spent in session
+        total_time = round(time.time() - session_start_time, 1)
+
+        # Update session with overall stats using local end time
+        cursor.execute('''
+            UPDATE sessions
+            SET end_time = ?,
+                total_time = ?,
+                total_questions = ?,
+                total_correct = ?,
+                avg_time_per_question = ?
+            WHERE session_id = ?
+        ''', (session_end_time_local, total_time, total_questions, total_correct, overall_avg_time, session_id))
+
+        connection.commit()
+
+        log_entry = create_log_message(f"Session {session_id} ended. Total questions: {total_questions}, "
+                                       f"Total correct: {total_correct}, Overall avg time: {overall_avg_time}")
+        log_message(log_entry)
+
+        cursor.close()
+        connection.close()
+
+    except sqlite3.Error as e:
+        log_entry = create_log_message(f"Database error ending session {session_id}: {e}")
+        log_message(log_entry)
+    except Exception as e:
+        log_entry = create_log_message(f"Unexpected error ending session {session_id}: {e}")
+        log_message(log_entry)
+
+
+def student_streak_query():
+    global current_student  # Access global current_student
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+
+    # First, get the student ID based on the current_student's name
+    cursor.execute("SELECT id FROM students WHERE name = ?", (current_student,))
+    result = cursor.fetchone()
+
+    if not result:
+        print(f"DEBUG: No student found for name {current_student}.")
+        return 0  # No student found, no streak
+
+    student_id = result[0]
+    today = datetime.today().date()  # Get today's date
+    print(f"DEBUG: Today is {today}.")
+
+    streak = 0  # Initialize streak
+    days_to_check = 1  # Start by checking yesterday
+
+    # Step 1: Check if there is data for yesterday
+    yesterday = today - timedelta(days=1)
+    print(f"DEBUG: Checking for session on {yesterday}.")
+    cursor.execute('''
+        SELECT COUNT(*) FROM sessions 
+        WHERE student_id = ? 
+        AND date(start_time) = ?
+    ''', (student_id, yesterday))
+
+    result = cursor.fetchone()
+
+    if result[0] == 0:
+        print(f"DEBUG: No session for {yesterday}. Streak is 0.")
+        return 0  # No session for yesterday, no streak
+
+    # Step 2: There is data for yesterday, so streak starts at 1
+    streak = 1
+    print(f"DEBUG: Session found for {yesterday}. Streak is now {streak} day(s).")
+
+    # Step 3: Check further consecutive days before yesterday
+    keep_checking = True
+    while keep_checking:
+        days_to_check += 1
+        streak_day = today - timedelta(days=days_to_check)
+        print(f"DEBUG: Checking for session on {streak_day}.")
+
+        cursor.execute('''
+            SELECT COUNT(*) FROM sessions 
+            WHERE student_id = ? 
+            AND date(start_time) = ?
+        ''', (student_id, streak_day))
+
+        result = cursor.fetchone()
+
+        if result[0] > 0:
+            # If there's data for this streak_day, increment the streak
+            streak += 1
+            print(f"DEBUG: Session found for {streak_day}. Streak is now {streak} day(s).")
+        else:
+            # No session found for this streak_day, stop the check
+            print(f"DEBUG: No session found for {streak_day}. Ending streak check.")
+            keep_checking = False
+
+    cursor.close()
+    connection.close()
+
+    print(f"DEBUG: Final streak is {streak} day(s).")
+    return streak
+
+
+
+
+
+
+
+        
 #################################################
 ### 4. Pygame Initialization and Window Setup ###
 #################################################
@@ -608,6 +790,8 @@ clock = pygame.time.Clock()
 main_menu_background = select_random_background("assets/images/main_menu/")
 options_background = select_random_background("assets/images/options/")
 
+# Initialize Text to Speech
+engine = pyttsx3.init()
 
 ############################
 ### Function Definitions ###
@@ -871,8 +1055,7 @@ def increase_volume(step=0.1):
     pygame.mixer.music.set_volume(music_volume)
 
 
-def introduction(font):
-    fade_text_in_and_out("Developed by:", "Alvadore Retro Technology", font)
+
 
 
 def draw_text(
@@ -1089,6 +1272,9 @@ def update_positions():
 ### 3. Game Logic Functions ###
 ###############################
 
+def introduction(font):
+    fade_text_in_and_out("Developed by:", "Alvadore Retro Technology", font)
+    
 
 def bonus_game():
     # Check if the assets/images directory exists
@@ -1331,9 +1517,6 @@ def bonus_game():
         music_loaded = load_mp3(random_mp3)
         if music_loaded:
             play_mp3()  # Play only if the music was successfully loaded
-    
-    # Return to main menu
-    return "main_menu"
 
 
 def display_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
@@ -1453,27 +1636,27 @@ def generate_problem():
     return num1, num2, answer
 
 
-def rainbow_numbers():
+def rainbow_numbers(session_id):
     global current_student  # Access the global current student
     
-    # Start a new session for the current student
-    session_id = start_new_session(current_student)
-
-    # If session could not be started, return to main menu
-    if session_id == -1:
-        print(f"Error: Failed to start session for {current_student}.")
-        return "main_menu"
-
     # Retrieve the lesson_id for Rainbow Cats
     connection = sqlite3.connect('learniverse.db')
     cursor = connection.cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Rainbow Cats',))
-    rainbow_cats_lesson_id = cursor.fetchone()[0]
+    result = cursor.fetchone()
+    if result:
+        rainbow_cats_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Rainbow Cats lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return -1  # Or handle as appropriate
     cursor.close()
     connection.close()
 
-    # Start the session timer
-    session_start_time = time.time()
+    # Start the lesson timer
+    lesson_start_time = time.time()
 
     running = True
     correct_answers = 0
@@ -1484,8 +1667,6 @@ def rainbow_numbers():
     clock = pygame.time.Clock()
     
     stop_mp3()
-
-    print(f"Current player: {current_student}")  # Debugging: show who is playing
 
     while running and problem_count < total_questions:
         num1, num2, answer = generate_problem()
@@ -1535,25 +1716,39 @@ def rainbow_numbers():
         
             clock.tick(60)  # Frame rate limiting
 
-    # Calculate and print the average time taken
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    # Calculate the average time taken for each question
     if completion_times:
         average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0  # Handle case where there were no completion times
 
-    # Record the session lesson performance in the database
-    add_session_lesson(session_id, rainbow_cats_lesson_id, total_questions, correct_answers, (correct_answers / total_questions) * 100)
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            rainbow_cats_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        # Handle the exception as needed
 
-    # End of game display: show final score and average time
-    screen.fill(screen_color)
-    
     # Final score message
     final_message = f"Final Score: {correct_answers}/{total_questions}"
     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-    
+
     # Average time per question message
     if completion_times:
         average_time_message = f"Average Time: {average_time} seconds"
-        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.5, center=True, enable_shadow=True, max_width=WIDTH)
-    
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
         if correct_answers == total_questions:
             perfect_score_message = "Perfect score!"
             draw_text(perfect_score_message, font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
@@ -1564,18 +1759,12 @@ def rainbow_numbers():
     pygame.display.flip()  # Update the display with the final messages
     
     time.sleep(4)  # Show the final score and average time for 4 seconds
-
+    
     if correct_answers == total_questions:
-        return "bonus_game"
+        bonus_game()
 
-    # End the session and update the session table with the total time
-    update_session_end_time(session_id, session_start_time)
-
-    play_mp3()
-    return "main_menu"
-
-
-
+    # Return the lesson results
+    return total_questions, correct_answers, average_time
 
 
 ########################################
@@ -1794,10 +1983,10 @@ def student_select_menu():
             student_rects.append((student_rect, student_name))
 
         # Display the input box for adding new students
-        input_box_rect = pygame.Rect(WIDTH * 0.3, HEIGHT * 0.8, WIDTH * 0.4, 40)  # The size of the input box
+        input_box_rect = pygame.Rect(WIDTH * 0.55, HEIGHT * 0.74, WIDTH * 0.4, 80)  # The size of the input box
         pygame.draw.rect(screen, text_color, input_box_rect, 2)  # Draw the input box
-        draw_text("Enter New Student:", font, text_color, WIDTH * 0.3, HEIGHT * 0.75, screen, enable_shadow=True)
-        draw_text(student_input, font, text_color, WIDTH * 0.35, HEIGHT * 0.81, screen, enable_shadow=True)
+        draw_text("New Student:", font, text_color, WIDTH * 0.05, HEIGHT * 0.75, screen, enable_shadow=True)
+        draw_text(student_input, font, text_color, WIDTH * 0.56, HEIGHT * 0.74, screen, enable_shadow=True)
 
         pygame.display.flip()  # Update the display
 
@@ -1813,7 +2002,7 @@ def student_select_menu():
                     if rect.collidepoint(mouse_pos):
                         current_student = student_name  # Store the selected student's name
                         print(f"Student '{student_name}' selected.")  # Print for debugging purposes
-                        return "rainbow_numbers"  # Transition to the rainbow_numbers menu
+                        return "session_manager"  # Transition to the rainbow_numbers menu
                 
                 # Check if the input box is clicked to activate text input
                 if input_box_rect.collidepoint(mouse_pos):
@@ -1833,6 +2022,155 @@ def student_select_menu():
                         student_input += event.unicode  # Append new character to the input
 
         clock.tick(60)
+
+
+def session_manager():
+    global current_student  # Access global current_student
+
+    # Step 1: Start the session and log in database
+    session_id = start_new_session(current_student)
+
+    # If session could not be started, return to main menu
+    if session_id == -1:
+        print(f"Error: Failed to start session for {current_student}.")
+        return "main_menu"
+
+    # Step 2: Logic for lesson flow
+    lessons_to_play = ["greet_student", "streak_check", "day_of_the_week", "rainbow_numbers"] 
+    total_questions = 0
+    total_correct = 0
+    total_times = []  # List to track the average time across lessons
+
+    # Loop through lessons
+    for lesson in lessons_to_play:
+        if lesson == "greet_student":
+            greet_student()  # Greet the student first
+        elif lesson == "streak_check":
+            streak_check()
+        elif lesson == "day_of_the_week":
+            day_of_the_week()
+        elif lesson == "rainbow_numbers":
+            # Run the lesson, passing session_id
+            lesson_result = rainbow_numbers(session_id)
+
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            questions_asked, correct_answers, avg_time = lesson_result
+            total_questions += questions_asked
+            total_correct += correct_answers
+            total_times.append(avg_time)
+
+            # Check if there's another lesson or handle lesson completion here
+            # You can add more lessons to `lessons_to_play` and logic here
+
+    # Step 3: Calculate total stats for the session
+    if total_times:
+        overall_avg_time = round(sum(total_times) / len(total_times), 1)
+    else:
+        overall_avg_time = 0
+
+    # Step 4: End the session and log overall session stats
+    end_session(session_id, total_questions, total_correct, overall_avg_time)
+
+    # Return to main menu after all lessons are done
+    return "main_menu"
+
+
+def day_of_the_week():
+    print("Entered day of the week function")
+    global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+    # Get today's day of the week (e.g., Monday, Tuesday, etc.)
+    today = datetime.now().strftime("%A")  # Returns the full weekday name (e.g., "Wednesday")
+
+    # Create the message to display
+    message = f"Today is {today}."
+
+    # Fill the screen with the background color from the applied theme
+    screen.fill(screen_color)
+
+    # Display the message with text shadow
+    draw_text(
+        message, 
+        font, 
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.25, 
+        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
+        center=True, 
+        enable_shadow=True, 
+        shadow_color=shadow_color
+    )
+
+    pygame.display.flip()  # Update the display
+
+    # Wait for a short duration so the message is visible
+    time.sleep(3)  # Show the message for 3 seconds
+    
+
+def streak_check():
+    global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+    # Fill the screen with the background color from the applied theme
+    screen.fill(screen_color)
+
+    # Query the student's streak
+    streak_days = student_streak_query()
+
+    # Check if the student is on a streak
+    if streak_days > 1:
+        message = f"Great job! You've been on a streak for {streak_days} days in a row!"
+    elif streak_days == 1:
+        message = "You're on a 1-day streak! Keep it up!"
+    else:
+        message = "Let's start a streak today! Keep it up!"
+
+    # Display the message
+    draw_text(
+        message, 
+        font, 
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.25, 
+        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
+        center=True, 
+        enable_shadow=True, 
+        shadow_color=shadow_color
+    )
+
+    pygame.display.flip()  # Update the display
+
+    # Wait for a short duration so the message is visible
+    time.sleep(3)  # Show the message for 3 seconds
+
+
+
+def greet_student():
+    global current_student  # Access global current_student
+    global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+    # Display a simple greeting
+    greeting_message = f"Hello, {current_student}! Welcome to your lesson."
+
+    # Fill the screen with the background color from the applied theme
+    screen.fill(screen_color)  # Use screen color from the global variable
+
+    # Use draw_text to display the greeting message, enabling word wrapping and centering
+    draw_text(
+        greeting_message, 
+        font, 
+        text_color,  # Use text color from the global variable
+        x=0, 
+        y=HEIGHT * 0.25, 
+        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
+        center=True,  # Center the text horizontally
+        enable_shadow=True,  # Enable text shadow for better visibility
+        shadow_color=shadow_color  # Use shadow color from the global variable
+    )
+
+    pygame.display.flip()  # Update the display
+
+    # Wait for a short duration so the greeting is visible
+    time.sleep(3)  # Show the greeting for 3 seconds
 
 
 def options_menu():
@@ -2349,6 +2687,8 @@ def main():
             current_state = bonus_game()
         elif current_state == "student_select_menu":
             current_state = student_select_menu()
+        elif current_state == "session_manager":
+            current_state = session_manager()
 
 if __name__ == "__main__":
     main()
