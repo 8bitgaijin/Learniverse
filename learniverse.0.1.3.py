@@ -144,7 +144,7 @@ last_problem = None
 ##################################
 # TODO
 # CAN I REMOVE THESE TWO SOMEHOW?
-REFERENCE_RESOLUTION = (1366, 768)
+REFERENCE_RESOLUTION = (1080, 1080)
 BASE_RESOLUTION = (1080, 1080)
 ##################################
 BASE_FONT_SIZE = 90  # Define a base font size 
@@ -162,7 +162,6 @@ icon = None
 ###########################
 ### 3. Helper Functions ###
 ###########################
-
 
 def create_log_message(message):
     """
@@ -276,7 +275,7 @@ def center_window(width, height):
         
 
 ###############################################################################
-### DATABASE FUNCTIONS                                                      ###
+### 3.1 DATABASE FUNCTIONS                                                  ###
 ###############################################################################
 
 def check_database_initialization():
@@ -435,8 +434,8 @@ def get_students():
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM students")
         students = cursor.fetchall()
-        log_entry = create_log_message(f"Retrieved {len(students)} students from database.")
-        log_message(log_entry)
+        # log_entry = create_log_message(f"Retrieved {len(students)} students from database.")
+        # log_message(log_entry)
         cursor.close()
         connection.close()
         return students
@@ -487,8 +486,8 @@ def get_session_lessons(session_id):
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM session_lessons WHERE session_id = ?", (session_id,))
         session_lessons = cursor.fetchall()
-        log_entry = create_log_message(f"Retrieved {len(session_lessons)} session lessons for session ID {session_id}.")
-        log_message(log_entry)
+        # log_entry = create_log_message(f"Retrieved {len(session_lessons)} session lessons for session ID {session_id}.")
+        # log_message(log_entry)
         cursor.close()
         connection.close()
         return session_lessons
@@ -541,44 +540,6 @@ def start_new_session(student_name):
         log_entry = create_log_message(f"Error starting session for student '{student_name}': {e}")
         log_message(log_entry)
         return -1
-
-
-def update_session_end_time(session_id, session_start_time, total_questions, total_correct):
-    """
-    Update the session with the end time, total questions, correct answers, and average time per question.
-    """
-    try:
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
-
-        # Get the end time as the local time
-        session_end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # Calculate the total time spent in the session (in seconds)
-        total_time = round(time.time() - session_start_time, 1)
-        avg_time_per_question = total_time / total_questions if total_questions > 0 else 0
-
-        # Update the session in the database with the local end time, total time, and performance metrics
-        cursor.execute('''
-            UPDATE sessions
-            SET end_time = ?, total_time = ?, total_questions = ?, 
-                total_correct = ?, avg_time_per_question = ?
-            WHERE session_id = ?
-        ''', (session_end_time, total_time, total_questions, total_correct, avg_time_per_question, session_id))
-        
-        connection.commit()
-
-        # Log the update
-        log_entry = create_log_message(f"Session {session_id} ended. Total time: {total_time} seconds, "
-                                       f"Total questions: {total_questions}, Total correct: {total_correct}.")
-        log_message(log_entry)
-
-        cursor.close()
-        connection.close()
-
-    except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error updating session {session_id}: {e}")
-        log_message(log_entry)
 
 
 def end_session(session_id, total_questions, total_correct, overall_avg_time):
@@ -661,7 +622,7 @@ def student_streak_query():
 
     student_id = result[0]
     today = datetime.today().date()  # Get today's date
-    print(f"DEBUG: Today is {today}.")
+    # print(f"DEBUG: Today is {today}.")
 
     streak = 0  # Initialize streak
     days_to_check = 1  # Start by checking yesterday
@@ -715,17 +676,10 @@ def student_streak_query():
     print(f"DEBUG: Final streak is {streak} day(s).")
     return streak
 
-
-
-
-
-
-
         
 #################################################
 ### 4. Pygame Initialization and Window Setup ###
 #################################################
-
 
 # Try to load and set the window icon from a specified file
 try:
@@ -793,15 +747,13 @@ options_background = select_random_background("assets/images/options/")
 # Initialize Text to Speech
 engine = pyttsx3.init()
 
+
 ############################
 ### Function Definitions ###
 ############################
-
-
 ############################
 ### 1. Utility Functions ###
 ############################
-
 
 def get_dynamic_font_size():
     """
@@ -814,18 +766,31 @@ def get_dynamic_font_size():
     scale_factor = min(WIDTH / BASE_RESOLUTION[0], HEIGHT / BASE_RESOLUTION[1])
     # Adjust the font size
     dynamic_font_size = int(BASE_FONT_SIZE * scale_factor)
+    
+    # Debug output
+    # print(f"DEBUG: WIDTH = {WIDTH}, HEIGHT = {HEIGHT}, BASE_RESOLUTION = {BASE_RESOLUTION}, scale_factor = {scale_factor}, font_size = {dynamic_font_size}")
+    
     return dynamic_font_size
 
 
-# Initialize the font based on the dynamically calculated font size.
 def init_fonts():
-    font_size = get_dynamic_font_size()
-    
-    # Check if the current font path is a file.
+    print("INITIALIZING FONTS")
+    font_size = get_dynamic_font_size()  # Dynamically adjust the size
+
+    # Initialize English font
     if os.path.isfile(current_font_name_or_path):
-        return pygame.font.Font(current_font_name_or_path, font_size)  # Load the font from the specified file.
+        english_font = pygame.font.Font(current_font_name_or_path, font_size)
     else:
-        return pygame.font.SysFont(current_font_name_or_path, font_size)  # Load the system font by name.
+        english_font = pygame.font.SysFont(current_font_name_or_path, font_size)
+    
+    print(f"DEBUG: English font size: {font_size}")
+
+    # Initialize Japanese font (assuming MS Gothic for Japanese text)
+    japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", font_size)
+    
+    print(f"DEBUG: Japanese font size: {font_size}")
+
+    return english_font, japanese_font  # Return both fonts
 
 
 def get_filtered_fonts():
@@ -859,9 +824,6 @@ def get_filtered_fonts():
     for font_name in sorted(pygame_fonts):
         if font_name not in excluded_fonts:
             try:
-                # Try rendering a sample text to verify the font works
-                # sample_font = pygame.font.SysFont(font_name, get_dynamic_font_size())
-                # If the font renders successfully, add it to the filtered list
                 filtered_fonts.append(font_name)
             except Exception as e:
                 log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
@@ -930,7 +892,25 @@ def stop_mp3():
     # Stop the music
     pygame.mixer.music.stop()    
     
+    
+def set_haruka_slow(engine):
+    """
+    Set the voice properties for the text-to-speech engine to use the 
+    Haruka voice at a slow speaking rate.
 
+    Parameters:
+    engine (pyttsx3.Engine): The text-to-speech engine instance.
+    """
+    # Set the voice to Haruka (Japanese) using the registry path
+    engine.setProperty(
+        'voice', 
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
+    )
+    
+    # Set the speech rate to 100 (slow)
+    engine.setProperty('rate', 100)
+    
+    
 ###################################    
 ### 2. Display and UI Functions ###
 ###################################    
@@ -1055,16 +1035,90 @@ def increase_volume(step=0.1):
     pygame.mixer.music.set_volume(music_volume)
 
 
+# def draw_text(
+#     text, font, color, x, y, surface=None, max_width=None, center=False, 
+#     enable_shadow=False, shadow_color=None, x_shadow_offset=2, y_shadow_offset=2,
+#     return_rect=False):
+#     """
+#     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
+#     word wrapping, centering, and optional rect return.
 
+#     Arguments:
+#     text -- The text to display.
+#     font -- The font to use for rendering.
+#     color -- The color of the text.
+#     x, y -- The top-left coordinates for drawing the text.
+#     surface -- The surface to draw the text on (defaults to screen if None).
+#     max_width -- The maximum width for word wrapping (optional).
+#     center -- Whether to center the text horizontally (optional).
+#     enable_shadow -- Whether to enable a drop shadow (optional).
+#     shadow_color -- The color of the drop shadow (optional, defaults to BLACK).
+#     x_shadow_offset -- The X offset for the drop shadow (optional, defaults to 2).
+#     y_shadow_offset -- The Y offset for the drop shadow (optional, defaults to 2).
+#     return_rect -- Whether to return the rect of the drawn text (optional).
 
+#     Returns:
+#     If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
+#     """
+    
+#     # Use the screen as the default surface if none is provided
+#     if surface is None:
+#         surface = screen
 
+#     # If shadow_color is not provided, use the passed shadow_color or global value
+#     if shadow_color is None:
+#         shadow_color = globals().get('shadow_color', BLACK)
+    
+#     # Split text into lines based on max_width for word wrapping
+#     if max_width:
+#         lines = []
+#         words = text.split(' ')
+#         current_line = []
+#         for word in words:
+#             test_line = ' '.join(current_line + [word])
+#             if font.size(test_line)[0] <= max_width:
+#                 current_line.append(word)
+#             else:
+#                 lines.append(' '.join(current_line))
+#                 current_line = [word]
+#         lines.append(' '.join(current_line))
+#     else:
+#         lines = [text]
+
+#     text_rect = None
+
+#     for i, line in enumerate(lines):
+#         if center:
+#             # Center the line horizontally within the given max_width
+#             text_width = font.size(line)[0]
+#             draw_x = (WIDTH - text_width) // 2
+#         else:
+#             draw_x = x
+        
+#         if enable_shadow:
+#             # Draw the shadow with the correct shadow_color
+#             shadow_surface = font.render(line, True, shadow_color)
+#             surface.blit(shadow_surface, (draw_x + x_shadow_offset, y + y_shadow_offset))
+
+#         # Draw the main text
+#         text_surface = font.render(line, True, color)
+#         surface.blit(text_surface, (draw_x, y))
+        
+#         # Calculate rect for the first line
+#         if i == 0 and return_rect:
+#             text_rect = pygame.Rect(draw_x, y, font.size(line)[0], font.size(line)[1])
+        
+#         # Move down to the next line
+#         y += font.get_linesize()
+
+#     return text_rect if return_rect else None
 def draw_text(
     text, font, color, x, y, surface=None, max_width=None, center=False, 
     enable_shadow=False, shadow_color=None, x_shadow_offset=2, y_shadow_offset=2,
-    return_rect=False):
+    return_rect=False, use_japanese_font=False):
     """
     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
-    word wrapping, centering, and optional rect return.
+    word wrapping, centering, and optional rect return. Optionally use Japanese font.
 
     Arguments:
     text -- The text to display.
@@ -1079,6 +1133,7 @@ def draw_text(
     x_shadow_offset -- The X offset for the drop shadow (optional, defaults to 2).
     y_shadow_offset -- The Y offset for the drop shadow (optional, defaults to 2).
     return_rect -- Whether to return the rect of the drawn text (optional).
+    use_japanese_font -- Whether to use the Japanese font (optional, defaults to False).
 
     Returns:
     If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
@@ -1091,6 +1146,12 @@ def draw_text(
     # If shadow_color is not provided, use the passed shadow_color or global value
     if shadow_color is None:
         shadow_color = globals().get('shadow_color', BLACK)
+
+    # Use Japanese font if specified
+    if use_japanese_font:
+        selected_font = j_font
+    else:
+        selected_font = font
     
     # Split text into lines based on max_width for word wrapping
     if max_width:
@@ -1099,7 +1160,7 @@ def draw_text(
         current_line = []
         for word in words:
             test_line = ' '.join(current_line + [word])
-            if font.size(test_line)[0] <= max_width:
+            if selected_font.size(test_line)[0] <= max_width:
                 current_line.append(word)
             else:
                 lines.append(' '.join(current_line))
@@ -1113,28 +1174,29 @@ def draw_text(
     for i, line in enumerate(lines):
         if center:
             # Center the line horizontally within the given max_width
-            text_width = font.size(line)[0]
+            text_width = selected_font.size(line)[0]
             draw_x = (WIDTH - text_width) // 2
         else:
             draw_x = x
         
         if enable_shadow:
             # Draw the shadow with the correct shadow_color
-            shadow_surface = font.render(line, True, shadow_color)
+            shadow_surface = selected_font.render(line, True, shadow_color)
             surface.blit(shadow_surface, (draw_x + x_shadow_offset, y + y_shadow_offset))
 
         # Draw the main text
-        text_surface = font.render(line, True, color)
+        text_surface = selected_font.render(line, True, color)
         surface.blit(text_surface, (draw_x, y))
         
         # Calculate rect for the first line
         if i == 0 and return_rect:
-            text_rect = pygame.Rect(draw_x, y, font.size(line)[0], font.size(line)[1])
+            text_rect = pygame.Rect(draw_x, y, selected_font.size(line)[0], selected_font.size(line)[1])
         
         # Move down to the next line
-        y += font.get_linesize()
+        y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
+
 
 
 def fade_text_in_and_out(line1, line2, font, max_width=None):
@@ -1226,12 +1288,12 @@ def update_positions():
     global start_rect, options_rect, exit_rect, back_to_main_menu_rect
     global volume_label_rect, volume_percentage_rect, minus_rect, plus_rect
     global resolution_label_rect, resolution_minus_rect, resolution_plus_rect
-    global problem_rect, question_pos, input_pos
+    global font, j_font  
 
     # Update the font based on current resolution
-    font = init_fonts()
-    
-    # Update text elements
+    font, j_font = init_fonts()  
+
+    # Update text elements using the English font
     start_text = font.render("Start", True, text_color)
     options_text = font.render("Options", True, text_color)
     exit_text = font.render("X", True, RED)
@@ -1261,11 +1323,6 @@ def update_positions():
     resolution_label_rect = resolution_label_text.get_rect(center=(WIDTH * 0.4, HEIGHT * 0.60))
     resolution_minus_rect = font.render("-", True, text_color).get_rect(center=(WIDTH * 0.2, HEIGHT * 0.60))
     resolution_plus_rect = font.render("+", True, text_color).get_rect(center=(WIDTH * 0.85, HEIGHT * 0.60))
-    
-    # Update math problem positions
-    question_pos = (WIDTH * 0.5, HEIGHT * 0.4)
-    input_pos = (WIDTH * 0.5, HEIGHT * 0.6)
-    problem_rect = font.render("?", True, text_color).get_rect(center=question_pos)
 
 
 ###############################
@@ -1740,6 +1797,10 @@ def rainbow_numbers(session_id):
         log_message(log_entry)
         # Handle the exception as needed
 
+    # Clear the screen with the background color from the theme/config
+    screen.fill(screen_color)  # Use the configured background color before drawing the final score
+
+
     # Final score message
     final_message = f"Final Score: {correct_answers}/{total_questions}"
     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
@@ -1906,7 +1967,6 @@ def load_options():
     apply_resolution()  # Apply resolution based on loaded settings
     apply_theme(current_theme)  # Apply the loaded theme
     pygame.mixer.music.set_volume(music_volume)
-    # font = init_fonts()
     update_positions()
 
 
@@ -1949,7 +2009,7 @@ def main_menu():
                 check_exit_click(mouse_pos, exit_rect)
             # elif event.type == pygame.KEYDOWN:
             #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-            #         return "bonus_game"  # Skip directly to the bonus game for debug
+            #         bonus_game() # Skip directly to the bonus game for debug
 
         clock.tick(60)
 
@@ -1963,7 +2023,7 @@ def student_select_menu():
 
     while True:
         # Recalculate the font size dynamically based on the current resolution
-        font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Use the global font
+        # font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Use the global font
 
         # Draw the background for the student select menu
         draw_background(main_menu_background)
@@ -2078,30 +2138,66 @@ def session_manager():
 def day_of_the_week():
     print("Entered day of the week function")
     global text_color, shadow_color, screen_color  # Access the theme-related globals
+    global engine  # Access the pyttsx3 engine
 
     # Get today's day of the week (e.g., Monday, Tuesday, etc.)
-    today = datetime.now().strftime("%A")  # Returns the full weekday name (e.g., "Wednesday")
+    today_english = datetime.now().strftime("%A")  # Returns the full weekday name (e.g., "Wednesday")
 
-    # Create the message to display
-    message = f"Today is {today}."
+    # Mapping English weekdays to Japanese equivalents (with hiragana)
+    japanese_days = {
+            "Monday": "月曜日",
+            "Tuesday": "火曜日",
+            "Wednesday": "水曜日", 
+            "Thursday": "木曜日",
+            "Friday": "金曜日",
+            "Saturday": "土曜日",
+            "Sunday": "日曜日"
+        }
+
+    today_japanese = japanese_days.get(today_english, today_english)  # Get the Japanese equivalent
+
+    # Create the messages to display
+    japanese_message = f"今日は {today_japanese} です。"  # In Japanese: "Today is (day) in Japanese"
+    english_message = f"Today is {today_english}."  # In English
+    
+    print(f"Japanese font size: {j_font.size(japanese_message)[1]}")
+    print(f"English font size: {font.size(english_message)[1]}")
 
     # Fill the screen with the background color from the applied theme
     screen.fill(screen_color)
 
-    # Display the message with text shadow
+    # Display the Japanese message
     draw_text(
-        message, 
-        font, 
+        japanese_message, 
+        j_font,  # Assuming you've set up a separate Japanese font
         text_color, 
         x=0, 
         y=HEIGHT * 0.25, 
-        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
+        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
+        center=True, 
+        enable_shadow=True, 
+        shadow_color=shadow_color
+    )
+
+    # Display the English message right below the Japanese message
+    draw_text(
+        english_message, 
+        font,  # Use the English font for this line
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.45,  # Display slightly below the Japanese text
+        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
         center=True, 
         enable_shadow=True, 
         shadow_color=shadow_color
     )
 
     pygame.display.flip()  # Update the display
+
+    # Use TTS to speak the Japanese message aloud
+    set_haruka_slow(engine)  # Set the voice to Japanese Haruka and slow down the rate
+    engine.say(japanese_message)  # Speak the Japanese sentence
+    engine.runAndWait()  # Block while the speech finishes
 
     # Wait for a short duration so the message is visible
     time.sleep(3)  # Show the message for 3 seconds
@@ -2147,6 +2243,7 @@ def streak_check():
 def greet_student():
     global current_student  # Access global current_student
     global text_color, shadow_color, screen_color  # Access the theme-related globals
+    # print(f"Japanese font size: {j_font.size}")
 
     # Display a simple greeting
     greeting_message = f"Hello, {current_student}! Welcome to your lesson."
@@ -2166,6 +2263,8 @@ def greet_student():
         enable_shadow=True,  # Enable text shadow for better visibility
         shadow_color=shadow_color  # Use shadow color from the global variable
     )
+    draw_text("こんにちは", font, text_color, 100, 100, use_japanese_font=True)
+
 
     pygame.display.flip()  # Update the display
 
@@ -2204,7 +2303,7 @@ def options_menu():
 
     while True:
         font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Update the font based on current font
-        update_positions()
+        # update_positions()
 
         # Draw the background for the options menu
         draw_background(options_background)
@@ -2655,9 +2754,9 @@ def main():
     # Check if the database is properly initialized before proceeding
     check_database_initialization()
     
-    # Initialize the font based on current settings
-    global font  # Declare font as global to modify it
-    font = init_fonts()  # Initialize the font here after loading options
+    # Initialize the fonts based on current settings (both English and Japanese)
+    global font, j_font  # Declare as global if you want to use these fonts throughout your project
+    font, j_font = init_fonts()  # Initialize both English and Japanese fonts
     
     # Music setup
     main_menu_music_directory = "assets/music/main_menu"
