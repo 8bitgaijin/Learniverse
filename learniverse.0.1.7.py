@@ -411,7 +411,7 @@ def _initialize_tables(cursor, connection):
 def insert_lessons(cursor, connection):
     """Insert default lessons into the lessons table if they don't already exist."""
     lessons = [
-        ("Rainbow Cats", "A math game to master mental arithmetic"),
+        ("Rainbow Numbers", "A math game to master mental arithmetic"),
         ("Hiragana", "A lesson to master the Japanese hiragana characters"),
         ("Katakana", "A lesson to master the Japanese katakana characters"),
     ]
@@ -494,38 +494,6 @@ def get_students():
         return []
 
 
-# def add_session_lesson(session_id, lesson_id, start_time, end_time, total_questions, questions_correct):
-#     """Add a new record to the session_lessons table with detailed lesson data and return its ID."""
-#     try:
-#         connection = sqlite3.connect('learniverse.db')
-#         cursor = connection.cursor()
-
-#         # Calculate total time and average time per question
-#         total_time = round(end_time - start_time, 1)
-#         avg_time_per_question = total_time / total_questions if total_questions > 0 else 0
-#         percent_correct = (questions_correct / total_questions) * 100 if total_questions > 0 else 0
-
-#         # Insert the lesson record into session_lessons
-#         cursor.execute('''
-#             INSERT INTO session_lessons (session_id, lesson_id, start_time, end_time, total_time, 
-#                                          questions_asked, questions_correct, avg_time_per_question, percent_correct)
-#             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-#         ''', (session_id, lesson_id, start_time, end_time, total_time, total_questions, 
-#               questions_correct, avg_time_per_question, percent_correct))
-
-#         connection.commit()
-#         session_lesson_id = cursor.lastrowid
-
-#         log_entry = create_log_message(f"Session lesson record added with ID: {session_lesson_id}")
-#         log_message(log_entry)
-#         cursor.close()
-#         connection.close()
-
-#         return session_lesson_id
-#     except sqlite3.Error as e:
-#         log_entry = create_log_message(f"Error adding session lesson record: {e}")
-#         log_message(log_entry)
-#         return -1
 def add_session_lesson(session_id, lesson_id, start_time, end_time, total_questions, questions_correct):
     """Add a new record to the session_lessons table with detailed lesson data and return its ID."""
     try:
@@ -1113,10 +1081,10 @@ def increase_volume(step=0.1):
 def draw_text(
     text, font, color, x, y, surface=None, max_width=None, center=False, 
     enable_shadow=False, shadow_color=None, x_shadow_offset=2, y_shadow_offset=2,
-    return_rect=False, use_japanese_font=False):
+    return_rect=False, use_japanese_font=False, font_override=None):
     """
     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
-    word wrapping, centering, and optional rect return. Optionally use Japanese font.
+    word wrapping, centering, and optional rect return. Optionally use Japanese font or override font size.
 
     Arguments:
     text -- The text to display.
@@ -1132,6 +1100,7 @@ def draw_text(
     y_shadow_offset -- The Y offset for the drop shadow (optional, defaults to 2).
     return_rect -- Whether to return the rect of the drawn text (optional).
     use_japanese_font -- Whether to use the Japanese font (optional, defaults to False).
+    font_override -- Optionally pass a different font for this draw call (optional).
 
     Returns:
     If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
@@ -1145,12 +1114,9 @@ def draw_text(
     if shadow_color is None:
         shadow_color = globals().get('shadow_color', BLACK)
 
-    # Use Japanese font if specified
-    if use_japanese_font:
-        selected_font = j_font
-    else:
-        selected_font = font
-    
+    # Select the font to use, prioritize font_override, then Japanese or default font
+    selected_font = font_override if font_override else (j_font if use_japanese_font else font)
+
     # Split text into lines based on max_width for word wrapping
     if max_width:
         lines = []
@@ -1194,6 +1160,7 @@ def draw_text(
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
+
 
 
 def fade_text_in_and_out(line1, line2, font, max_width=None):
@@ -1530,14 +1497,6 @@ def bonus_game_fat_tuna():
         draw_text("Game Over! You were eaten by the piranha.", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
         pygame.display.flip()
         time.sleep(5)
-    
-    # Re-do main menu music before returning
-    main_menu_music_directory = "assets/music/main_menu"
-    random_mp3 = get_random_mp3(main_menu_music_directory)
-    if random_mp3:
-        music_loaded = load_mp3(random_mp3)
-        if music_loaded:
-            play_mp3()  # Play only if the music was successfully loaded
 
 
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
@@ -1660,15 +1619,15 @@ def generate_rainbow_number_problem():
 def rainbow_numbers(session_id):
     global current_student  # Access the global current student
     
-    # Retrieve the lesson_id for Rainbow Cats
+    # Retrieve the lesson_id for Rainbow Numbers
     connection = sqlite3.connect('learniverse.db')
     cursor = connection.cursor()
-    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Rainbow Cats',))
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Rainbow Numbers',))
     result = cursor.fetchone()
     if result:
         rainbow_cats_lesson_id = result[0]
     else:
-        log_entry = create_log_message("Rainbow Cats lesson not found in the database.")
+        log_entry = create_log_message("Rainbow Numbers lesson not found in the database.")
         log_message(log_entry)
         cursor.close()
         connection.close()
@@ -1698,12 +1657,12 @@ def rainbow_numbers(session_id):
     running = True
     correct_answers = 0
     problem_count = 0
-    total_questions = 10
+    total_questions = 5
     completion_times = []  # List to store time taken for each question
 
     clock = pygame.time.Clock()
     
-    stop_mp3()
+    # stop_mp3()
 
     while running and problem_count < total_questions:
         num1, num2, answer = generate_rainbow_number_problem()
@@ -1795,7 +1754,7 @@ def rainbow_numbers(session_id):
             draw_text(perfect_score_message, font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
             if average_time < 3.0:
                 mastery_message = "MASTERY!"
-                draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.75, center=True, enable_shadow=True)
+                draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
 
     pygame.display.flip()  # Update the display with the final messages
     
@@ -1882,6 +1841,16 @@ def load_options():
 
 def main_menu():
     global font  # Ensure we update the global font variable
+    
+    # Check if music is currently playing
+    if not pygame.mixer.music.get_busy():  # Returns False if no music is playing
+        # If no music is playing, load and play a random MP3
+        main_menu_music_directory = "assets/music/main_menu"
+        random_mp3 = get_random_mp3(main_menu_music_directory)
+        if random_mp3:
+            music_loaded = load_mp3(random_mp3)
+            if music_loaded:
+                play_mp3()  # Start playing the random music if successfully loaded
 
     while True:
         # Recalculate the font size dynamically based on the current resolution
@@ -2034,7 +2003,19 @@ def session_manager():
         return "main_menu"
 
     # Step 2: Logic for lesson flow
-    lessons_to_play = ["greet_student", "streak_check", "day_of_the_week", "month_of_the_year","rainbow_numbers"] 
+    lessons_to_play = ["greet_student", 
+                       "streak_check", 
+                       "day_of_the_week", 
+                       "month_of_the_year", 
+                       "skip_counting", 
+                       "hiragana_teach",
+                       "rainbow_numbers",
+                       "skip_counting_japanese",
+                       "hiragana_quiz",
+                       "single_digit_addition",
+                       "japanese_colors_teach",
+                       "single_digit_subtraction",
+                       "japanese_colors_quiz"] 
     total_questions = 0
     total_correct = 0
     total_times = []  # List to track the average time across lessons
@@ -2043,24 +2024,63 @@ def session_manager():
     for lesson in lessons_to_play:
         if lesson == "greet_student":
             greet_student()  # Greet the student first
+            
         elif lesson == "streak_check":
             streak_check()
+            
         elif lesson == "day_of_the_week":
             day_of_the_week()
         elif lesson == "month_of_the_year":
             month_of_the_year()
+        elif lesson == "skip_counting":
+            skip_counting()
+        elif lesson == "hiragana_teach":
+            hiragana_teach()
         elif lesson == "rainbow_numbers":
             # Run the lesson, passing session_id
             lesson_result = rainbow_numbers(session_id)
-
+            
             # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             questions_asked, correct_answers, avg_time = lesson_result
             total_questions += questions_asked
             total_correct += correct_answers
             total_times.append(avg_time)
-
-            # Check if there's another lesson or handle lesson completion here
-            # You can add more lessons to `lessons_to_play` and logic here
+        elif lesson == "skip_counting_japanese":
+            skip_counting_japanese()
+        # elif lesson == "hiragana_quiz":
+            # Run the lesson, passing session_id
+            # lesson_result = hiragana_quiz(session_id)
+            
+            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            # questions_asked, correct_answers, avg_time = lesson_result
+            # total_questions += questions_asked
+            # total_correct += correct_answers
+            # total_times.append(avg_time)
+        # elif lesson == "single_digit_addition":
+        #     single_digit_addition()
+            # pass
+            # Run the lesson, passing session_id
+            # lesson_result = single_digit_addition(session_id)
+            
+            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            # questions_asked, correct_answers, avg_time = lesson_result
+            # total_questions += questions_asked
+            # total_correct += correct_answers
+            # total_times.append(avg_time)
+        elif lesson == "japanese_colors_teach":
+            japanese_colors_teach()
+        # elif lesson == "japanese_colors_quiz":
+            # Run the lesson, passing session_id
+            # lesson_result = japanese_colors_quiz(session_id)
+            
+            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            # questions_asked, correct_answers, avg_time = lesson_result
+            # total_questions += questions_asked
+            # total_correct += correct_answers
+            # total_times.append(avg_time)
+        # Check if there's another lesson or handle lesson completion here
+        # You can add more lessons to `lessons_to_play` and logic here
+        
 
     # Step 3: Calculate total stats for the session
     if total_times:
@@ -2078,6 +2098,8 @@ def session_manager():
 def greet_student():
     global current_student  # Access global current_student
     global text_color, shadow_color, screen_color  # Access the theme-related globals
+    
+    stop_mp3()
 
     # Get the current time
     current_time = datetime.now().time()
@@ -2296,6 +2318,187 @@ def month_of_the_year():
 
     # Wait for a short duration so the message is visible
     time.sleep(1)  # Show the message for 3 seconds
+
+
+def skip_counting():
+    """Randomly selects a number between 2-9 and performs skip counting up to 100."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Select a random number from 2-9
+    skip_number = random.randint(2, 9)
+
+    # Clear the screen and inform the student about the starting number
+    screen.fill(screen_color)
+    intro_message = f"Let's skip count by {skip_number}!"
+    
+    # Display the intro message and update the screen
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Pause for a couple of seconds before starting the counting
+    time.sleep(2)
+
+    # Start counting by the selected number, stopping at 100
+    for i in range(skip_number, 101, skip_number):
+        # Clear the screen before displaying each number
+        screen.fill(screen_color)
+
+        # Convert the number to string for display
+        number_str = str(i)
+
+        # Display the number in the center of the screen
+        draw_text(number_str, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen after drawing the number
+        pygame.display.flip()
+
+        # Speak the number aloud in English
+        speak_english(number_str)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the skip counting, show a completion message
+    completion_message = "Great job!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Wait a few seconds before exiting the function
+    time.sleep(3)
+
+
+def hiragana_teach():
+    """Displays each of the 46 basic hiragana characters one by one and reads them aloud using Japanese TTS."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # List of the 46 basic hiragana characters
+    hiragana_list = [
+        "あ", "い", "う", "え", "お",  # a, i, u, e, o
+        "か", "き", "く", "け", "こ",  # ka, ki, ku, ke, ko
+        "さ", "し", "す", "せ", "そ",  # sa, shi, su, se, so
+        "た", "ち", "つ", "て", "と",  # ta, chi, tsu, te, to
+        "な", "に", "ぬ", "ね", "の",  # na, ni, nu, ne, no
+        "は", "ひ", "ふ", "へ", "ほ",  # ha, hi, fu, he, ho
+        "ま", "み", "む", "め", "も",  # ma, mi, mu, me, mo
+        "や",       "ゆ",       "よ",  # ya, (skip yi), yu, (skip ye), yo
+        "ら", "り", "る", "れ", "ろ",  # ra, ri, ru, re, ro
+        "わ",              "を",        # wa, (skip wi), (skip we), wo
+        "ん"                        # n
+    ]
+
+    # Define a larger font for the hiragana characters
+    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+
+    # Clear the screen and inform the student about the lesson
+    screen.fill(screen_color)
+    intro_message = "Let's learn Hiragana!"
+    
+    # Display the intro message and update the screen
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Pause for a couple of seconds before starting the lesson
+    time.sleep(2)
+
+    # Loop through the hiragana list and show each character one by one
+    for hiragana_char in hiragana_list:
+        # Clear the screen before displaying each character
+        screen.fill(screen_color)
+
+        # Display the hiragana character in the center of the screen using the large font
+        draw_text(hiragana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
+
+        # Update the screen after drawing the character
+        pygame.display.flip()
+
+        # Speak the hiragana character aloud using Japanese TTS
+        speak_japanese(hiragana_char)
+
+        # Pause for a couple of seconds before moving to the next character
+        time.sleep(1)
+
+    # After completing the lesson, show a completion message
+    completion_message = "Great job!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Wait a few seconds before exiting the function
+    time.sleep(3)
+
+
+def skip_counting_japanese():
+    """Performs skip counting in Arabic numerals from 1 to 30, while speaking the numbers in Japanese."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Clear the screen and inform the student about the activity
+    screen.fill(screen_color)
+    intro_message = "Let's count in Japanese!"
+    
+    # Display the intro message and update the screen
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Pause for a couple of seconds before starting the counting
+    time.sleep(2)
+
+    # Start counting from 1 to 30
+    for i in range(1, 31):
+        # Clear the screen before displaying each number
+        screen.fill(screen_color)
+
+        # Convert the number to string for display
+        number_str = str(i)
+
+        # Display the number in the center of the screen (Arabic numeral)
+        draw_text(number_str, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen after drawing the number
+        pygame.display.flip()
+
+        # Speak the number aloud in Japanese (using Haruka voice)
+        speak_japanese(number_str)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the skip counting, show a completion message
+    completion_message = "Great job!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    pygame.display.flip()
+
+    # Wait a few seconds before exiting the function
+    time.sleep(3)
+
+
+def hiragana_quiz(session_id):
+    pass
+
+def single_digit_addition(session_id):
+    pass
+
+def japanese_colors_teach():
+    pass
+
+def single_digit_subtraction():
+    pass
+
+def japanese_colors_quiz(session_id):
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def options_menu():
