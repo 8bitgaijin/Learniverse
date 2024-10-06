@@ -1297,7 +1297,6 @@ def update_positions():
 def bonus_game_fat_tuna():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
-        # Log the error if needed
         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
         log_message(log_entry)
         return "main_menu"
@@ -1305,7 +1304,7 @@ def bonus_game_fat_tuna():
     # Calculate scaling factors based on the current resolution
     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
-    scale_factor = min(scale_factor_x, scale_factor_y)  # Maintain aspect ratio
+    scale_factor = min(scale_factor_x, scale_factor_y)
 
     FALL_SPEED = 13 * scale_factor  # Base speed for falling platforms, scaled
     RESPAWN_RATE = 10  # Probability out of 100 for a new platform to spawn each frame
@@ -1358,7 +1357,6 @@ def bonus_game_fat_tuna():
     # Initialize the cat
     player_img = pygame.image.load('assets/images/sprites/cat01.png')
     player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor), int(player_img.get_height() * scale_factor)))
-    # Instantiate the Cat object with the correct scaling
     cat = Cat(player_img, WIDTH // 2, HEIGHT - player_img.get_rect().height, 25 * scale_factor, scale_factor)
 
     # Create a clock object to control the frame rate
@@ -1371,21 +1369,18 @@ def bonus_game_fat_tuna():
     if random_mp3:
         music_loaded = load_mp3(random_mp3)
         if music_loaded:
-            play_mp3()  # Play only if the music was successfully loaded
-            
-    # Bonus Mode Display Phase
-    while time.time() - start_time < 5 and running:
+            play_mp3()
+
+    # Bonus Mode Display Phase (show controls and animated text)
+    running = True
+    controls_displayed = False
+    start_time = time.time()
+
+    while not controls_displayed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-                pygame.mixer.music.stop()
-                pygame.quit()  # Ensure Pygame quits properly
-                sys.exit()  # Exit the program
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-                    running = False
-                    pygame.mixer.music.stop()
-                    return
+                pygame.quit()
+                sys.exit()
 
         # Draw the bonus mode background (or fallback to navy blue)
         if bonus_mode_background:
@@ -1393,7 +1388,7 @@ def bonus_game_fat_tuna():
         else:
             screen.fill(screen_color)
 
-        # Render the four lines of static text with drop shadows and centered
+        # Render the controls
         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
         draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
         draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
@@ -1415,14 +1410,23 @@ def bonus_game_fat_tuna():
 
         # Draw the bouncing text at the new position
         screen.blit(text_surface, (text_x, text_y))
+
+        # Draw the "Continue..." button below the controls
+        continue_rect = draw_continue_button()
         pygame.display.flip()
 
-        clock.tick(60)  # Control the frame rate
+        # Check for "Continue..." button click without stopping the animation
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    controls_displayed = True  # Exit the loop and continue to gameplay
 
+        clock.tick(60)  # Keep the animation going at 60 FPS
+
+    # Gameplay Phase
     try:
-        # Gameplay Phase
         start_time = time.time()
-
         while running:
             elapsed_time = int(time.time() - start_time)
             current_time = pygame.time.get_ticks()
@@ -1431,8 +1435,8 @@ def bonus_game_fat_tuna():
                 if event.type == pygame.QUIT:
                     running = False
                     pygame.mixer.music.stop()
-                    pygame.quit()  # Ensure Pygame quits properly
-                    sys.exit()  # Exit the program
+                    pygame.quit()
+                    sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
                         running = False
@@ -1517,16 +1521,33 @@ def bonus_game_fat_tuna():
         # Ensure music stops and resources are freed if an exception occurs
         stop_mp3()
 
+    # Game Over or Win Phase
     if win:
         screen.fill(screen_color)
-        draw_text(f"You caught the Fat Tuna in {elapsed_time} seconds!", font, text_color,  WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
-        pygame.display.flip()
-        time.sleep(5)
+        draw_text(f"You caught the Fat Tuna in {elapsed_time} seconds!", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
     elif game_over:
         screen.fill(screen_color)
         draw_text("Game Over! You were eaten by the piranha.", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
-        pygame.display.flip()
-        time.sleep(5)
+
+    # Draw the "Continue..." button after game completion message
+    continue_rect = draw_continue_button()
+
+    pygame.display.flip()
+
+    # Wait for the player to click "Continue..." after the game ends
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Continue after the "Continue..." button is clicked
+
+
+
 
 
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
@@ -1947,7 +1968,7 @@ def main_menu():
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     bonus_game_fat_tuna() # Skip directly to the bonus game for debug
                 elif event.key == pygame.K_r:
-                    rainbow_numbers(45)
+                    rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
 
         clock.tick(60)
 
