@@ -1009,6 +1009,7 @@ def interpolate_color(start_color, end_color, fraction):
         start_color[2] + (end_color[2] - start_color[2]) * fraction,
     )
  
+    
 # Function to draw lightning bolt with color gradient
 def draw_lightning(screen, start_pos, end_pos, background_image):
     """
@@ -1019,9 +1020,9 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
     start_color = (173, 216, 230)  # Light blue
     end_color = (255, 255, 255)    # White
 
-    BOLT_SEGMENTS = 8  # Number of segments for each bolt
-    FLASH_COUNT = 5    # Number of bolts per flash burst
-    BOLT_FLASH_DURATION = 50  # Duration to display each flash (milliseconds)
+    BOLT_SEGMENTS = 10  # Number of segments for each bolt
+    FLASH_COUNT = 10    # Number of bolts per flash burst
+    BOLT_FLASH_DURATION = 40  # Duration to display each flash (milliseconds)
 
     # Load the background image (which will always exist in this version)
     bg_image = pygame.image.load(background_image)
