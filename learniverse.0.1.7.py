@@ -136,7 +136,6 @@ color_themes = {
 ### 2. Global Variables (State) ###
 ###################################
 
-
 # Global variable to store the last generated problem
 last_problem = None
 
@@ -989,6 +988,13 @@ def check_exit_click(mouse_pos, exit_rect):
         sys.exit()
 
 
+def check_continue_click(mouse_pos, continue_rect):
+    """Check if the 'Continue...' button was clicked."""
+    if continue_rect.collidepoint(mouse_pos):
+        return True  # Indicate that the button was clicked
+    return False
+
+
 def decrease_volume(step=0.1):
     global music_volume
     music_volume = max(0.0, music_volume - step)  # Floor volume at 0.0 (mute)
@@ -1052,6 +1058,30 @@ def draw_exit_button():
     exit_rect = draw_text("X", exit_font, RED, x_position, y_position, screen, enable_shadow=True, return_rect=True)
 
     return exit_rect
+
+
+def draw_continue_button():
+    global current_font_name_or_path  # Ensure we're using the global variable for font
+
+    # Update the dynamic font size for the continue button based on the current resolution
+    continue_font_size = int(get_dynamic_font_size() * 0.8)  # Adjust the size as necessary
+
+    # Recreate the font with the new size using the current font name or path
+    if os.path.isfile(current_font_name_or_path):
+        # If it's a file path, load the font from the file
+        continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+    else:
+        # If it's a system font, use the font name
+        continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+
+    # Calculate the position for the "Continue..." text to be at 55% across the screen width
+    x_position = WIDTH * 0.55
+    y_position = HEIGHT * 0.90  # 90% down the screen
+
+    # Use draw_text to render the continue button with a drop shadow and get its rect
+    continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+
+    return continue_rect
 
 
 def display_text_and_wait(text):
@@ -1648,8 +1678,22 @@ def rainbow_numbers(session_id):
         enable_shadow=True, 
         shadow_color=shadow_color  # Use the shadow color from the theme
     )
+    
+    # Draw the "Continue..." button before starting the lesson
+    continue_rect = draw_continue_button()
     pygame.display.flip()  # Update the display
-    time.sleep(3)  # Pause for 3 seconds to show the message
+
+    # Wait for the student to click "Continue..." to start the lesson
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -1739,7 +1783,6 @@ def rainbow_numbers(session_id):
     # Clear the screen with the background color from the theme/config
     screen.fill(screen_color)  # Use the configured background color before drawing the final score
 
-
     # Final score message
     final_message = f"Final Score: {correct_answers}/{total_questions}"
     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
@@ -1756,15 +1799,29 @@ def rainbow_numbers(session_id):
                 mastery_message = "MASTERY!"
                 draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
 
+    # Draw the "Continue..." button after displaying the final score
+    continue_rect = draw_continue_button()
+    
     pygame.display.flip()  # Update the display with the final messages
-    
-    time.sleep(4)  # Show the final score and average time for 4 seconds
-    
+
+    # Wait for the student to click "Continue..." after the final score
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
+
     if correct_answers == total_questions:
         bonus_game_fat_tuna()
 
     # Return the lesson results
     return total_questions, correct_answers, average_time
+
 
 
 ########################################
@@ -1889,6 +1946,8 @@ def main_menu():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+                elif event.key == pygame.K_r:
+                    rainbow_numbers(45)
 
         clock.tick(60)
 
@@ -2095,6 +2154,7 @@ def session_manager():
     return "main_menu"
 
 
+
 def greet_student():
     global current_student  # Access global current_student
     global text_color, shadow_color, screen_color  # Access the theme-related globals
@@ -2106,54 +2166,69 @@ def greet_student():
 
     # Determine the appropriate greeting based on the time of day
     if current_time >= datetime.strptime("00:01", "%H:%M").time() and current_time < datetime.strptime("12:00", "%H:%M").time():
-        # Morning greeting (12:01 AM to 12:00 PM)
+        # Morning greeting
         greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
-        greeting_message_jp = "おはようございます。"  # "Good morning" in Japanese (Hiragana)
+        greeting_message_jp = "おはようございます。"  # Good morning in Japanese
     elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("18:00", "%H:%M").time():
-        # Afternoon greeting (12:00 PM to 6:00 PM)
+        # Afternoon greeting
         greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
-        greeting_message_jp = "こんにちは。"  # "Hello" in Japanese (Hiragana)
+        greeting_message_jp = "こんにちは。"  # Hello in Japanese
     else:
-        # Evening greeting (6:00 PM to 12:00 AM)
+        # Evening greeting
         greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
-        greeting_message_jp = "こんばんは。"  # "Good evening" in Japanese (Hiragana)
+        greeting_message_jp = "こんばんは。"  # Good evening in Japanese
 
     # Fill the screen with the background color from the applied theme
-    screen.fill(screen_color)  # Use screen color from the global variable
+    screen.fill(screen_color)
 
-    # Use draw_text to display the English greeting message
+    # Draw the English greeting message
     draw_text(
         greeting_message_eng, 
         font, 
-        text_color,  # Use text color from the global variable
+        text_color,  
         x=0, 
         y=HEIGHT * 0.20, 
-        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
-        center=True,  # Center the text horizontally
-        enable_shadow=True,  # Enable text shadow for better visibility
-        shadow_color=shadow_color  # Use shadow color from the global variable
+        max_width=WIDTH * 0.95, 
+        center=True,  
+        enable_shadow=True,  
+        shadow_color=shadow_color  
     )
 
-    # Use draw_text to display the Japanese greeting message
+    # Draw the Japanese greeting message
     draw_text(
         greeting_message_jp, 
-        j_font,  # Assuming you've set up a separate Japanese font
+        j_font,  
         text_color, 
         x=0, 
-        y=HEIGHT * 0.60,  # Display the Japanese message below the English message
-        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
-        center=True,  # Center the text horizontally
-        enable_shadow=True,  # Enable text shadow for better visibility
-        shadow_color=shadow_color  # Use shadow color from the global variable
+        y=HEIGHT * 0.60,  
+        max_width=WIDTH * 0.95, 
+        center=True,  
+        enable_shadow=True,  
+        shadow_color=shadow_color  
     )
+
+    # Draw the "Continue..." button
+    continue_rect = draw_continue_button()
 
     pygame.display.flip()  # Update the display
 
     # Use the reusable TTS function to speak the Japanese greeting aloud
     speak_japanese(greeting_message_jp)
 
-    # Wait for a short duration so the greeting is visible
-    time.sleep(1)  # Show the greeting for 3 seconds
+    # Wait for the "Continue..." click
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                # Check if the "Continue..." button is clicked using the check_continue_click function
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Exit the loop when "Continue..." is clicked
+
+
 
 
 def streak_check():
@@ -2186,10 +2261,24 @@ def streak_check():
         shadow_color=shadow_color
     )
 
+    # Draw the "Continue..." button
+    continue_rect = draw_continue_button()
+
     pygame.display.flip()  # Update the display
 
-    # Wait for a short duration so the message is visible
-    time.sleep(3)  # Show the message for 3 seconds
+    # Wait for the "Continue..." click
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                # Check if the "Continue..." button is clicked
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Exit the loop when "Continue..." is clicked
+
 
 
 def day_of_the_week():
@@ -2244,13 +2333,27 @@ def day_of_the_week():
         shadow_color=shadow_color
     )
 
+    # Draw the "Continue..." button
+    continue_rect = draw_continue_button()
+
     pygame.display.flip()  # Update the display
 
     # Use the reusable TTS function to speak the Japanese message aloud
     speak_japanese(japanese_message)
 
-    # Wait for a short duration so the message is visible
-    time.sleep(1)  # Show the message for 3 seconds
+    # Wait for the "Continue..." click
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                # Check if the "Continue..." button is clicked
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Exit the loop when "Continue..." is clicked
+
 
 
 def month_of_the_year():
@@ -2311,13 +2414,27 @@ def month_of_the_year():
         shadow_color=shadow_color
     )
 
+    # Draw the "Continue..." button
+    continue_rect = draw_continue_button()
+
     pygame.display.flip()  # Update the display
 
     # Use the reusable TTS function to speak the Japanese message aloud
     speak_japanese(japanese_message)
 
-    # Wait for a short duration so the message is visible
-    time.sleep(1)  # Show the message for 3 seconds
+    # Wait for the "Continue..." click
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                # Check if the "Continue..." button is clicked
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Exit the loop when "Continue..." is clicked
+
 
 
 def skip_counting():
@@ -2333,10 +2450,23 @@ def skip_counting():
     
     # Display the intro message and update the screen
     draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after intro message
+    continue_rect = draw_continue_button()
+    
     pygame.display.flip()
 
-    # Pause for a couple of seconds before starting the counting
-    time.sleep(2)
+    # Wait for the student to click "Continue..." to start skip counting
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
 
     # Start counting by the selected number, stopping at 100
     for i in range(skip_number, 101, skip_number):
@@ -2362,10 +2492,24 @@ def skip_counting():
     completion_message = "Great job!"
     screen.fill(screen_color)
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after the completion message
+    continue_rect = draw_continue_button()
+    
     pygame.display.flip()
 
-    # Wait a few seconds before exiting the function
-    time.sleep(3)
+    # Wait for the student to click "Continue..." to move on to the next lesson
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
+
 
 
 def hiragana_teach():
@@ -2396,10 +2540,23 @@ def hiragana_teach():
     
     # Display the intro message and update the screen
     draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button before starting the lesson
+    continue_rect = draw_continue_button()
+    
     pygame.display.flip()
 
-    # Pause for a couple of seconds before starting the lesson
-    time.sleep(2)
+    # Wait for the student to click "Continue..." to start the lesson
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
 
     # Loop through the hiragana list and show each character one by one
     for hiragana_char in hiragana_list:
@@ -2422,10 +2579,24 @@ def hiragana_teach():
     completion_message = "Great job!"
     screen.fill(screen_color)
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after the completion message
+    continue_rect = draw_continue_button()
+    
     pygame.display.flip()
 
-    # Wait a few seconds before exiting the function
-    time.sleep(3)
+    # Wait for the student to click "Continue..." before moving on
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
+
 
 
 def skip_counting_japanese():
@@ -2438,10 +2609,23 @@ def skip_counting_japanese():
     
     # Display the intro message and update the screen
     draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after intro message
+    continue_rect = draw_continue_button()
+
     pygame.display.flip()
 
-    # Pause for a couple of seconds before starting the counting
-    time.sleep(2)
+    # Wait for the student to click "Continue..." to start the counting
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
 
     # Start counting from 1 to 30
     for i in range(1, 31):
@@ -2467,10 +2651,24 @@ def skip_counting_japanese():
     completion_message = "Great job!"
     screen.fill(screen_color)
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    # Draw the "Continue..." button after the completion message
+    continue_rect = draw_continue_button()
+
     pygame.display.flip()
 
-    # Wait a few seconds before exiting the function
-    time.sleep(3)
+    # Wait for the student to click "Continue..." before exiting the function
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Proceed after the "Continue..." button is clicked
+
 
 
 def hiragana_quiz(session_id):

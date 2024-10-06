@@ -398,7 +398,7 @@ def _initialize_tables(cursor, connection):
         ''')
 
         connection.commit()
-        log_entry = create_log_message("Database tables initialized successfully, including 'Rainbow Cats' lesson.")
+        log_entry = create_log_message("Database tables initialized successfully.")
         log_message(log_entry)
     except sqlite3.Error as e:
         log_entry = create_log_message(f"Error initializing tables: {e}")
@@ -1166,33 +1166,7 @@ def fade_text_in_and_out(line1, line2, font, max_width=None):
             alpha -= FADE_SPEED
 
 
-def learniverse_explanation():
-    # Define the folder path for the background images
-    folder_path = "assets/images/explanation"
 
-    # Select a random background image
-    background_image_path = select_random_background(folder_path)
-
-    # Define the text to display
-    texts = [
-        "What is Learniverse?",
-        "Learniverse is an educational game designed to make learning fun!",
-        "It helps students practice math skills through interactive gameplay.",
-        "By integrating game elements, Learniverse aims to reduce the stress often associated with math.",
-        "Students can choose their own pace and level, making learning personalized.",
-        "The game provides instant feedback and rewards for progress.",
-        "Learniverse covers fundamental math concepts that align with educational standards.",
-        "Our goal is to turn learning into an engaging and enjoyable experience."
-    ]
-
-    for text in texts:
-        # Draw the background before displaying the text
-        draw_background(background_image_path)
-
-        # Display the text
-        display_text_and_wait(text)
-
-    return "main_menu"  # Return to the main menu after all texts are displayed
 
 
 def update_positions():
@@ -1242,10 +1216,6 @@ def update_positions():
 ###############################
 ### 3. Game Logic Functions ###
 ###############################
-
-def introduction(font):
-    fade_text_in_and_out("Developed by:", "Alvadore Retro Technology", font)
-    
 
 def bonus_game_fat_tuna():
     # Check if the assets/images directory exists
@@ -1746,115 +1716,11 @@ def rainbow_numbers(session_id):
 ### 4. Menu and Navigation Functions ###
 ########################################
 
+def introduction(font):
+    fade_text_in_and_out("Developed by:", "Alvadore Retro Technology", font)
 
-def credit_roll():
-    # Load the cat sprite and initialize its position and direction
-    try:
-        cat_image = pygame.image.load("assets/images/sprites/cat01.png").convert_alpha()
-        cat_rect = cat_image.get_rect()
-        cat_rect.y = HEIGHT - cat_rect.height  # Position the cat at the bottom of the screen
-        cat_speed = 4  # Set the speed of the cat
-        cat_direction = 1  # 1 for right, -1 for left
-        cat_loaded = True
-    except (FileNotFoundError, pygame.error) as e:
-        log_entry = create_log_message(f"Error loading cat sprite: {e}")
-        log_message(log_entry)
-        cat_loaded = False
 
-    # Function to update and draw the cat sprite
-    def draw_moving_cat(cat_image, cat_rect, cat_direction):
-        nonlocal cat_speed
 
-        cat_rect.x += cat_speed * cat_direction
-        
-        # Flip direction if the cat hits the edge of the screen
-        if cat_rect.left <= 0 or cat_rect.right >= WIDTH:
-            cat_direction *= -1
-            cat_image = pygame.transform.flip(cat_image, True, False)
-        
-        screen.blit(cat_image, cat_rect)
-        return cat_image, cat_direction
-
-    # Override the fade_text_in_and_out function to include the moving cat
-    def fade_text_in_and_out_with_cat(line1, line2, font, max_width=None):
-        alpha = 0
-        fading_in = True
-        text_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        pause_time = 2000  # Time in milliseconds to pause at full alpha
-        pause_counter = 0
-
-        while fading_in or alpha > 0:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                    return  # Skip to the main menu
-
-            # Clear the text surface
-            text_surface.fill((0, 0, 0, 0))
-
-            # Adjust the alpha of the surface
-            text_surface.set_alpha(alpha)
-
-            # Draw the first line of text onto the transparent text surface
-            draw_text(
-                line1, font, text_color, 0, HEIGHT * 0.3, text_surface,
-                max_width=WIDTH, center=True, enable_shadow=True
-            )
-
-            # Draw the second line of text onto the transparent text surface
-            draw_text(
-                line2, font, text_color, 0, HEIGHT * 0.6, text_surface,
-                max_width=WIDTH, center=True, enable_shadow=True
-            )
-
-            # Fill the screen with black
-            screen.fill(screen_color)
-
-            # Blit the transparent text surface onto the main screen
-            screen.blit(text_surface, (0, 0))
-            
-            # Draw the moving cat sprite if it was successfully loaded
-            if cat_loaded:
-                nonlocal cat_image, cat_direction
-                cat_image, cat_direction = draw_moving_cat(cat_image, cat_rect, cat_direction)
-
-            pygame.display.flip()
-            clock.tick(60)
-
-            # Handle the fade-in and fade-out logic
-            if fading_in:
-                alpha += FADE_SPEED
-                if alpha >= 255:
-                    alpha = 255
-                    fading_in = False
-                    pause_counter = pause_time  # Start the pause counter
-            else:
-                if pause_counter > 0:
-                    pause_counter -= clock.get_time()  # Decrease the counter based on elapsed time
-                else:
-                    alpha -= FADE_SPEED
-
-    # Use the modified fade_text_in_and_out_with_cat function
-    fade_text_in_and_out_with_cat("Developed by:", "Alvadore Retro Technology", font)
-    fade_text_in_and_out_with_cat("Chief Executive Officer", "William Alexander Martins", font)
-    fade_text_in_and_out_with_cat("Chief Financial Officer", "Mary Evangeline Martins", font)
-    fade_text_in_and_out_with_cat("Chief Information Officer", "Shane William Martins", font)
-    fade_text_in_and_out_with_cat("Chief Operations Officer", "Ethan Hunter Martins", font)
-    fade_text_in_and_out_with_cat("Chief Technology Officer", "Jeffrey Matthew Neff Esq.", font)
-    fade_text_in_and_out_with_cat("Made possible by:", "Supporters like you!", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "Guido van Rossum", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "Richard Stallman", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the PyInstaller team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Pygame team", font)
-    fade_text_in_and_out_with_cat("Pygame is licensed under", "LGPL version 2.1", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Suno team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Blender team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Krita team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Stable Diffusion team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Ubuntu team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the ChatGPT team", font)
 
 
 def load_options():
@@ -1926,8 +1792,6 @@ def main_menu():
                     bonus_game_fat_tuna() # Skip directly to the bonus game for debug
 
         clock.tick(60)
-
-
 def student_select_menu():
     global font, current_student  # Make font and current_student global so they can be used across the function
 
@@ -1997,6 +1861,34 @@ def student_select_menu():
         clock.tick(60)
 
 
+def learniverse_explanation():
+    # Define the folder path for the background images
+    folder_path = "assets/images/explanation"
+
+    # Select a random background image
+    background_image_path = select_random_background(folder_path)
+
+    # Define the text to display
+    texts = [
+        "What is Learniverse?",
+        "Learniverse is an educational game designed to make learning fun!",
+        "It helps students practice math skills through interactive gameplay.",
+        "By integrating game elements, Learniverse aims to reduce the stress often associated with math.",
+        "Students can choose their own pace and level, making learning personalized.",
+        "The game provides instant feedback and rewards for progress.",
+        "Learniverse covers fundamental math concepts that align with educational standards.",
+        "Our goal is to turn learning into an engaging and enjoyable experience."
+    ]
+
+    for text in texts:
+        # Draw the background before displaying the text
+        draw_background(background_image_path)
+
+        # Display the text
+        display_text_and_wait(text)
+
+    return "main_menu"  # Return to the main menu after all texts are displayed
+
 def session_manager():
     global current_student  # Access global current_student
 
@@ -2046,6 +1938,98 @@ def session_manager():
 
     # Return to main menu after all lessons are done
     return "main_menu"
+
+
+def greet_student():
+    global current_student  # Access global current_student
+    global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+    # Get the current time
+    current_time = datetime.now().time()
+
+    # Determine the appropriate greeting based on the time of day
+    if current_time >= datetime.strptime("00:01", "%H:%M").time() and current_time < datetime.strptime("12:00", "%H:%M").time():
+        # Morning greeting (12:01 AM to 12:00 PM)
+        greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
+        greeting_message_jp = "おはようございます"  # "Good morning" in Japanese (Hiragana)
+    elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("18:00", "%H:%M").time():
+        # Afternoon greeting (12:00 PM to 6:00 PM)
+        greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
+        greeting_message_jp = "こんにちは"  # "Hello" in Japanese (Hiragana)
+    else:
+        # Evening greeting (6:00 PM to 12:00 AM)
+        greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
+        greeting_message_jp = "こんばんは"  # "Good evening" in Japanese (Hiragana)
+
+    # Fill the screen with the background color from the applied theme
+    screen.fill(screen_color)  # Use screen color from the global variable
+
+    # Use draw_text to display the English greeting message
+    draw_text(
+        greeting_message_eng, 
+        font, 
+        text_color,  # Use text color from the global variable
+        x=0, 
+        y=HEIGHT * 0.25, 
+        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
+        center=True,  # Center the text horizontally
+        enable_shadow=True,  # Enable text shadow for better visibility
+        shadow_color=shadow_color  # Use shadow color from the global variable
+    )
+
+    # Use draw_text to display the Japanese greeting message
+    draw_text(
+        greeting_message_jp, 
+        j_font,  # Assuming you've set up a separate Japanese font
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.45,  # Display the Japanese message below the English message
+        max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
+        center=True,  # Center the text horizontally
+        enable_shadow=True,  # Enable text shadow for better visibility
+        shadow_color=shadow_color  # Use shadow color from the global variable
+    )
+
+    pygame.display.flip()  # Update the display
+
+    # Wait for a short duration so the greeting is visible
+    time.sleep(3)  # Show the greeting for 3 seconds
+
+
+def streak_check():
+    global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+    # Fill the screen with the background color from the applied theme
+    screen.fill(screen_color)
+
+    # Query the student's streak
+    streak_days = student_streak_query()
+
+    # Check if the student is on a streak
+    if streak_days > 1:
+        message = f"Great job! You've been on a streak for {streak_days} days in a row!"
+    elif streak_days == 1:
+        message = "You're on a 1-day streak! Keep it up!"
+    else:
+        message = "Let's start a streak today! Keep it up!"
+
+    # Display the message
+    draw_text(
+        message, 
+        font, 
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.25, 
+        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
+        center=True, 
+        enable_shadow=True, 
+        shadow_color=shadow_color
+    )
+
+    pygame.display.flip()  # Update the display
+
+    # Wait for a short duration so the message is visible
+    time.sleep(3)  # Show the message for 3 seconds
 
 
 def day_of_the_week():
@@ -2111,74 +2095,6 @@ def day_of_the_week():
     # Wait for a short duration so the message is visible
     time.sleep(3)  # Show the message for 3 seconds
     
-
-def streak_check():
-    global text_color, shadow_color, screen_color  # Access the theme-related globals
-
-    # Fill the screen with the background color from the applied theme
-    screen.fill(screen_color)
-
-    # Query the student's streak
-    streak_days = student_streak_query()
-
-    # Check if the student is on a streak
-    if streak_days > 1:
-        message = f"Great job! You've been on a streak for {streak_days} days in a row!"
-    elif streak_days == 1:
-        message = "You're on a 1-day streak! Keep it up!"
-    else:
-        message = "Let's start a streak today! Keep it up!"
-
-    # Display the message
-    draw_text(
-        message, 
-        font, 
-        text_color, 
-        x=0, 
-        y=HEIGHT * 0.25, 
-        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
-        center=True, 
-        enable_shadow=True, 
-        shadow_color=shadow_color
-    )
-
-    pygame.display.flip()  # Update the display
-
-    # Wait for a short duration so the message is visible
-    time.sleep(3)  # Show the message for 3 seconds
-
-
-
-def greet_student():
-    global current_student  # Access global current_student
-    global text_color, shadow_color, screen_color  # Access the theme-related globals
-
-    # Display a simple greeting
-    greeting_message = f"Hello, {current_student}! Welcome to your lesson."
-
-    # Fill the screen with the background color from the applied theme
-    screen.fill(screen_color)  # Use screen color from the global variable
-
-    # Use draw_text to display the greeting message, enabling word wrapping and centering
-    draw_text(
-        greeting_message, 
-        font, 
-        text_color,  # Use text color from the global variable
-        x=0, 
-        y=HEIGHT * 0.25, 
-        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
-        center=True,  # Center the text horizontally
-        enable_shadow=True,  # Enable text shadow for better visibility
-        shadow_color=shadow_color  # Use shadow color from the global variable
-    )
-    draw_text("こんにちは", font, text_color, 100, 100, use_japanese_font=True)
-
-
-    pygame.display.flip()  # Update the display
-
-    # Wait for a short duration so the greeting is visible
-    time.sleep(3)  # Show the greeting for 3 seconds
-
 
 def options_menu():
     global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color  # Access the global variables
@@ -2355,6 +2271,116 @@ def save_options():
     except Exception as e:
         log_entry = create_log_message(f"Error saving options: {e}")
         log_message(log_entry)
+        
+
+def credit_roll():
+    # Load the cat sprite and initialize its position and direction
+    try:
+        cat_image = pygame.image.load("assets/images/sprites/cat01.png").convert_alpha()
+        cat_rect = cat_image.get_rect()
+        cat_rect.y = HEIGHT - cat_rect.height  # Position the cat at the bottom of the screen
+        cat_speed = 4  # Set the speed of the cat
+        cat_direction = 1  # 1 for right, -1 for left
+        cat_loaded = True
+    except (FileNotFoundError, pygame.error) as e:
+        log_entry = create_log_message(f"Error loading cat sprite: {e}")
+        log_message(log_entry)
+        cat_loaded = False
+
+    # Function to update and draw the cat sprite
+    def draw_moving_cat(cat_image, cat_rect, cat_direction):
+        nonlocal cat_speed
+
+        cat_rect.x += cat_speed * cat_direction
+        
+        # Flip direction if the cat hits the edge of the screen
+        if cat_rect.left <= 0 or cat_rect.right >= WIDTH:
+            cat_direction *= -1
+            cat_image = pygame.transform.flip(cat_image, True, False)
+        
+        screen.blit(cat_image, cat_rect)
+        return cat_image, cat_direction
+
+    # Override the fade_text_in_and_out function to include the moving cat
+    def fade_text_in_and_out_with_cat(line1, line2, font, max_width=None):
+        alpha = 0
+        fading_in = True
+        text_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        pause_time = 2000  # Time in milliseconds to pause at full alpha
+        pause_counter = 0
+
+        while fading_in or alpha > 0:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    return  # Skip to the main menu
+
+            # Clear the text surface
+            text_surface.fill((0, 0, 0, 0))
+
+            # Adjust the alpha of the surface
+            text_surface.set_alpha(alpha)
+
+            # Draw the first line of text onto the transparent text surface
+            draw_text(
+                line1, font, text_color, 0, HEIGHT * 0.3, text_surface,
+                max_width=WIDTH, center=True, enable_shadow=True
+            )
+
+            # Draw the second line of text onto the transparent text surface
+            draw_text(
+                line2, font, text_color, 0, HEIGHT * 0.6, text_surface,
+                max_width=WIDTH, center=True, enable_shadow=True
+            )
+
+            # Fill the screen with black
+            screen.fill(screen_color)
+
+            # Blit the transparent text surface onto the main screen
+            screen.blit(text_surface, (0, 0))
+            
+            # Draw the moving cat sprite if it was successfully loaded
+            if cat_loaded:
+                nonlocal cat_image, cat_direction
+                cat_image, cat_direction = draw_moving_cat(cat_image, cat_rect, cat_direction)
+
+            pygame.display.flip()
+            clock.tick(60)
+
+            # Handle the fade-in and fade-out logic
+            if fading_in:
+                alpha += FADE_SPEED
+                if alpha >= 255:
+                    alpha = 255
+                    fading_in = False
+                    pause_counter = pause_time  # Start the pause counter
+            else:
+                if pause_counter > 0:
+                    pause_counter -= clock.get_time()  # Decrease the counter based on elapsed time
+                else:
+                    alpha -= FADE_SPEED
+
+    # Use the modified fade_text_in_and_out_with_cat function
+    fade_text_in_and_out_with_cat("Developed by:", "Alvadore Retro Technology", font)
+    fade_text_in_and_out_with_cat("Chief Executive Officer", "William Alexander Martins", font)
+    fade_text_in_and_out_with_cat("Chief Financial Officer", "Mary Evangeline Martins", font)
+    fade_text_in_and_out_with_cat("Chief Information Officer", "Shane William Martins", font)
+    fade_text_in_and_out_with_cat("Chief Operations Officer", "Ethan Hunter Martins", font)
+    fade_text_in_and_out_with_cat("Chief Technology Officer", "Jeffrey Matthew Neff Esq.", font)
+    fade_text_in_and_out_with_cat("Made possible by:", "Supporters like you!", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "Guido van Rossum", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "Richard Stallman", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the PyInstaller team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Pygame team", font)
+    fade_text_in_and_out_with_cat("Pygame is licensed under", "LGPL version 2.1", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Suno team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Blender team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Krita team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Stable Diffusion team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Ubuntu team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the ChatGPT team", font)
 
 
 class Cat:
