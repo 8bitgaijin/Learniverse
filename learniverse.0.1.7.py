@@ -7,6 +7,7 @@ Learniverse
 import ctypes
 from datetime import datetime, timedelta
 import json
+import math
 import os
 import pygame
 import pyttsx3
@@ -46,6 +47,9 @@ FOREST_GREEN = (34,111,95)  # A forest green for screen
 LAVENDER = (230, 230, 250)  # A soft lavender for text
 DEEP_PURPLE = (75, 0, 130)  # A deep purple for shadow
 COOL_BLUE = (100, 149, 237)  # A cool blue for the background
+TRUNK_COLOR = (139, 69, 19)  # Brown for trunk and branches
+LEAF_COLOR = (34, 139, 34)   # Green for leaves
+LIGHTNING_COLOR = (255, 255, 255)
 
 # Student selectable color themes
 color_themes = {
@@ -130,6 +134,11 @@ color_themes = {
         "screen_color": (244, 164, 96)  # Sandy Brown
     }
 }
+
+BOLT_SEGMENTS = 15
+BOLT_SPREAD = 50
+BOLT_LIFETIME = 0.2  # Lifetime of each lightning bolt in seconds
+lightning_bolts = []  # Store lightning bolts
 
 
 ###################################
@@ -951,6 +960,136 @@ def set_haruka_slow(engine):
     # Set the speech rate to 100 (slow)
     engine.setProperty('rate', 100)
     
+
+# Function to draw a branch segment
+def draw_branch(screen, start_pos, end_pos, thickness, color):
+    pygame.draw.line(screen, color, start_pos, end_pos, thickness)
+
+# Function to grow a tree
+def grow_tree(screen, start_x, start_y, max_depth, max_branches):
+    # Randomized recursive tree
+    branches = [(start_x, start_y, -90)]  # Starting trunk (x, y, angle - 90 degrees pointing up)
+    branch_thickness = 10  # Start thickness for the trunk
+    
+    for depth in range(max_depth):
+        new_branches = []
+        
+        for branch in branches:
+            x, y, angle = branch
+            branch_length = random.randint(10, 40)  # Random length for variety
+            
+            # Calculate new branch endpoint
+            end_x = x + math.cos(math.radians(angle)) * branch_length
+            end_y = y + math.sin(math.radians(angle)) * branch_length
+            
+            # Draw the branch
+            draw_branch(screen, (x, y), (end_x, end_y), branch_thickness, TRUNK_COLOR)
+            
+            # Randomly decide how many branches to grow from this segment
+            num_new_branches = random.randint(1, max_branches)
+            
+            for _ in range(num_new_branches):
+                new_angle = angle + random.randint(-40, 40)  # Random angle variation
+                new_branches.append((end_x, end_y, new_angle))  # Append new branches
+
+            # At the end of depth, we add leaves
+            if depth == max_depth - 1:
+                pygame.draw.circle(screen, LEAF_COLOR, (int(end_x), int(end_y)), 5)  # Leaves at the tips
+
+        # Update for next depth
+        branches = new_branches
+        branch_thickness = max(1, branch_thickness - 1)  # Decrease thickness with each level
+
+
+# Function to interpolate color (light blue to white)
+def interpolate_color(start_color, end_color, fraction):
+    return (
+        start_color[0] + (end_color[0] - start_color[0]) * fraction,
+        start_color[1] + (end_color[1] - start_color[1]) * fraction,
+        start_color[2] + (end_color[2] - start_color[2]) * fraction,
+    )
+ 
+# Function to draw lightning bolt with color gradient
+def draw_lightning(screen, start_pos, end_pos, background_image):
+    """
+    Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
+    while keeping the background image intact.
+    """
+    # Prepare colors for the lightning
+    start_color = (173, 216, 230)  # Light blue
+    end_color = (255, 255, 255)    # White
+
+    BOLT_SEGMENTS = 8  # Number of segments for each bolt
+    FLASH_COUNT = 5    # Number of bolts per flash burst
+    BOLT_FLASH_DURATION = 50  # Duration to display each flash (milliseconds)
+
+    # Load the background image (which will always exist in this version)
+    bg_image = pygame.image.load(background_image)
+
+    for _ in range(3):  # Number of flash bursts
+        # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
+        screen.blit(bg_image, (0, 0))
+
+        # Step 2: Draw multiple lightning bolts in this frame
+        for _ in range(FLASH_COUNT):
+            current_pos = start_pos
+            for i in range(BOLT_SEGMENTS):
+                fraction = i / BOLT_SEGMENTS
+                color = (
+                    int(start_color[0] + (end_color[0] - start_color[0]) * fraction),
+                    int(start_color[1] + (end_color[1] - start_color[1]) * fraction),
+                    int(start_color[2] + (end_color[2] - start_color[2]) * fraction)
+                )
+
+                next_x = current_pos[0] + random.randint(-BOLT_SPREAD, BOLT_SPREAD)
+                next_y = current_pos[1] + (end_pos[1] - start_pos[1]) // BOLT_SEGMENTS
+                next_pos = (next_x, next_y)
+
+                # Draw the segment of the lightning bolt
+                pygame.draw.line(screen, color, current_pos, next_pos, 2)
+                current_pos = next_pos
+
+            # Draw the final segment of the bolt
+            pygame.draw.line(screen, end_color, current_pos, end_pos, 2)
+
+        # Step 3: Display the lightning on top of the background
+        pygame.display.flip()
+
+        # Step 4: Hold the lightning flash for a brief moment
+        pygame.time.delay(BOLT_FLASH_DURATION)
+
+        # Step 5: Clear the screen by redrawing the background (erasing previous bolts)
+        screen.blit(bg_image, (0, 0))
+
+        # Step 6: Refresh the screen to apply the cleared frame
+        pygame.display.flip()
+
+        # Short delay before the next flash burst
+        pygame.time.delay(20)
+
+    # Step 7: Redraw the background to ensure it persists after the lightning effect
+    screen.blit(bg_image, (0, 0))
+    pygame.display.flip()  # Final refresh with background intact
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
     
 ###################################    
 ### 2. Display and UI Functions ###
@@ -1593,10 +1732,11 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
     pygame.display.flip()
 
 
-def display_result(result_text, image_folder=None):
+def display_result(result_text, image_folder=None, use_lightning=False):
     """
     Display the result text and an optional image from the given folder.
-    If an image is provided, display a particle effect over the image.
+    If an image is provided and 'use_lightning' is True, show lightning instead of particles.
+    If 'use_lightning' is False, show a particle effect.
     """
     # Clear the event queue to avoid any unwanted inputs
     pygame.event.clear()
@@ -1604,43 +1744,52 @@ def display_result(result_text, image_folder=None):
     # Initialize particle list
     particles = []
 
+    # Get the image path and set the background
     if image_folder:
         image_path = select_random_background(image_folder)
         draw_background(image_path)
 
-        # Generate particles for the effect
-        for _ in range(500):  # Number of particles to generate
-            x = random.randint(0, WIDTH)
-            y = random.randint(0, HEIGHT)
-            color = random.choice([NAVY_BLUE, (255, 255, 255), ROYAL_BLUE, LIGHT_BLUE])
-            particles.append(Particle(x, y, color))
-    
+        if not use_lightning:
+            # Generate particles for the effect (only if use_lightning is False)
+            for _ in range(500):  # Number of particles to generate
+                x = random.randint(0, WIDTH)
+                y = random.randint(0, HEIGHT)
+                color = random.choice([NAVY_BLUE, (255, 255, 255), ROYAL_BLUE, LIGHT_BLUE])
+                particles.append(Particle(x, y, color))
+
     else:
         # If no image folder is provided, fill the screen with the current screen color
         screen.fill(screen_color)
     
-    # Display loop for particle effect
-    for _ in range(50):  # Run the effect for 50 frames
-        if image_folder:
-            # Transparent fill to allow particles to fade
-            screen.fill((0, 0, 0, 0))
-            draw_background(image_path)
+    # Display loop for particle effect or lightning effect
+    if use_lightning:
+        # Show lightning effect if the fast answer condition is met
+        for _ in range(3):  # Increased number of lightning bolts for dramatic effect
+            draw_lightning(screen, (random.randint(0, WIDTH), 0), (random.randint(0, WIDTH), HEIGHT), image_path)
+            pygame.display.flip()
+            pygame.time.delay(150)  # Slight delay between lightning bolts
+    else:
+        # Show particle effect for slower answers
+        for _ in range(50):  # Run the particle effect for 50 frames
+            if image_folder:
+                # Transparent fill to allow particles to fade
+                screen.fill((0, 0, 0, 0))
+                draw_background(image_path)
 
-            # Update and draw each particle
-            for particle in particles[:]:
-                particle.update()
-                if particle.lifetime <= 0:
-                    particles.remove(particle)
-                else:
-                    particle.draw(screen)
-        else:
-            # For incorrect answers, just fill the screen with the current screen color
-            screen.fill(screen_color)
+                # Update and draw each particle
+                for particle in particles[:]:
+                    particle.update()
+                    if particle.lifetime <= 0:
+                        particles.remove(particle)
+                    else:
+                        particle.draw(screen)
+            else:
+                # For incorrect answers, just fill the screen with the current screen color
+                screen.fill(screen_color)
 
-        # Draw the result text on top of the particles or background
-        draw_text(result_text, font, text_color, WIDTH // 2, HEIGHT // 2, center=True, enable_shadow=True)
-        pygame.display.flip()
-        # time.sleep(0.03)  # Small delay for animation timing
+            # Draw the result text on top of the particles or background
+            draw_text(result_text, font, text_color, WIDTH // 2, HEIGHT // 2, center=True, enable_shadow=True)
+            pygame.display.flip()
     
     # Final display and pause before exiting the function
     pygame.display.flip()
@@ -1648,6 +1797,8 @@ def display_result(result_text, image_folder=None):
 
     # Clear the event queue again after displaying the result
     pygame.event.clear()
+
+
 
 
 def generate_rainbow_number_problem():
@@ -1669,7 +1820,7 @@ def generate_rainbow_number_problem():
 
 def rainbow_numbers(session_id):
     global current_student  # Access the global current student
-    
+
     # Retrieve the lesson_id for Rainbow Numbers
     connection = sqlite3.connect('learniverse.db')
     cursor = connection.cursor()
@@ -1685,21 +1836,21 @@ def rainbow_numbers(session_id):
         return -1  # Or handle as appropriate
     cursor.close()
     connection.close()
-    
+
     # Display the introductory message
     screen.fill(screen_color)  # Fill the screen with the background color
     draw_text(
-        "Let's work on Rainbow Numbers!", 
-        font, 
-        text_color, 
-        x=0, 
-        y=HEIGHT * 0.4, 
+        "Let's work on Rainbow Numbers!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
-        center=True, 
-        enable_shadow=True, 
+        center=True,
+        enable_shadow=True,
         shadow_color=shadow_color  # Use the shadow color from the theme
     )
-    
+
     # Draw the "Continue..." button before starting the lesson
     continue_rect = draw_continue_button()
     pygame.display.flip()  # Update the display
@@ -1726,8 +1877,6 @@ def rainbow_numbers(session_id):
     completion_times = []  # List to store time taken for each question
 
     clock = pygame.time.Clock()
-    
-    # stop_mp3()
 
     while running and problem_count < total_questions:
         num1, num2, answer = generate_rainbow_number_problem()
@@ -1740,12 +1889,12 @@ def rainbow_numbers(session_id):
 
         while not question_complete:
             screen.fill(screen_color)  # Clear the screen before drawing
-            
+
             # Draw the math problem
             display_rainbow_math_problem(num1, num2, user_input, first_input)
-            
+
             pygame.display.flip()  # Update the display
-            
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -1755,17 +1904,19 @@ def rainbow_numbers(session_id):
                         end_time = time.time()
                         time_taken = round(end_time - start_time, 1)  # Calculate time for the question
                         completion_times.append(time_taken)
-                        
+
                         if int(user_input) == num2:
                             correct_answers += 1
-                            
+
                             if time_taken < 3:
-                                display_result("CORRECT!", "assets/images/fast_cats")
+                                # Fast answer case: display fast_cats image and lightning bolts
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
                             else:
-                                display_result("CORRECT!", "assets/images/cats")
+                                # Slow answer case: display normal cat image and particle effects
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
                         else:
                             display_result(f"Sorry, the answer is {num2}")
-                        
+
                         pygame.event.clear()  # Clear the event queue to avoid queued inputs
                         problem_count += 1
                         question_complete = True  # Move to the next question
@@ -1774,7 +1925,7 @@ def rainbow_numbers(session_id):
                     elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
                         user_input += event.unicode
                         first_input = False
-        
+
             clock.tick(60)  # Frame rate limiting
 
     # End of lesson timer
@@ -1822,7 +1973,7 @@ def rainbow_numbers(session_id):
 
     # Draw the "Continue..." button after displaying the final score
     continue_rect = draw_continue_button()
-    
+
     pygame.display.flip()  # Update the display with the final messages
 
     # Wait for the student to click "Continue..." after the final score
@@ -1842,6 +1993,9 @@ def rainbow_numbers(session_id):
 
     # Return the lesson results
     return total_questions, correct_answers, average_time
+
+
+
 
 
 
@@ -2227,7 +2381,12 @@ def greet_student():
         enable_shadow=True,  
         shadow_color=shadow_color  
     )
-
+    
+    # Start growing tree from the exact bottom center
+    grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
+    # Start growing tree from the exact bottom center
+    grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
+    
     # Draw the "Continue..." button
     continue_rect = draw_continue_button()
 
