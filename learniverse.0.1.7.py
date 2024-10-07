@@ -8,6 +8,7 @@ import ctypes
 from datetime import datetime, timedelta
 import json
 import math
+import noise
 import os
 import pygame
 import pyttsx3
@@ -50,6 +51,8 @@ COOL_BLUE = (100, 149, 237)  # A cool blue for the background
 TRUNK_COLOR = (139, 69, 19)  # Brown for trunk and branches
 LEAF_COLOR = (34, 139, 34)   # Green for leaves
 LIGHTNING_COLOR = (255, 255, 255)
+SKY_BLUE = (135, 206, 235)  # Sky blue background
+
 
 # Student selectable color themes
 color_themes = {
@@ -135,10 +138,19 @@ color_themes = {
     }
 }
 
+# Constants for lightning SFX
 BOLT_SEGMENTS = 15
 BOLT_SPREAD = 50
 BOLT_LIFETIME = 0.2  # Lifetime of each lightning bolt in seconds
 lightning_bolts = []  # Store lightning bolts
+
+# Constants for clouds SFX
+BASE_ALPHA = 220  # Higher base alpha for more visible clouds
+NOISE_SCALE = 0.005  # Scale to control cloud pattern size
+CLOUD_THRESHOLD = 0.05  # Lower threshold to make clouds more dense
+ALPHA_MULTIPLIER = 2.5  # Control how quickly alpha ramps up for denser clouds
+CLOUD_SPEED = 0.5  # Speed of the cloud movement (pixels per frame)
+x_offset = 0  # Horizontal offset for cloud movement
 
 
 ###################################
@@ -1073,7 +1085,24 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
     pygame.display.flip()  # Final refresh with background intact
 
 
-
+# Function to generate a Perlin noise cloud mask with horizontal offset
+def generate_perlin_cloud(x_offset):
+    # Create a surface for the cloud with alpha
+    cloud_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+    
+    # Generate Perlin noise for the entire screen
+    for x in range(WIDTH):
+        for y in range(HEIGHT):
+            # Introduce a horizontal offset to create the movement effect
+            noise_value = noise.pnoise2((x + x_offset) * NOISE_SCALE, y * NOISE_SCALE, octaves=4)
+            
+            # If the noise value is higher than the threshold, draw a cloud pixel
+            if noise_value > CLOUD_THRESHOLD:
+                # Scale the alpha based on the noise value to make smoother cloud edges
+                alpha = min(int((noise_value - CLOUD_THRESHOLD) * 255 * ALPHA_MULTIPLIER), BASE_ALPHA)
+                pygame.draw.circle(cloud_surface, (*WHITE, alpha), (x, y), 3)  # Larger clouds
+    
+    return cloud_surface
 
 
 
@@ -2258,11 +2287,10 @@ def session_manager():
     # Loop through lessons
     for lesson in lessons_to_play:
         if lesson == "greet_student":
-            greet_student()  # Greet the student first
-            
+            greet_student()  
         elif lesson == "streak_check":
             streak_check()
-            
+
         elif lesson == "day_of_the_week":
             day_of_the_week()
         elif lesson == "month_of_the_year":
@@ -2345,7 +2373,7 @@ def greet_student():
         # Morning greeting
         greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
         greeting_message_jp = "おはようございます。"  # Good morning in Japanese
-    elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("18:00", "%H:%M").time():
+    elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("17:00", "%H:%M").time():
         # Afternoon greeting
         greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
         greeting_message_jp = "こんにちは。"  # Hello in Japanese
@@ -2354,8 +2382,13 @@ def greet_student():
         greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
         greeting_message_jp = "こんばんは。"  # Good evening in Japanese
 
-    # Fill the screen with the background color from the applied theme
-    screen.fill(screen_color)
+    # Set a static sky blue background with Perlin clouds
+    SKY_BLUE = (135, 206, 235)
+    screen.fill(SKY_BLUE)  # Fill the screen with sky blue
+
+    # Generate and blit Perlin clouds
+    cloud_surface = generate_perlin_cloud(0)  # Use zero offset for static clouds
+    screen.blit(cloud_surface, (0, 0))
 
     # Draw the English greeting message
     draw_text(
@@ -2385,7 +2418,6 @@ def greet_student():
     
     # Start growing tree from the exact bottom center
     grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
-    # Start growing tree from the exact bottom center
     grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
     
     # Draw the "Continue..." button
@@ -2402,12 +2434,15 @@ def greet_student():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()  # Correctly exit the program
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 # Check if the "Continue..." button is clicked using the check_continue_click function
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
+
+                    
+
 
 
 
