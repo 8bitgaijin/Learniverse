@@ -2201,7 +2201,7 @@ def main_menu():
                 elif event.key == pygame.K_r:
                     rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
                 elif event.key == pygame.K_s:
-                    skip_counting_japanese()
+                    skip_counting()
 
         clock.tick(60)
 
@@ -2451,8 +2451,8 @@ def greet_student():
         shadow_color=shadow_color  
     )
 
-    # Draw the Japanese greeting message
-    draw_text(
+    # Draw the Japanese greeting message and return its rect for click detection
+    japanese_text_rect = draw_text(
         greeting_message_jp, 
         j_font,  
         text_color, 
@@ -2461,7 +2461,8 @@ def greet_student():
         max_width=WIDTH * 0.95, 
         center=True,  
         enable_shadow=True,  
-        shadow_color=shadow_color  
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can detect clicks
     )
     
     # Start growing tree from the exact bottom center
@@ -2476,7 +2477,7 @@ def greet_student():
     # Use the reusable TTS function to speak the Japanese greeting aloud
     speak_japanese(greeting_message_jp)
 
-    # Wait for the "Continue..." click
+    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -2485,9 +2486,15 @@ def greet_student():
                 sys.exit()  # Correctly exit the program
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                # Check if the "Continue..." button is clicked using the check_continue_click function
+
+                # Check if the Japanese text is clicked
+                if japanese_text_rect.collidepoint(mouse_pos):
+                    speak_japanese(greeting_message_jp)  # Replay the Japanese greeting
+
+                # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
+
 
                     
 
@@ -2553,14 +2560,14 @@ def day_of_the_week():
 
     # Mapping English weekdays to Japanese equivalents (with hiragana)
     japanese_days = {
-            "Monday": "月曜日",
-            "Tuesday": "火曜日",
-            "Wednesday": "水曜日", 
-            "Thursday": "木曜日",
-            "Friday": "金曜日",
-            "Saturday": "土曜日",
-            "Sunday": "日曜日"
-        }
+        "Monday": "月曜日",
+        "Tuesday": "火曜日",
+        "Wednesday": "水曜日", 
+        "Thursday": "木曜日",
+        "Friday": "金曜日",
+        "Saturday": "土曜日",
+        "Sunday": "日曜日"
+    }
 
     today_japanese = japanese_days.get(today_english, today_english)  # Get the Japanese equivalent
 
@@ -2571,8 +2578,8 @@ def day_of_the_week():
     # Fill the screen with the background color from the applied theme
     screen.fill(screen_color)
 
-    # Display the Japanese message
-    draw_text(
+    # Display the Japanese message and capture its rect for click detection
+    japanese_text_rect = draw_text(
         japanese_message, 
         j_font,  # Assuming you've set up a separate Japanese font
         text_color, 
@@ -2581,7 +2588,8 @@ def day_of_the_week():
         max_width=WIDTH * 0.95,  # Wrap text within 80% of the screen width
         center=True, 
         enable_shadow=True, 
-        shadow_color=shadow_color
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect for the Japanese text
     )
 
     # Display the English message right below the Japanese message
@@ -2605,7 +2613,7 @@ def day_of_the_week():
     # Use the reusable TTS function to speak the Japanese message aloud
     speak_japanese(japanese_message)
 
-    # Wait for the "Continue..." click
+    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -2614,9 +2622,15 @@ def day_of_the_week():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
+
+                # Check if the Japanese text is clicked
+                if japanese_text_rect.collidepoint(mouse_pos):
+                    speak_japanese(japanese_message)  # Replay the Japanese message
+
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
+
 
 
 
@@ -2652,8 +2666,8 @@ def month_of_the_year():
     # Fill the screen with the background color from the applied theme
     screen.fill(screen_color)
 
-    # Display the Japanese message
-    draw_text(
+    # Display the Japanese message and capture its rect for click detection
+    japanese_text_rect = draw_text(
         japanese_message, 
         j_font,  # Assuming you've set up a separate Japanese font
         text_color, 
@@ -2662,7 +2676,8 @@ def month_of_the_year():
         max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
         center=True, 
         enable_shadow=True, 
-        shadow_color=shadow_color
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect for the Japanese text
     )
 
     # Display the English message right below the Japanese message
@@ -2686,7 +2701,7 @@ def month_of_the_year():
     # Use the reusable TTS function to speak the Japanese message aloud
     speak_japanese(japanese_message)
 
-    # Wait for the "Continue..." click
+    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -2695,15 +2710,30 @@ def month_of_the_year():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
+
+                # Check if the Japanese text is clicked
+                if japanese_text_rect.collidepoint(mouse_pos):
+                    speak_japanese(japanese_message)  # Replay the Japanese message
+
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
 
 
 
+
 def skip_counting():
     """Randomly selects a number between 2-9 and performs skip counting up to 100."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+    # Define a larger size for the skip-counted numbers
+    large_font_size = 200  # Adjust size as necessary
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
 
     # Select a random number from 2-9
     skip_number = random.randint(2, 9)
@@ -2740,8 +2770,8 @@ def skip_counting():
         # Convert the number to string for display
         number_str = str(i)
 
-        # Display the number in the center of the screen
-        draw_text(number_str, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+        # Display the number in the center of the screen using the larger font size
+        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
 
         # Update the screen after drawing the number
         pygame.display.flip()
@@ -2752,7 +2782,7 @@ def skip_counting():
         # Pause for a second before showing the next number
         time.sleep(1)
 
-    # After completing the skip counting, show a completion message
+    # After completing the skip counting, show a completion message using the default font
     completion_message = "Great job!"
     screen.fill(screen_color)
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
@@ -2773,6 +2803,7 @@ def skip_counting():
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Proceed after the "Continue..." button is clicked
+
 
 
 
