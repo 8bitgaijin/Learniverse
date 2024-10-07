@@ -946,7 +946,6 @@ def get_filtered_fonts():
     return filtered_fonts
 
 
-
 def get_random_mp3(directory):
     """Get a random MP3 file from the specified directory."""
     try:
@@ -1020,11 +1019,11 @@ def set_haruka_slow(engine):
     engine.setProperty('rate', 100)
     
 
-# Function to draw a branch segment
 def draw_branch(screen, start_pos, end_pos, thickness, color):
+    # Function to draw a branch segment
     pygame.draw.line(screen, color, start_pos, end_pos, thickness)
 
-# Function to grow a tree
+
 def grow_tree(screen, start_x, start_y, max_depth, max_branches):
     # Randomized recursive tree
     branches = [(start_x, start_y, -90)]  # Starting trunk (x, y, angle - 90 degrees pointing up)
@@ -1061,12 +1060,12 @@ def grow_tree(screen, start_x, start_y, max_depth, max_branches):
 
 
 # Function to interpolate color (light blue to white)
-def interpolate_color(start_color, end_color, fraction):
-    return (
-        start_color[0] + (end_color[0] - start_color[0]) * fraction,
-        start_color[1] + (end_color[1] - start_color[1]) * fraction,
-        start_color[2] + (end_color[2] - start_color[2]) * fraction,
-    )
+# def interpolate_color(start_color, end_color, fraction):
+#     return (
+#         start_color[0] + (end_color[0] - start_color[0]) * fraction,
+#         start_color[1] + (end_color[1] - start_color[1]) * fraction,
+#         start_color[2] + (end_color[2] - start_color[2]) * fraction,
+#     )
  
     
 # Function to draw lightning bolt with color gradient
@@ -1133,15 +1132,25 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
 
 
 # Function to generate a Perlin noise cloud mask with horizontal offset
+# import random
+
 def generate_perlin_cloud(x_offset):
     # Create a surface for the cloud with alpha
     cloud_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-    
+
+    # Generate a random seed offset for both x and y directions to create a different cloud pattern
+    random_x_offset = random.uniform(0, 10000)  # Randomize X offset
+    random_y_offset = random.uniform(0, 10000)  # Randomize Y offset
+
     # Generate Perlin noise for the entire screen
     for x in range(WIDTH):
         for y in range(HEIGHT):
-            # Introduce a horizontal offset to create the movement effect
-            noise_value = noise.pnoise2((x + x_offset) * NOISE_SCALE, y * NOISE_SCALE, octaves=4)
+            # Apply random offsets to both X and Y to randomize the cloud pattern
+            noise_value = noise.pnoise2(
+                (x + x_offset + random_x_offset) * NOISE_SCALE, 
+                (y + random_y_offset) * NOISE_SCALE, 
+                octaves=4
+            )
             
             # If the noise value is higher than the threshold, draw a cloud pixel
             if noise_value > CLOUD_THRESHOLD:
@@ -1150,7 +1159,6 @@ def generate_perlin_cloud(x_offset):
                 pygame.draw.circle(cloud_surface, (*WHITE, alpha), (x, y), 3)  # Larger clouds
     
     return cloud_surface
-
 
 
 
