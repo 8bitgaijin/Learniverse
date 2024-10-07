@@ -856,25 +856,56 @@ def init_fonts():
 
 
 def get_filtered_fonts():
-    # List of known problematic fonts to exclude (only essential exclusions)
+    # List of known problematic fonts to exclude (alphabetized)
     excluded_fonts = {
-        'wingdings', 'wingdings2', 'wingdings3', 'webdings', 'bookshelfsymbol7', 
-        'symbol', 'segoeuiemoji', 'segoeuisymbol', 'holomdl2assets', 'codicon', 
-        'fontawesome47webfont', 'fontawesome4webfont47', 
-        'fontawesome5brandswebfont', 
-        'fontawesome5brandswebfont5154', 'fontawesome5regularwebfont', 
-        'fontawesome5regularwebfont5154', 'fontawesome5solidwebfont', 
-        'fontawesome5solidwebfont5154', 'materialdesignicons5webfont', 
-        'materialdesignicons5webfont5955', 
-        'materialdesignicons6webfont', 'materialdesignicons6webfont6996', 
-        'remixicon', 'remixicon250', 
-        'opensymbol', 'widelatin', 'segmdl2', 'REFSPCL', 'segoemdl2assets', 
-        'segoefluenticons',
-        'sansserifcollection', 'msreferencespecialty', 'msoutlook', 
-        'miriammonoclmbookoblique',
-        'miriamclmbook', 'miriamclm', 'lucidasanstypewriterregular', 
-        'lucidasanstypewriteroblique',
-        'goudystout', 'extra', 'dejavumathtexgyreregular', 'amiriquranregular'
+        # 'amiriquranregular', 
+        # # 'bookshelfsymbol7', 
+        # # 'codicon', 
+        # # 'codicon0035', 
+        # 'dejavumathtexgyreregular', 
+        # 'elusiveicons', 
+        # 'elusiveicons-webfont', 
+        # 'elusiveicons-webfont-2.0', 
+        # 'extra', 
+        # 'fontawesome47webfont', 
+        # 'fontawesome5brandswebfont', 
+        # 'fontawesome5brandswebfont5154', 
+        # 'fontawesome5regularwebfont', 
+        # 'fontawesome5regularwebfont5154', 
+        # 'fontawesome5solidwebfont', 
+        # 'fontawesome5solidwebfont5154', 
+        # 'goudystout', 
+        # 'holomdl2assets', 
+        # 'lucidasanstypewriteroblique', 
+        # 'lucidasanstypewriterregular', 
+        # 'materialdesignicons5webfont', 
+        # 'materialdesignicons5webfont5955', 
+        # 'materialdesignicons6webfont', 
+        # 'materialdesignicons6webfont6996', 
+        # 'miriamclm', 
+        # 'miriamclmbook', 
+        # 'miriammonoclmbookoblique', 
+        # 'msoutlook', 
+        # 'msreferencespecialty', 
+        # 'opensymbol', 
+        # 'phosphor', 
+        # 'phosphor-1.3.0', 
+        # 'playbill', 
+        # 'pmingliuextb', 
+        # 'remixicon', 
+        # 'remixicon250', 
+        # 'sansserifcollection', 
+        # 'segoeuiemoji', 
+        # 'segoeuisymbol', 
+        # 'segoefluenticons', 
+        # 'segoemdl2assets', 
+        # 'segmdl2', 
+        # 'symbol', 
+        # 'webdings', 
+        # 'widelatin', 
+        # 'wingdings', 
+        # 'wingdings2', 
+        # 'wingdings3'
     }
 
     # List fonts available through Pygame
@@ -884,12 +915,27 @@ def get_filtered_fonts():
     fallback_font = "arial"  # Define a safe fallback font
     
     for font_name in sorted(pygame_fonts):
-        if font_name not in excluded_fonts:
-            try:
-                filtered_fonts.append(font_name)
-            except Exception as e:
-                log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
-                log_message(log_entry)
+        try:
+            # Check if the font should be excluded based on the list
+            if any(excluded in font_name for excluded in excluded_fonts):
+                print(f"Excluding font: {font_name}")
+                continue
+
+            # Attempt to use the font, which will validate if it's working
+            pygame.font.SysFont(font_name, 12)  # Check font by loading it with small size
+            filtered_fonts.append(font_name)
+            print(f"Including font: {font_name}")
+
+        except FileNotFoundError:
+            # Log error for missing font
+            print(f"Font not found: {font_name}, excluding.")
+            log_entry = create_log_message(f"Font not found and excluded: {font_name}")
+            log_message(log_entry)
+
+        except Exception as e:
+            # Catch any other issues and log them without crashing
+            log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
+            log_message(log_entry)
     
     # Ensure we have at least one valid font, fallback to 'arial' if necessary
     if not filtered_fonts:
@@ -898,6 +944,7 @@ def get_filtered_fonts():
         filtered_fonts = [fallback_font]
 
     return filtered_fonts
+
 
 
 def get_random_mp3(directory):
@@ -2148,11 +2195,11 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
                 # Check if "X" was clicked
                 check_exit_click(mouse_pos, exit_rect)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
-                elif event.key == pygame.K_r:
-                    rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+            #     elif event.key == pygame.K_r:
+            #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
 
         clock.tick(60)
 
