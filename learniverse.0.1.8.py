@@ -318,8 +318,8 @@ def check_database_initialization():
             cursor = connection.cursor()
             _initialize_tables(cursor, connection)
         else:
-            log_entry = create_log_message("'learniverse.db' found, checking accessibility...")
-            log_message(log_entry)
+            # log_entry = create_log_message("'learniverse.db' found, checking accessibility...")
+            # log_message(log_entry)
             
             connection = sqlite3.connect(db_name)
             cursor = connection.cursor()
@@ -327,7 +327,7 @@ def check_database_initialization():
             result = cursor.fetchone()
 
             if result:
-                # log_entry = create_log_message("'students' table found. Database is ready.")
+                log_entry = create_log_message("'students' table found. Database is ready.")
                 log_message(log_entry)
             else:
                 log_entry = create_log_message("'students' table not found. Initializing tables...")
@@ -437,12 +437,12 @@ def insert_lessons(cursor, connection):
     ]
 
     try:
-        log_entry = create_log_message(f"Lessons to process: {lessons}")
-        log_message(log_entry)
+        # log_entry = create_log_message(f"Lessons to process: {lessons}")
+        # log_message(log_entry)
 
         for title, description in lessons:
-            log_entry = create_log_message(f"Checking if lesson exists: {title}")
-            log_message(log_entry)
+            # log_entry = create_log_message(f"Checking if lesson exists: {title}")
+            # log_message(log_entry)
 
             # Check if the lesson already exists, case-insensitive check
             cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
@@ -460,11 +460,11 @@ def insert_lessons(cursor, connection):
                 # Commit after every insert to ensure changes are saved
                 connection.commit()
 
-                log_entry = create_log_message(f"Lesson added: {title}.")
-            else:
-                log_entry = create_log_message(f"Lesson already exists: {title}.")
+            #     log_entry = create_log_message(f"Lesson added: {title}.")
+            # else:
+            #     log_entry = create_log_message(f"Lesson already exists: {title}.")
             
-            log_message(log_entry)
+            # log_message(log_entry)
 
         log_entry = create_log_message("Lesson insertion process completed.")
         log_message(log_entry)
@@ -740,7 +740,147 @@ def student_streak_query():
 
     return streak
 
-        
+
+def get_student_progress(session_id):
+    """Retrieves the student's current level for a specific lesson based on the session_id.
+    If no entry exists, it initializes progress with level 1 and returns 1."""
+    try:
+        # Connect to the database
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
+
+        # Fetch student_id from the sessions table
+        cursor.execute('''
+            SELECT student_id
+            FROM sessions
+            WHERE session_id = ?
+        ''', (session_id,))
+        session_result = cursor.fetchone()
+
+        if not session_result:
+            raise ValueError(f"No session data found for session_id: {session_id}")
+
+        student_id = session_result[0]
+
+        # Fetch lesson_id from the lessons table based on the lesson title (Hiragana)
+        cursor.execute('''
+            SELECT lesson_id
+            FROM lessons
+            WHERE title = 'Hiragana'
+        ''')
+        lesson_result = cursor.fetchone()
+
+        if not lesson_result:
+            raise ValueError("No lesson data found for Hiragana in the lessons table")
+
+        lesson_id = lesson_result[0]
+
+        # Query the student progress for the lesson
+        cursor.execute('''
+            SELECT student_level
+            FROM student_lesson_progress
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (student_id, lesson_id))
+        progress_result = cursor.fetchone()
+
+        if progress_result:
+            # If progress exists, retrieve the current level
+            student_level = progress_result[0]
+        else:
+            # If no progress exists, insert a new entry with level 1
+            cursor.execute('''
+                INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
+                VALUES (?, ?, 1)
+            ''', (student_id, lesson_id))
+            connection.commit()
+            student_level = 1  # Default to level 1
+
+        log_message(f"Fetched student progress: student_id={student_id}, lesson_id={lesson_id}, level={student_level}")
+        return student_level
+
+    except sqlite3.Error as e:
+        log_message(f"Error retrieving student progress: {e}")
+        raise  # Raise the error for proper handling upstream
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def set_student_progress(session_id):
+    """Updates the student_lesson_progress table for the given student based on session results."""
+    try:
+        # Connect to the database
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
+
+        # Fetch student_id, lesson_id, questions_correct, and questions_asked from the session and session_lessons tables
+        # Correcting the column names from total_correct and total_questions
+        cursor.execute('''
+            SELECT s.student_id, sl.lesson_id, sl.questions_correct, sl.questions_asked
+            FROM session_lessons sl
+            JOIN sessions s ON sl.session_id = s.session_id
+            WHERE sl.session_id = ?
+        ''', (session_id,))
+        result = cursor.fetchone()
+
+        if not result:
+            log_message(f"No session data found for session_id: {session_id}")
+            return
+
+        student_id, lesson_id, questions_correct, questions_asked = result
+
+        # Calculate the student's current percentage correct
+        percent_correct = (questions_correct / questions_asked) * 100 if questions_asked > 0 else 0
+        log_message(f"Student {student_id} got {percent_correct}% in lesson {lesson_id}.")
+
+        # Fetch or initialize the student's current level for the lesson
+        cursor.execute('''
+            SELECT student_level
+            FROM student_lesson_progress
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (student_id, lesson_id))
+        progress_result = cursor.fetchone()
+
+        if progress_result:
+            current_level = progress_result[0]
+        else:
+            # Insert a new record for this student's progress at level 1 if no record exists
+            cursor.execute('''
+                INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
+                VALUES (?, ?, 1)
+            ''', (student_id, lesson_id))
+            connection.commit()
+            current_level = 1
+
+        # Check if the student scored 100% and should level up
+        if percent_correct == 100:
+            new_level = current_level + 1
+            log_message(f"Student {student_id} leveled up to {new_level} for lesson {lesson_id}.")
+        else:
+            new_level = current_level
+
+        # Update the student's progress in the database
+        cursor.execute('''
+            UPDATE student_lesson_progress
+            SET student_level = ?
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (new_level, student_id, lesson_id))
+
+        # Commit the changes
+        connection.commit()
+
+        # Log the successful update
+        cursor.execute('SELECT * FROM student_lesson_progress WHERE student_id = ? AND lesson_id = ?', (student_id, lesson_id))
+        log_message(f"Updated student progress: {cursor.fetchall()}")
+
+    except sqlite3.Error as e:
+        log_message(f"Error updating student progress: {e}")
+        connection.rollback()
+    finally:
+        cursor.close()
+        connection.close()
+
+  
 #################################################
 ### 4. Pygame Initialization and Window Setup ###
 #################################################
@@ -2296,6 +2436,7 @@ def session_manager():
 
     # Step 2: Logic for lesson flow
     lessons_to_play = ["greet_student",
+                       "hiragana_teach",
                        "hiragana_quiz",
                        "streak_check", 
                        "day_of_the_week", 
@@ -2326,7 +2467,7 @@ def session_manager():
         elif lesson == "skip_counting":
             skip_counting()
         elif lesson == "hiragana_teach":
-            hiragana_teach()
+            hiragana_teach(session_id)
         elif lesson == "rainbow_numbers":
             # Run the lesson, passing session_id
             lesson_result = rainbow_numbers(session_id)
@@ -2782,9 +2923,12 @@ def skip_counting():
                     waiting = False  # Proceed after the "Continue..." button is clicked
 
 
-def hiragana_teach():
-    """Displays each of the 46 basic hiragana characters one by one and reads them aloud using Japanese TTS."""
+def hiragana_teach(session_id):
+    """Displays Hiragana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
+    
+    # Retrieve the student's current level for the Hiragana lesson
+    student_level = get_student_progress(session_id)
 
     # List of the 46 basic hiragana characters
     hiragana_list = [
@@ -2801,12 +2945,19 @@ def hiragana_teach():
         "ん"                        # n
     ]
 
+    # Define the max number of characters the student will be taught based on their level
+    # Each level teaches 5 additional characters, up to a maximum of 46 characters
+    max_characters = min(student_level * 5, len(hiragana_list))
+
+    # Get the subset of Hiragana to teach based on the student's current level
+    hiragana_subset = hiragana_list[:max_characters]
+
     # Define a larger font for the hiragana characters
     large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
 
     # Clear the screen and inform the student about the lesson
     screen.fill(screen_color)
-    intro_message = "Let's learn Hiragana!"
+    intro_message = f"Let's learn Hiragana! You are currently on level {student_level}."
     
     # Display the intro message and update the screen
     draw_text(intro_message, 
@@ -2836,8 +2987,8 @@ def hiragana_teach():
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Proceed after the "Continue..." button is clicked
 
-    # Loop through the hiragana list and show each character one by one
-    for hiragana_char in hiragana_list:
+    # Loop through the subset of Hiragana based on the student's level and show each character
+    for hiragana_char in hiragana_subset:
         # Clear the screen before displaying each character
         screen.fill(screen_color)
 
@@ -2874,6 +3025,7 @@ def hiragana_teach():
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Proceed after the "Continue..." button is clicked
+
 
 
 def skip_counting_japanese():
@@ -3010,6 +3162,9 @@ def display_hiragana_quiz(screen, hiragana_char, options):
 def hiragana_quiz(session_id):
     """Presents a quiz on Hiragana characters based on the student's level and updates their progress."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
+    
+    # Retrieve the student's current level for the Hiragana lesson
+    student_level = get_student_progress(session_id)
 
     # Retrieve the lesson_id for Hiragana
     connection = sqlite3.connect('learniverse.db')
@@ -3025,10 +3180,10 @@ def hiragana_quiz(session_id):
         connection.close()
         return -1  # Or handle as appropriate
 
-    # Display the introductory message
+    # Display the introductory message with the student's current level
     screen.fill(screen_color)
     draw_text(
-        "Hiragana quiz!",
+        f"Hiragana quiz! You are currently on level {student_level}.",
         font,
         text_color,
         x=0,
@@ -3042,7 +3197,7 @@ def hiragana_quiz(session_id):
     continue_rect = draw_continue_button()
     pygame.display.flip()
 
-    # Wait for the student to click "Continue..."
+    # Wait for the student to click "Continue..." to start the quiz
     waiting = True
     while waiting:
         for event in pygame.event.get():
@@ -3056,15 +3211,6 @@ def hiragana_quiz(session_id):
 
     # Start the lesson timer
     lesson_start_time = time.time()
-
-    # Retrieve student's current level and corresponding Hiragana characters
-    cursor.execute('''
-        SELECT student_level FROM student_lesson_progress
-        WHERE student_id = (SELECT student_id FROM sessions WHERE session_id = ?) 
-        AND lesson_id = ?
-    ''', (session_id, hiragana_lesson_id))
-    result = cursor.fetchone()
-    student_level = result[0] if result else 1  # Default to level 1 if no progress
 
     # Define the list of Hiragana characters based on the level
     hiragana_list = [
@@ -3080,11 +3226,13 @@ def hiragana_quiz(session_id):
         ('わ', 'wa'), ('を', 'wo'), ('ん', 'n')
     ]
 
-    hiragana_subset = hiragana_list[:5] if student_level == 1 else hiragana_list[:10]  # Adjust based on level
+    # Adjust the number of Hiragana characters based on the student's level
+    max_characters = min(student_level * 5, len(hiragana_list))
+    hiragana_subset = hiragana_list[:max_characters]
 
     random.shuffle(hiragana_subset)
 
-    total_questions = 5  # Set the number of questions based on the level
+    total_questions = 5  # Set the number of questions
     correct_answers = 0
     completion_times = []
     clock = pygame.time.Clock()
@@ -3178,9 +3326,9 @@ def hiragana_quiz(session_id):
         
         if average_time < 3.0:  # Check for mastery (perfect score and fast response)
             draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
-        # Trigger bonus stage
-        bonus_game_fat_tuna()
 
+        # Call the function to update student progress since the student got 100%
+        set_student_progress(session_id)
 
     continue_rect = draw_continue_button()
     pygame.display.flip()
@@ -3196,12 +3344,18 @@ def hiragana_quiz(session_id):
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
-
+    
+    if correct_answers == total_questions:
+        # Trigger bonus stage
+        bonus_game_fat_tuna()
+        
     # Close cursor and connection
     cursor.close()
     connection.close()
 
     return total_questions, correct_answers, average_time
+
+
 
 
 
