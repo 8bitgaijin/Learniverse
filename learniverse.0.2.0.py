@@ -318,8 +318,8 @@ def check_database_initialization():
             cursor = connection.cursor()
             _initialize_tables(cursor, connection)
         else:
-            log_entry = create_log_message("'learniverse.db' found, checking accessibility...")
-            log_message(log_entry)
+            # log_entry = create_log_message("'learniverse.db' found, checking accessibility...")
+            # log_message(log_entry)
             
             connection = sqlite3.connect(db_name)
             cursor = connection.cursor()
@@ -327,7 +327,7 @@ def check_database_initialization():
             result = cursor.fetchone()
 
             if result:
-                # log_entry = create_log_message("'students' table found. Database is ready.")
+                log_entry = create_log_message("'students' table found. Database is ready.")
                 log_message(log_entry)
             else:
                 log_entry = create_log_message("'students' table not found. Initializing tables...")
@@ -437,12 +437,12 @@ def insert_lessons(cursor, connection):
     ]
 
     try:
-        log_entry = create_log_message(f"Lessons to process: {lessons}")
-        log_message(log_entry)
+        # log_entry = create_log_message(f"Lessons to process: {lessons}")
+        # log_message(log_entry)
 
         for title, description in lessons:
-            log_entry = create_log_message(f"Checking if lesson exists: {title}")
-            log_message(log_entry)
+            # log_entry = create_log_message(f"Checking if lesson exists: {title}")
+            # log_message(log_entry)
 
             # Check if the lesson already exists, case-insensitive check
             cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
@@ -460,11 +460,11 @@ def insert_lessons(cursor, connection):
                 # Commit after every insert to ensure changes are saved
                 connection.commit()
 
-                log_entry = create_log_message(f"Lesson added: {title}.")
-            else:
-                log_entry = create_log_message(f"Lesson already exists: {title}.")
+            #     log_entry = create_log_message(f"Lesson added: {title}.")
+            # else:
+            #     log_entry = create_log_message(f"Lesson already exists: {title}.")
             
-            log_message(log_entry)
+            # log_message(log_entry)
 
         log_entry = create_log_message("Lesson insertion process completed.")
         log_message(log_entry)
@@ -740,7 +740,165 @@ def student_streak_query():
 
     return streak
 
-        
+
+def get_student_progress(session_id, lesson_title):
+    """Retrieves the student's current level for a specific lesson based on the session_id and lesson_title.
+    If no entry exists for the lesson, it initializes progress with level 1 and returns 1."""
+    try:
+        # Connect to the database
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
+
+        # Fetch student_id from the sessions table
+        cursor.execute('''
+            SELECT student_id
+            FROM sessions
+            WHERE session_id = ?
+        ''', (session_id,))
+        session_result = cursor.fetchone()
+
+        if not session_result:
+            raise ValueError(f"No session data found for session_id: {session_id}")
+
+        student_id = session_result[0]
+
+        # Fetch lesson_id from the lessons table based on the provided lesson title (e.g., 'Hiragana', 'Katakana')
+        cursor.execute('''
+            SELECT lesson_id
+            FROM lessons
+            WHERE title = ?
+        ''', (lesson_title,))
+        lesson_result = cursor.fetchone()
+
+        if not lesson_result:
+            raise ValueError(f"No lesson data found for {lesson_title} in the lessons table")
+
+        lesson_id = lesson_result[0]
+
+        # Query the student progress for the specific lesson
+        cursor.execute('''
+            SELECT student_level
+            FROM student_lesson_progress
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (student_id, lesson_id))
+        progress_result = cursor.fetchone()
+
+        if progress_result:
+            # If progress exists, retrieve the current level
+            student_level = progress_result[0]
+        else:
+            # If no progress exists for this lesson, insert a new entry with level 1
+            cursor.execute('''
+                INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
+                VALUES (?, ?, 1)
+            ''', (student_id, lesson_id))
+            connection.commit()
+            student_level = 1  # Default to level 1
+
+        log_message(f"Fetched student progress: student_id={student_id}, lesson_id={lesson_id}, level={student_level}")
+        return student_level
+
+    except sqlite3.Error as e:
+        log_message(f"Error retrieving student progress: {e}")
+        raise  # Raise the error for proper handling upstream
+    finally:
+        cursor.close()
+        connection.close()
+
+
+
+def set_student_progress(session_id, lesson_title):
+    """Updates the student_lesson_progress table for the given student and lesson based on session results."""
+    try:
+        # Connect to the database
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
+
+        # Fetch student_id, lesson_id, questions_correct, and questions_asked from the session and session_lessons tables
+        cursor.execute('''
+            SELECT s.student_id, sl.lesson_id, sl.questions_correct, sl.questions_asked
+            FROM session_lessons sl
+            JOIN sessions s ON sl.session_id = s.session_id
+            JOIN lessons l ON sl.lesson_id = l.lesson_id
+            WHERE sl.session_id = ? AND l.title = ?
+        ''', (session_id, lesson_title))
+        result = cursor.fetchone()
+
+        if not result:
+            log_message(f"No session data found for session_id: {session_id}")
+            return
+
+        student_id, lesson_id, questions_correct, questions_asked = result
+
+        # Calculate the student's current percentage correct
+        percent_correct = (questions_correct / questions_asked) * 100 if questions_asked > 0 else 0
+        log_message(f"Student {student_id} got {percent_correct}% in lesson {lesson_id} ({lesson_title}).")
+
+        # Fetch or initialize the student's current level for the lesson
+        cursor.execute('''
+            SELECT student_level
+            FROM student_lesson_progress
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (student_id, lesson_id))
+        progress_result = cursor.fetchone()
+
+        if progress_result:
+            current_level = progress_result[0]
+        else:
+            # Insert a new record for this student's progress at level 1 if no record exists
+            cursor.execute('''
+                INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
+                VALUES (?, ?, 1)
+            ''', (student_id, lesson_id))
+            connection.commit()
+            current_level = 1
+
+        # Check if the student scored 100% and should level up
+        if percent_correct == 100:
+            new_level = current_level + 1
+            log_message(f"Student {student_id} leveled up to {new_level} for lesson {lesson_id}.")
+        else:
+            new_level = current_level
+
+        # Update the student's progress in the database
+        cursor.execute('''
+            UPDATE student_lesson_progress
+            SET student_level = ?
+            WHERE student_id = ? AND lesson_id = ?
+        ''', (new_level, student_id, lesson_id))
+
+        # Commit the changes
+        connection.commit()
+
+        # Log the successful update
+        cursor.execute('SELECT * FROM student_lesson_progress WHERE student_id = ? AND lesson_id = ?', (student_id, lesson_id))
+        log_message(f"Updated student progress: {cursor.fetchall()}")
+
+    except sqlite3.Error as e:
+        log_message(f"Error updating student progress: {e}")
+        connection.rollback()
+    finally:
+        cursor.close()
+        connection.close()
+
+
+
+def fetch_lesson_id(lesson_title):
+    """Fetches the lesson_id for a given lesson title."""
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", (lesson_title,))
+    result = cursor.fetchone()
+    cursor.close()
+    connection.close()
+    
+    if result:
+        return result[0]
+    else:
+        log_message(f"Lesson '{lesson_title}' not found in the database.")
+        return None
+
+
 #################################################
 ### 4. Pygame Initialization and Window Setup ###
 #################################################
@@ -918,7 +1076,7 @@ def get_filtered_fonts():
         try:
             # Check if the font should be excluded based on the list
             if any(excluded in font_name for excluded in excluded_fonts):
-                print(f"Excluding font: {font_name}")
+                # print(f"Excluding font: {font_name}")
                 continue
 
             # Attempt to use the font, which will validate if it's working
@@ -1058,17 +1216,7 @@ def grow_tree(screen, start_x, start_y, max_depth, max_branches):
         branches = new_branches
         branch_thickness = max(1, branch_thickness - 1)  # Decrease thickness with each level
 
-
-# Function to interpolate color (light blue to white)
-# def interpolate_color(start_color, end_color, fraction):
-#     return (
-#         start_color[0] + (end_color[0] - start_color[0]) * fraction,
-#         start_color[1] + (end_color[1] - start_color[1]) * fraction,
-#         start_color[2] + (end_color[2] - start_color[2]) * fraction,
-#     )
- 
     
-# Function to draw lightning bolt with color gradient
 def draw_lightning(screen, start_pos, end_pos, background_image):
     """
     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
@@ -1131,10 +1279,8 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
     pygame.display.flip()  # Final refresh with background intact
 
 
-# Function to generate a Perlin noise cloud mask with horizontal offset
-# import random
-
 def generate_perlin_cloud(x_offset):
+    # Function to generate a Perlin noise cloud mask with horizontal offset
     # Create a surface for the cloud with alpha
     cloud_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
@@ -1160,21 +1306,6 @@ def generate_perlin_cloud(x_offset):
     
     return cloud_surface
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
     
 ###################################    
 ### 2. Display and UI Functions ###
@@ -1260,30 +1391,6 @@ def draw_background(image_path):
         screen.fill(screen_color)
 
 
-def draw_exit_button():
-    global current_font_name_or_path  # Ensure we're using the global variable
-
-    # Update the dynamic font size for the exit button based on the current resolution
-    exit_font_size = int(get_dynamic_font_size() * 0.8)  # Slightly smaller than the other fonts
-
-    # Recreate the font with the new size using the current font name or path
-    if os.path.isfile(current_font_name_or_path):
-        # If it's a file path, load the font from the file
-        exit_font = pygame.font.Font(current_font_name_or_path, exit_font_size)
-    else:
-        # If it's a system font, use the font name
-        exit_font = pygame.font.SysFont(current_font_name_or_path, exit_font_size)
-
-    # Calculate the position for the "X" to be at 95% across the screen width
-    x_position = WIDTH *  0.95
-    y_position = 20  # Keep the Y position at 20 pixels from the top
-
-    # Use draw_text to render the exit button with a drop shadow and get its rect
-    exit_rect = draw_text("X", exit_font, RED, x_position, y_position, screen, enable_shadow=True, return_rect=True)
-
-    return exit_rect
-
-
 def draw_continue_button():
     global current_font_name_or_path  # Ensure we're using the global variable for font
 
@@ -1306,6 +1413,24 @@ def draw_continue_button():
     continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, shadow_color=shadow_color, return_rect=True)
 
     return continue_rect
+
+
+def draw_and_wait_continue_button():
+    """Draws the 'Continue...' button and waits for the student to click."""
+    continue_rect = draw_continue_button()
+    pygame.display.flip()
+    
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False
+    return
 
 
 def display_text_and_wait(text):
@@ -1414,7 +1539,6 @@ def draw_text(
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
-
 
 
 def fade_text_in_and_out(line1, line2, font, max_width=None):
@@ -1764,14 +1888,11 @@ def bonus_game_fat_tuna():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()  
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
-
-
-
 
 
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
@@ -1873,7 +1994,14 @@ def display_result(result_text, image_folder=None, use_lightning=False):
                 screen.fill(screen_color)
 
             # Draw the result text on top of the particles or background
-            draw_text(result_text, font, text_color, WIDTH // 2, HEIGHT // 2, center=True, enable_shadow=True)
+            draw_text(result_text, 
+                      font, 
+                      text_color, 
+                      WIDTH // 2, 
+                      HEIGHT // 2, 
+                      center=True, 
+                      enable_shadow=True,
+                      max_width=WIDTH)
             pygame.display.flip()
     
     # Final display and pause before exiting the function
@@ -1882,8 +2010,6 @@ def display_result(result_text, image_folder=None, use_lightning=False):
 
     # Clear the event queue again after displaying the result
     pygame.event.clear()
-
-
 
 
 def generate_rainbow_number_problem():
@@ -1937,20 +2063,7 @@ def rainbow_numbers(session_id):
     )
 
     # Draw the "Continue..." button before starting the lesson
-    continue_rect = draw_continue_button()
-    pygame.display.flip()  # Update the display
-
-    # Wait for the student to click "Continue..." to start the lesson
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
+    draw_and_wait_continue_button()
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -2057,31 +2170,13 @@ def rainbow_numbers(session_id):
                 draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
 
     # Draw the "Continue..." button after displaying the final score
-    continue_rect = draw_continue_button()
-
-    pygame.display.flip()  # Update the display with the final messages
-
-    # Wait for the student to click "Continue..." after the final score
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
+    draw_and_wait_continue_button()
 
     if correct_answers == total_questions:
         bonus_game_fat_tuna()
 
     # Return the lesson results
     return total_questions, correct_answers, average_time
-
-
-
-
 
 
 ########################################
@@ -2183,7 +2278,7 @@ def main_menu():
         explanation_rect = draw_text("Learniverse?", font, text_color, 0, HEIGHT * 0.85, screen, center=True, enable_shadow=True, return_rect=True)
         
         # Draw the exit button using the new draw_text function and get its rect for click detection
-        exit_rect = draw_exit_button()
+        # exit_rect = draw_exit_button()
         
         pygame.display.flip()
 
@@ -2203,13 +2298,13 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
                 # Check if "X" was clicked
                 check_exit_click(mouse_pos, exit_rect)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
-                elif event.key == pygame.K_r:
-                    rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
-                elif event.key == pygame.K_s:
-                    skip_counting()
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+            #     elif event.key == pygame.K_r:
+            #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
+            #     elif event.key == pygame.K_s:
+            #         skip_counting()
 
         clock.tick(60)
 
@@ -2324,7 +2419,11 @@ def session_manager():
         return "main_menu"
 
     # Step 2: Logic for lesson flow
-    lessons_to_play = ["greet_student", 
+    lessons_to_play = ["greet_student",
+                       # "hiragana_teach",
+                       "katakana_teach",
+                       # "hiragana_quiz",
+                       "katakana_quiz",
                        "streak_check", 
                        "day_of_the_week", 
                        "month_of_the_year", 
@@ -2344,7 +2443,7 @@ def session_manager():
     # Loop through lessons
     for lesson in lessons_to_play:
         if lesson == "greet_student":
-            greet_student()  
+            greet_student()
         elif lesson == "streak_check":
             streak_check()
         elif lesson == "day_of_the_week":
@@ -2354,7 +2453,9 @@ def session_manager():
         elif lesson == "skip_counting":
             skip_counting()
         elif lesson == "hiragana_teach":
-            hiragana_teach()
+            hiragana_teach(session_id)
+        elif lesson == "katakana_teach":
+            katakana_teach(session_id)
         elif lesson == "rainbow_numbers":
             # Run the lesson, passing session_id
             lesson_result = rainbow_numbers(session_id)
@@ -2366,15 +2467,24 @@ def session_manager():
             total_times.append(avg_time)
         elif lesson == "skip_counting_japanese":
             skip_counting_japanese()
-        # elif lesson == "hiragana_quiz":
+        elif lesson == "hiragana_quiz":
             # Run the lesson, passing session_id
-            # lesson_result = hiragana_quiz(session_id)
+            lesson_result = hiragana_quiz(session_id)
             
-            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            # questions_asked, correct_answers, avg_time = lesson_result
-            # total_questions += questions_asked
-            # total_correct += correct_answers
-            # total_times.append(avg_time)
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            questions_asked, correct_answers, avg_time = lesson_result
+            total_questions += questions_asked
+            total_correct += correct_answers
+            total_times.append(avg_time)
+        elif lesson == "katakana_quiz":
+            # Run the lesson, passing session_id
+            lesson_result = katakana_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            questions_asked, correct_answers, avg_time = lesson_result
+            total_questions += questions_asked
+            total_correct += correct_answers
+            total_times.append(avg_time)
         # elif lesson == "single_digit_addition":
         #     single_digit_addition()
             # pass
@@ -2477,7 +2587,8 @@ def greet_student():
     grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
     grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
     
-    # Draw the "Continue..." button
+    # Draw the "Continue..." button wihtout draw_and_wait_continue_button()
+    # As we do special stuff while waiting
     continue_rect = draw_continue_button()
 
     pygame.display.flip()  # Update the display
@@ -2502,12 +2613,6 @@ def greet_student():
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
-
-
-                    
-
-
-
 
 
 def streak_check():
@@ -2541,23 +2646,7 @@ def streak_check():
     )
 
     # Draw the "Continue..." button
-    continue_rect = draw_continue_button()
-
-    pygame.display.flip()  # Update the display
-
-    # Wait for the "Continue..." click
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                # Check if the "Continue..." button is clicked
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Exit the loop when "Continue..." is clicked
-
+    draw_and_wait_continue_button()
 
 
 def day_of_the_week():
@@ -2627,7 +2716,7 @@ def day_of_the_week():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()  
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
@@ -2638,8 +2727,6 @@ def day_of_the_week():
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
-
-
 
 
 def month_of_the_year():
@@ -2715,7 +2802,7 @@ def month_of_the_year():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                exit()
+                sys.exit()  
             if event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
 
@@ -2726,8 +2813,6 @@ def month_of_the_year():
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
-
-
 
 
 def skip_counting():
@@ -2751,24 +2836,18 @@ def skip_counting():
     intro_message = f"Let's skip count by {skip_number}!"
     
     # Display the intro message and update the screen
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(intro_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
     
     # Draw the "Continue..." button after intro message
-    continue_rect = draw_continue_button()
-    
-    pygame.display.flip()
-
-    # Wait for the student to click "Continue..." to start skip counting
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
+    draw_and_wait_continue_button()
 
     # Start counting by the selected number, stopping at 100
     for i in range(skip_number, 101, skip_number):
@@ -2796,110 +2875,7 @@ def skip_counting():
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
     
     # Draw the "Continue..." button after the completion message
-    continue_rect = draw_continue_button()
-    
-    pygame.display.flip()
-
-    # Wait for the student to click "Continue..." to move on to the next lesson
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
-
-
-
-
-def hiragana_teach():
-    """Displays each of the 46 basic hiragana characters one by one and reads them aloud using Japanese TTS."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
-
-    # List of the 46 basic hiragana characters
-    hiragana_list = [
-        "あ", "い", "う", "え", "お",  # a, i, u, e, o
-        "か", "き", "く", "け", "こ",  # ka, ki, ku, ke, ko
-        "さ", "し", "す", "せ", "そ",  # sa, shi, su, se, so
-        "た", "ち", "つ", "て", "と",  # ta, chi, tsu, te, to
-        "な", "に", "ぬ", "ね", "の",  # na, ni, nu, ne, no
-        "は", "ひ", "ふ", "へ", "ほ",  # ha, hi, fu, he, ho
-        "ま", "み", "む", "め", "も",  # ma, mi, mu, me, mo
-        "や",       "ゆ",       "よ",  # ya, (skip yi), yu, (skip ye), yo
-        "ら", "り", "る", "れ", "ろ",  # ra, ri, ru, re, ro
-        "わ",              "を",        # wa, (skip wi), (skip we), wo
-        "ん"                        # n
-    ]
-
-    # Define a larger font for the hiragana characters
-    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
-
-    # Clear the screen and inform the student about the lesson
-    screen.fill(screen_color)
-    intro_message = "Let's learn Hiragana!"
-    
-    # Display the intro message and update the screen
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-    
-    # Draw the "Continue..." button before starting the lesson
-    continue_rect = draw_continue_button()
-    
-    pygame.display.flip()
-
-    # Wait for the student to click "Continue..." to start the lesson
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
-
-    # Loop through the hiragana list and show each character one by one
-    for hiragana_char in hiragana_list:
-        # Clear the screen before displaying each character
-        screen.fill(screen_color)
-
-        # Display the hiragana character in the center of the screen using the large font
-        draw_text(hiragana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
-
-        # Update the screen after drawing the character
-        pygame.display.flip()
-
-        # Speak the hiragana character aloud using Japanese TTS
-        speak_japanese(hiragana_char)
-
-        # Pause for a couple of seconds before moving to the next character
-        time.sleep(1)
-
-    # After completing the lesson, show a completion message
-    completion_message = "Great job!"
-    screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-    
-    # Draw the "Continue..." button after the completion message
-    continue_rect = draw_continue_button()
-    
-    pygame.display.flip()
-
-    # Wait for the student to click "Continue..." before moving on
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
-
+    draw_and_wait_continue_button()
 
 
 def skip_counting_japanese():
@@ -2920,24 +2896,18 @@ def skip_counting_japanese():
     intro_message = "Let's count in Japanese!"
     
     # Display the intro message and update the screen using the default global font
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(intro_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
     
     # Draw the "Continue..." button after the intro message
-    continue_rect = draw_continue_button()
-
-    pygame.display.flip()
-
-    # Wait for the student to click "Continue..." to start the counting
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
+    draw_and_wait_continue_button()
 
     # Start counting from 1 to 30
     for i in range(1, 31):
@@ -2965,31 +2935,347 @@ def skip_counting_japanese():
     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
 
     # Draw the "Continue..." button after the completion message
-    continue_rect = draw_continue_button()
+    draw_and_wait_continue_button()
+
+
+def get_hiragana_subset_by_level(student_level, hiragana_list):
+    """Returns the subset of Hiragana characters to teach or quiz based on the student's level."""
+    max_characters = min(student_level * 5, len(hiragana_list))
+    return hiragana_list[:max_characters]
+
+
+def hiragana_teach(session_id):
+    """Displays Hiragana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+    
+    # Retrieve the student's current level for the Hiragana lesson
+    student_level = get_student_progress(session_id, 'Hiragana')
+
+    # List of the 46 basic hiragana characters
+    hiragana_list = [
+        "あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", 
+        "さ", "し", "す", "せ", "そ", "た", "ち", "つ", "て", "と", 
+        "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", 
+        "ま", "み", "む", "め", "も", "や", "ゆ", "よ", "ら", "り", 
+        "る", "れ", "ろ", "わ", "を", "ん"
+    ]
+
+    # Get the subset of Hiragana to teach based on the student's current level
+    hiragana_subset = get_hiragana_subset_by_level(student_level, hiragana_list)
+
+    # Define a larger font for the hiragana characters
+    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+
+    # Clear the screen and inform the student about the lesson
+    screen.fill(screen_color)
+    intro_message = f"Let's learn Hiragana! You are currently on level {student_level}."
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+
+    # Display "Continue..." button and wait for user input
+    draw_and_wait_continue_button()
+
+    # Loop through the subset of Hiragana and show each character
+    for hiragana_char in hiragana_subset:
+        screen.fill(screen_color)
+        draw_text(hiragana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
+        pygame.display.flip()
+        speak_japanese(hiragana_char)
+        time.sleep(1)
+
+    # Show completion message and wait for "Continue..."
+    screen.fill(screen_color)
+    draw_text("Great job!", font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color)
+    draw_and_wait_continue_button()
+
+
+
+
+
+def display_hiragana_quiz(screen, hiragana_char, options):
+    screen.fill(NAVY_BLUE)
+
+    # Draw the Hiragana on the screen using the updated draw_text function
+    draw_text(
+        hiragana_char,
+        j_font,  # Assuming you have a separate Japanese font loaded
+        WHITE,
+        x=WIDTH // 2,
+        y=HEIGHT // 3,
+        center=True,
+        enable_shadow=True,
+        shadow_color=BLACK,
+        use_japanese_font=True
+    )
+
+    # Draw the multiple-choice options
+    option_rects = []
+    y_pos = HEIGHT * 0.6
+    answer_buffer = HEIGHT * 0.1
+
+    for i, option in enumerate(options):
+        option_rect = draw_text(
+            option,
+            font,  # Use your default or specific font here
+            WHITE,
+            x=WIDTH // 2,
+            y=y_pos + i * answer_buffer,
+            center=True,
+            enable_shadow=True,
+            shadow_color=BLACK,
+            return_rect=True
+        )
+        option_rects.append((option_rect, option))
 
     pygame.display.flip()
-
-    # Wait for the student to click "Continue..." before exiting the function
-    waiting = True
-    while waiting:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Proceed after the "Continue..." button is clicked
-
-
-
-
-
-
+    return option_rects
 
 
 def hiragana_quiz(session_id):
-    pass
+    """Presents a quiz on Hiragana characters based on the student's level and updates their progress."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Retrieve the student's current level for the Hiragana lesson
+    student_level = get_student_progress(session_id, 'Hiragana')
+
+    # Fetch the Hiragana lesson ID
+    hiragana_lesson_id = fetch_lesson_id('Hiragana')
+    if hiragana_lesson_id is None:
+        return -1  # Exit if lesson_id not found
+
+    # Display the introductory message with the student's current level
+    screen.fill(screen_color)
+    draw_text(f"Hiragana quiz! You are currently on level {student_level}.", font, text_color,
+              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    # List of Hiragana characters
+    hiragana_list = [
+        ('あ', 'a'), ('い', 'i'), ('う', 'u'), ('え', 'e'), ('お', 'o'), ('か', 'ka'), 
+        ('き', 'ki'), ('く', 'ku'), ('け', 'ke'), ('こ', 'ko'), ('さ', 'sa'), ('し', 'shi'), 
+        ('す', 'su'), ('せ', 'se'), ('そ', 'so'), ('た', 'ta'), ('ち', 'chi'), ('つ', 'tsu'), 
+        ('て', 'te'), ('と', 'to'), ('な', 'na'), ('に', 'ni'), ('ぬ', 'nu'), ('ね', 'ne'), 
+        ('の', 'no'), ('は', 'ha'), ('ひ', 'hi'), ('ふ', 'fu'), ('へ', 'he'), ('ほ', 'ho'),
+        ('ま', 'ma'), ('み', 'mi'), ('む', 'mu'), ('め', 'me'), ('も', 'mo'), ('や', 'ya'),
+        ('ゆ', 'yu'), ('よ', 'yo'), ('ら', 'ra'), ('り', 'ri'), ('る', 'ru'), ('れ', 're'),
+        ('ろ', 'ro'), ('わ', 'wa'), ('を', 'wo'), ('ん', 'n')
+    ]
+
+    # Adjust the number of Hiragana characters based on the student's level
+    hiragana_subset = get_hiragana_subset_by_level(student_level, hiragana_list)
+    random.shuffle(hiragana_subset)
+
+    total_questions = 5  # Set the number of questions
+    correct_answers = 0
+    completion_times = []
+
+    # Quiz loop
+    for problem_count in range(total_questions):
+        hiragana_char, correct_english = hiragana_subset[problem_count % len(hiragana_subset)]
+
+        # Create multiple-choice options
+        incorrect_answers = random.sample(
+            [h[1] for h in hiragana_subset if h[1] != correct_english], 3)
+        options = [correct_english] + incorrect_answers
+        random.shuffle(options)
+
+        # Display the quiz options and get option rects
+        option_rects = display_hiragana_quiz(screen, hiragana_char, options)
+
+        # Wait for student to click on an option
+        start_time = time.time()
+        question_complete = False
+        while not question_complete:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    for rect, option in option_rects:
+                        if rect.collidepoint(mouse_pos):
+                            time_taken = round(time.time() - start_time, 1)
+                            completion_times.append(time_taken)
+
+                            if option == correct_english:
+                                correct_answers += 1
+                                display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
+                            else:
+                                display_result(f"Sorry, the correct answer is {correct_english}")
+                            question_complete = True
+
+            pygame.time.Clock().tick(60)
+
+    # Final score and performance
+    lesson_end_time = time.time()
+    average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
+    add_session_lesson(session_id, hiragana_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+
+    # Display the final score and handle perfect scores
+    screen.fill(screen_color)
+    draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+    
+    if correct_answers == total_questions:
+        set_student_progress(session_id, 'Hiragana')  # Level up on perfect score
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+    
+    # Return the results of the quiz
+    return total_questions, correct_answers, average_time
+
+
+def katakana_teach(session_id):
+    """Displays Katakana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+    
+    # Retrieve the student's current level for the Katakana lesson
+    student_level = get_student_progress(session_id, 'Katakana')
+
+    # List of the 46 basic katakana characters
+    katakana_list = [
+        "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", 
+        "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト", 
+        "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", 
+        "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", 
+        "ル", "レ", "ロ", "ワ", "ヲ", "ン"
+    ]
+
+    # Get the subset of Katakana to teach based on the student's current level
+    katakana_subset = get_hiragana_subset_by_level(student_level, katakana_list)
+
+    # Define a larger font for the katakana characters
+    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+
+    # Clear the screen and inform the student about the lesson
+    screen.fill(screen_color)
+    intro_message = f"Let's learn Katakana! You are currently on level {student_level}."
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+
+    draw_and_wait_continue_button()
+
+    # Loop through the subset of Katakana and show each character
+    for katakana_char in katakana_subset:
+        screen.fill(screen_color)
+        draw_text(katakana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
+        pygame.display.flip()
+        speak_japanese(katakana_char)
+        time.sleep(1)
+
+    # Show completion message and wait for "Continue..."
+    screen.fill(screen_color)
+    draw_text("Great job!", font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color)
+    draw_and_wait_continue_button()
+
+
+def katakana_quiz(session_id):
+    """Presents a quiz on Katakana characters based on the student's level and updates their progress."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Retrieve the student's current level for the Katakana lesson
+    student_level = get_student_progress(session_id, 'Katakana')
+
+    # Fetch the Katakana lesson ID
+    katakana_lesson_id = fetch_lesson_id('Katakana')
+    if katakana_lesson_id is None:
+        return -1  # Exit if lesson_id not found
+
+    # Display the introductory message with the student's current level
+    screen.fill(screen_color)
+    draw_text(f"Katakana quiz! You are currently on level {student_level}.", font, text_color,
+              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    # List of Katakana characters
+    katakana_list = [
+        ('ア', 'a'), ('イ', 'i'), ('ウ', 'u'), ('エ', 'e'), ('オ', 'o'),
+        # Continue for the entire list...
+    ]
+
+    # Adjust the number of Katakana characters based on the student's level
+    katakana_subset = get_hiragana_subset_by_level(student_level, katakana_list)
+    random.shuffle(katakana_subset)
+
+    total_questions = 5
+    correct_answers = 0
+    completion_times = []
+
+    # Quiz loop (same as in hiragana_quiz)
+    for problem_count in range(total_questions):
+        katakana_char, correct_english = katakana_subset[problem_count % len(katakana_subset)]
+
+        # Create multiple-choice options
+        incorrect_answers = random.sample([k[1] for k in katakana_subset if k[1] != correct_english], 3)
+        options = [correct_english] + incorrect_answers
+        random.shuffle(options)
+
+        # Display the quiz options and get option rects
+        option_rects = display_hiragana_quiz(screen, katakana_char, options)
+
+        # Wait for student to click on an option
+        start_time = time.time()
+        question_complete = False
+        while not question_complete:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    for rect, option in option_rects:
+                        if rect.collidepoint(mouse_pos):
+                            time_taken = round(time.time() - start_time, 1)
+                            completion_times.append(time_taken)
+
+                            if option == correct_english:
+                                correct_answers += 1
+                                display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
+                            else:
+                                display_result(f"Sorry, the correct answer is {correct_english}")
+                            question_complete = True
+
+            pygame.time.Clock().tick(60)
+
+    # Final score and performance
+    lesson_end_time = time.time()
+    average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
+    add_session_lesson(session_id, katakana_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+
+    # Display the final score and handle perfect scores
+    screen.fill(screen_color)
+    draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+    
+    if correct_answers == total_questions:
+        set_student_progress(session_id, 'Katakana')  # Level up on perfect score
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+    
+    return total_questions, correct_answers, average_time
+
 
 def single_digit_addition(session_id):
     pass
@@ -3100,7 +3386,7 @@ def options_menu():
         credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
 
         # Draw the exit button with a shadow
-        exit_rect = draw_exit_button()
+        # exit_rect = draw_exit_button()
 
         pygame.display.flip()
 
