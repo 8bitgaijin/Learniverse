@@ -434,6 +434,7 @@ def insert_lessons(cursor, connection):
         ("Rainbow Numbers", "A math game to master mental arithmetic"),
         ("Hiragana", "A lesson to master the Japanese hiragana characters"),
         ("Katakana", "A lesson to master the Japanese katakana characters"),
+        ("Single Digit Addition", "Single Digit Addition")
     ]
 
     try:
@@ -806,7 +807,6 @@ def get_student_progress(session_id, lesson_title):
         connection.close()
 
 
-
 def set_student_progress(session_id, lesson_title):
     """Updates the student_lesson_progress table for the given student and lesson based on session results."""
     try:
@@ -880,7 +880,6 @@ def set_student_progress(session_id, lesson_title):
     finally:
         cursor.close()
         connection.close()
-
 
 
 def fetch_lesson_id(lesson_title):
@@ -1336,11 +1335,11 @@ def apply_theme(theme_name):
         apply_theme("light")
 
 
-def check_exit_click(mouse_pos, exit_rect):
-    """Check if the 'X' exit button was clicked."""
-    if exit_rect.collidepoint(mouse_pos):
-        pygame.quit()
-        sys.exit()
+# def check_exit_click(mouse_pos, exit_rect):
+#     """Check if the 'X' exit button was clicked."""
+#     if exit_rect.collidepoint(mouse_pos):
+#         pygame.quit()
+#         sys.exit()
 
 
 def check_continue_click(mouse_pos, continue_rect):
@@ -2179,6 +2178,143 @@ def rainbow_numbers(session_id):
     return total_questions, correct_answers, average_time
 
 
+def generate_single_digit_addition_problem():
+    """Generates two random single-digit numbers (1-9) and returns the problem and the answer."""
+    num1 = random.randint(1, 9)
+    num2 = random.randint(1, 9)
+    answer = num1 + num2
+    return num1, num2, answer
+
+def single_digit_addition(session_id):
+    """Presents a single-digit addition quiz with random numbers and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Single Digit Addition
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Addition',))
+    result = cursor.fetchone()
+    
+    if result:
+        addition_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Single Digit Addition lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        # Return a valid tuple with zeroed values in case of failure
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)  # Fill the screen with the background color
+    draw_text(
+        "Let's work on Single-Digit Addition!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color  # Use the shadow color from the theme
+    )
+
+    # Draw the "Continue..." button before starting the lesson
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []  # List to store time taken for each question
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        num1, num2, answer = generate_single_digit_addition_problem()
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)  # Clear the screen before drawing
+
+            # Draw the math problem
+            display_rainbow_math_problem(num1, num2, user_input, first_input)
+
+            pygame.display.flip()  # Update the display
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)  # Calculate time for the question
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                # Fast answer case: display fast_cats image and lightning bolts
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                # Slow answer case: display normal cat image and particle effects
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()  # Clear the event queue to avoid queued inputs
+                        problem_count += 1
+                        question_complete = True  # Move to the next question
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)  # Frame rate limiting
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    # Calculate the average time taken for each question
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0  # Handle case where there were no completion times
+
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            addition_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        # Return a valid tuple even in case of an error
+        return total_questions, correct_answers, average_time
+
+    # Return the lesson results (ensure it's a tuple!)
+    return total_questions, correct_answers, average_time
+
+
+
 ########################################
 ### 4. Menu and Navigation Functions ###
 ########################################
@@ -2420,6 +2556,7 @@ def session_manager():
 
     # Step 2: Logic for lesson flow
     lessons_to_play = ["greet_student",
+                       'single_digit_addition',
                        # "hiragana_teach",
                        "katakana_teach",
                        # "hiragana_quiz",
@@ -2432,7 +2569,7 @@ def session_manager():
                        "rainbow_numbers",
                        "skip_counting_japanese",
                        "hiragana_quiz",
-                       "single_digit_addition",
+                       # "single_digit_addition",
                        "japanese_colors_teach",
                        "single_digit_subtraction",
                        "japanese_colors_quiz"] 
@@ -2485,17 +2622,20 @@ def session_manager():
             total_questions += questions_asked
             total_correct += correct_answers
             total_times.append(avg_time)
-        # elif lesson == "single_digit_addition":
-        #     single_digit_addition()
-            # pass
-            # Run the lesson, passing session_id
-            # lesson_result = single_digit_addition(session_id)
+        elif lesson == "single_digit_addition":
+            print("Running sungle digit addition")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = single_digit_addition(session_id)
             
-            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            # questions_asked, correct_answers, avg_time = lesson_result
-            # total_questions += questions_asked
-            # total_correct += correct_answers
-            # total_times.append(avg_time)
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: single_digit_addition did not return a valid result.")
+
         elif lesson == "japanese_colors_teach":
             japanese_colors_teach()
         # elif lesson == "japanese_colors_quiz":
@@ -3277,8 +3417,6 @@ def katakana_quiz(session_id):
     return total_questions, correct_answers, average_time
 
 
-def single_digit_addition(session_id):
-    pass
 
 def japanese_colors_teach():
     pass
