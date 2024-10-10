@@ -434,7 +434,9 @@ def insert_lessons(cursor, connection):
         ("Rainbow Numbers", "A math game to master mental arithmetic"),
         ("Hiragana", "A lesson to master the Japanese hiragana characters"),
         ("Katakana", "A lesson to master the Japanese katakana characters"),
-        ("Single Digit Addition", "Single Digit Addition")
+        ("Single Digit Addition", "Single Digit Addition"),
+        ("Single Digit Subtraction", "Single Digit Subtraction"),
+        ("Single Digit Multiplication", "Single Digit Multiplication")
     ]
 
     try:
@@ -2185,6 +2187,50 @@ def generate_single_digit_addition_problem():
     answer = num1 + num2
     return num1, num2, answer
 
+
+def display_single_digit_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
+    screen.fill(screen_color)
+    
+    # Dynamically calculate positions based on screen size
+    right_x = WIDTH * 0.55  # Right edge for alignment
+    num1_y = HEIGHT * 0.4
+    num2_y = HEIGHT * 0.5
+    line_y = HEIGHT * 0.57
+    sum_y = HEIGHT * 0.63
+    
+    # Draw the first number (right-aligned)
+    num1_surface = font.render(str(num1), True, text_color)
+    num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
+    screen.blit(num1_surface, num1_rect)
+    
+    # Draw the plus sign (right-aligned with some offset)
+    plus_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
+    plus_surface = font.render("+", True, text_color)
+    plus_rect = plus_surface.get_rect(right=plus_sign_x, centery=num2_y)
+    screen.blit(plus_surface, plus_rect)
+    
+    # Draw the second number (right-aligned)
+    num2_surface = font.render(str(num2), True, text_color)
+    num2_rect = num2_surface.get_rect(right=right_x, centery=num2_y)
+    screen.blit(num2_surface, num2_rect)
+    
+    # Calculate line width with a factor
+    line_width = max(num1_surface.get_width(), num2_surface.get_width(), font.size(str(num1 + num2))[0]) * line_length_factor
+    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+    
+    # Draw the sum placeholder or the input from the user (right-aligned)
+    if first_input:
+        input_text = "?"  # Show "?" as the sum the student needs to enter
+    else:
+        input_text = user_input
+        
+    input_surface = font.render(input_text, True, text_color)
+    input_rect = input_surface.get_rect(right=right_x, centery=sum_y)
+    screen.blit(input_surface, input_rect)
+
+    pygame.display.flip()
+
+
 def single_digit_addition(session_id):
     """Presents a single-digit addition quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
@@ -2248,7 +2294,7 @@ def single_digit_addition(session_id):
             screen.fill(screen_color)  # Clear the screen before drawing
 
             # Draw the math problem
-            display_rainbow_math_problem(num1, num2, user_input, first_input)
+            display_single_digit_math_problem(num1, num2, user_input, first_input)
 
             pygame.display.flip()  # Update the display
 
@@ -2310,9 +2356,446 @@ def single_digit_addition(session_id):
         # Return a valid tuple even in case of an error
         return total_questions, correct_answers, average_time
 
-    # Return the lesson results (ensure it's a tuple!)
+    # Clear the screen before displaying the final score
+    screen.fill(screen_color)
+
+    # Final score message
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    # Average time per question message
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    # Perfect score check and bonus game trigger
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+        
+
+    # Draw the "Continue..." button after displaying the final score
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        # Trigger the bonus game for a perfect score
+        bonus_game_fat_tuna()
+
+    # Return the lesson results
     return total_questions, correct_answers, average_time
 
+
+def generate_single_digit_subtraction_problem():
+    """Generates two random single-digit numbers (1-9) and returns the problem and the answer, ensuring no negative results."""
+    num1 = random.randint(1, 9)
+    num2 = random.randint(1, 9)
+    if num1 < num2:
+        num1, num2 = num2, num1  # Ensure num1 is always larger to avoid negative answers
+    answer = num1 - num2
+    return num1, num2, answer
+
+def display_single_digit_subtraction_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
+    screen.fill(screen_color)
+    
+    # Dynamically calculate positions based on screen size
+    right_x = WIDTH * 0.55  # Right edge for alignment
+    num1_y = HEIGHT * 0.4
+    num2_y = HEIGHT * 0.5
+    line_y = HEIGHT * 0.57
+    sum_y = HEIGHT * 0.63
+    
+    # Draw the first number (right-aligned)
+    num1_surface = font.render(str(num1), True, text_color)
+    num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
+    screen.blit(num1_surface, num1_rect)
+    
+    # Draw the minus sign (right-aligned with some offset)
+    minus_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
+    minus_surface = font.render("-", True, text_color)
+    minus_rect = minus_surface.get_rect(right=minus_sign_x, centery=num2_y)
+    screen.blit(minus_surface, minus_rect)
+    
+    # Draw the second number (right-aligned)
+    num2_surface = font.render(str(num2), True, text_color)
+    num2_rect = num2_surface.get_rect(right=right_x, centery=num2_y)
+    screen.blit(num2_surface, num2_rect)
+    
+    # Calculate line width with a factor
+    line_width = max(num1_surface.get_width(), num2_surface.get_width(), font.size(str(num1 - num2))[0]) * line_length_factor
+    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+    
+    # Draw the sum placeholder or the input from the user (right-aligned)
+    if first_input:
+        input_text = "?"  # Show "?" as the sum the student needs to enter
+    else:
+        input_text = user_input
+        
+    input_surface = font.render(input_text, True, text_color)
+    input_rect = input_surface.get_rect(right=right_x, centery=sum_y)
+    screen.blit(input_surface, input_rect)
+
+    pygame.display.flip()
+
+def single_digit_subtraction(session_id):
+    """Presents a single-digit subtraction quiz with random numbers and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Single Digit Subtraction
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Subtraction',))
+    result = cursor.fetchone()
+    
+    if result:
+        subtraction_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Single Digit Subtraction lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        # Return a valid tuple with zeroed values in case of failure
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)  # Fill the screen with the background color
+    draw_text(
+        "Let's work on Single-Digit Subtraction!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color  # Use the shadow color from the theme
+    )
+
+    # Draw the "Continue..." button before starting the lesson
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []  # List to store time taken for each question
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        num1, num2, answer = generate_single_digit_subtraction_problem()
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)  # Clear the screen before drawing
+
+            # Draw the math problem
+            display_single_digit_subtraction_problem(num1, num2, user_input, first_input)
+
+            pygame.display.flip()  # Update the display
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)  # Calculate time for the question
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                # Fast answer case: display fast_cats image and lightning bolts
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                # Slow answer case: display normal cat image and particle effects
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()  # Clear the event queue to avoid queued inputs
+                        problem_count += 1
+                        question_complete = True  # Move to the next question
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)  # Frame rate limiting
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    # Calculate the average time taken for each question
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0  # Handle case where there were no completion times
+
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            subtraction_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        # Return a valid tuple even in case of an error
+        return total_questions, correct_answers, average_time
+
+    # Clear the screen before displaying the final score
+    screen.fill(screen_color)
+
+    # Final score message
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    # Average time per question message
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    # Perfect score check and bonus game trigger
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    # Draw the "Continue..." button after displaying the final score
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        # Trigger the bonus game for a perfect score
+        bonus_game_fat_tuna()
+
+    # Return the lesson results
+    return total_questions, correct_answers, average_time
+
+
+def generate_single_digit_multiplication_problem():
+    """Generates two random single-digit numbers (1-9) and returns the problem and the answer."""
+    num1 = random.randint(1, 9)
+    num2 = random.randint(1, 9)
+    answer = num1 * num2
+    return num1, num2, answer
+
+def display_single_digit_multiplication_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
+    screen.fill(screen_color)
+    
+    # Dynamically calculate positions based on screen size
+    right_x = WIDTH * 0.55  # Right edge for alignment
+    num1_y = HEIGHT * 0.4
+    num2_y = HEIGHT * 0.5
+    line_y = HEIGHT * 0.57
+    sum_y = HEIGHT * 0.63
+    
+    # Draw the first number (right-aligned)
+    num1_surface = font.render(str(num1), True, text_color)
+    num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
+    screen.blit(num1_surface, num1_rect)
+    
+    # Draw the multiplication sign (right-aligned with some offset)
+    multiply_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
+    multiply_surface = font.render("×", True, text_color)
+    multiply_rect = multiply_surface.get_rect(right=multiply_sign_x, centery=num2_y)
+    screen.blit(multiply_surface, multiply_rect)
+    
+    # Draw the second number (right-aligned)
+    num2_surface = font.render(str(num2), True, text_color)
+    num2_rect = num2_surface.get_rect(right=right_x, centery=num2_y)
+    screen.blit(num2_surface, num2_rect)
+    
+    # Calculate line width with a factor
+    line_width = max(num1_surface.get_width(), num2_surface.get_width(), font.size(str(num1 * num2))[0]) * line_length_factor
+    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+    
+    # Draw the sum placeholder or the input from the user (right-aligned)
+    if first_input:
+        input_text = "?"  # Show "?" as the sum the student needs to enter
+    else:
+        input_text = user_input
+        
+    input_surface = font.render(input_text, True, text_color)
+    input_rect = input_surface.get_rect(right=right_x, centery=sum_y)
+    screen.blit(input_surface, input_rect)
+
+    pygame.display.flip()
+
+def single_digit_multiplication(session_id):
+    """Presents a single-digit multiplication quiz with random numbers and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Single Digit Multiplication
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Multiplication',))
+    result = cursor.fetchone()
+    
+    if result:
+        multiplication_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Single Digit Multiplication lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        # Return a valid tuple with zeroed values in case of failure
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)  # Fill the screen with the background color
+    draw_text(
+        "Let's work on Single-Digit Multiplication!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color  # Use the shadow color from the theme
+    )
+
+    # Draw the "Continue..." button before starting the lesson
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []  # List to store time taken for each question
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        num1, num2, answer = generate_single_digit_multiplication_problem()
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)  # Clear the screen before drawing
+
+            # Draw the math problem
+            display_single_digit_multiplication_problem(num1, num2, user_input, first_input)
+
+            pygame.display.flip()  # Update the display
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)  # Calculate time for the question
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                # Fast answer case: display fast_cats image and lightning bolts
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                # Slow answer case: display normal cat image and particle effects
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()  # Clear the event queue to avoid queued inputs
+                        problem_count += 1
+                        question_complete = True  # Move to the next question
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)  # Frame rate limiting
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    # Calculate the average time taken for each question
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0  # Handle case where there were no completion times
+
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            multiplication_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        # Return a valid tuple even in case of an error
+        return total_questions, correct_answers, average_time
+
+    # Clear the screen before displaying the final score
+    screen.fill(screen_color)
+
+    # Final score message
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    # Average time per question message
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    # Perfect score check and bonus game trigger
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    # Draw the "Continue..." button after displaying the final score
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        # Trigger the bonus game for a perfect score
+        bonus_game_fat_tuna()
+
+    # Return the lesson results
+    return total_questions, correct_answers, average_time
 
 
 ########################################
@@ -2553,14 +3036,14 @@ def session_manager():
     if session_id == -1:
         print(f"Error: Failed to start session for {current_student}.")
         return "main_menu"
-
-    # Step 2: Logic for lesson flow
+    
+    #####################################
+    ### Step 2: Logic for lesson flow ###
+    #####################################
     lessons_to_play = ["greet_student",
-                       'single_digit_addition',
-                       # "hiragana_teach",
-                       "katakana_teach",
-                       # "hiragana_quiz",
-                       "katakana_quiz",
+                       "single_digit_addition",
+                       "single_digit_subtraction",
+                       "single_digit_multiplication",
                        "streak_check", 
                        "day_of_the_week", 
                        "month_of_the_year", 
@@ -2569,7 +3052,7 @@ def session_manager():
                        "rainbow_numbers",
                        "skip_counting_japanese",
                        "hiragana_quiz",
-                       # "single_digit_addition",
+                       "single_digit_addition",
                        "japanese_colors_teach",
                        "single_digit_subtraction",
                        "japanese_colors_quiz"] 
@@ -2635,7 +3118,32 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_digit_addition did not return a valid result.")
-
+        elif lesson == "single_digit_subtraction":
+            print("Running sungle digit subtraction")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = single_digit_subtraction(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                ("Error: single_digit_subtraction did not return a valid result.")
+        elif lesson == "single_digit_multiplication":
+            print("Running sungle digit multiplication")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = single_digit_multiplication(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: single_digit_multiplication did not return a valid result.")
         elif lesson == "japanese_colors_teach":
             japanese_colors_teach()
         # elif lesson == "japanese_colors_quiz":
@@ -3285,11 +3793,16 @@ def katakana_teach(session_id):
 
     # List of the 46 basic katakana characters
     katakana_list = [
-        "ア", "イ", "ウ", "エ", "オ", "カ", "キ", "ク", "ケ", "コ", 
-        "サ", "シ", "ス", "セ", "ソ", "タ", "チ", "ツ", "テ", "ト", 
-        "ナ", "ニ", "ヌ", "ネ", "ノ", "ハ", "ヒ", "フ", "ヘ", "ホ", 
-        "マ", "ミ", "ム", "メ", "モ", "ヤ", "ユ", "ヨ", "ラ", "リ", 
-        "ル", "レ", "ロ", "ワ", "ヲ", "ン"
+        "ア", "イ", "ウ", "エ", "オ", 
+        "カ", "キ", "ク", "ケ", "コ", 
+        "サ", "シ", "ス", "セ", "ソ", 
+        "タ", "チ", "ツ", "テ", "ト", 
+        "ナ", "ニ", "ヌ", "ネ", "ノ", 
+        "ハ", "ヒ", "フ", "ヘ", "ホ", 
+        "マ", "ミ", "ム", "メ", "モ", 
+        "ヤ", "ユ", "ヨ", 
+        "ラ", "リ", "ル", "レ", "ロ", 
+        "ワ", "ヲ", "ン"
     ]
 
     # Get the subset of Katakana to teach based on the student's current level
@@ -3346,9 +3859,18 @@ def katakana_quiz(session_id):
 
     # List of Katakana characters
     katakana_list = [
-        ('ア', 'a'), ('イ', 'i'), ('ウ', 'u'), ('エ', 'e'), ('オ', 'o'),
-        # Continue for the entire list...
+        ('ア', 'a'), ('イ', 'i'), ('ウ', 'u'), ('エ', 'e'), ('オ', 'o'),  # a, i, u, e, o
+        ('カ', 'ka'), ('キ', 'ki'), ('ク', 'ku'), ('ケ', 'ke'), ('コ', 'ko'),  # ka, ki, ku, ke, ko
+        ('サ', 'sa'), ('シ', 'shi'), ('ス', 'su'), ('セ', 'se'), ('ソ', 'so'),  # sa, shi, su, se, so
+        ('タ', 'ta'), ('チ', 'chi'), ('ツ', 'tsu'), ('テ', 'te'), ('ト', 'to'),  # ta, chi, tsu, te, to
+        ('ナ', 'na'), ('ニ', 'ni'), ('ヌ', 'nu'), ('ネ', 'ne'), ('ノ', 'no'),  # na, ni, nu, ne, no
+        ('ハ', 'ha'), ('ヒ', 'hi'), ('フ', 'fu'), ('ヘ', 'he'), ('ホ', 'ho'),  # ha, hi, fu, he, ho
+        ('マ', 'ma'), ('ミ', 'mi'), ('ム', 'mu'), ('メ', 'me'), ('モ', 'mo'),  # ma, mi, mu, me, mo
+        ('ヤ', 'ya'), ('ユ', 'yu'), ('ヨ', 'yo'),  # ya, yu, yo
+        ('ラ', 'ra'), ('リ', 'ri'), ('ル', 'ru'), ('レ', 're'), ('ロ', 'ro'),  # ra, ri, ru, re, ro
+        ('ワ', 'wa'), ('ヲ', 'wo'), ('ン', 'n')  # wa, wo, n
     ]
+
 
     # Adjust the number of Katakana characters based on the student's level
     katakana_subset = get_hiragana_subset_by_level(student_level, katakana_list)
@@ -3421,8 +3943,7 @@ def katakana_quiz(session_id):
 def japanese_colors_teach():
     pass
 
-def single_digit_subtraction():
-    pass
+
 
 def japanese_colors_quiz(session_id):
     pass
