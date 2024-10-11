@@ -442,7 +442,9 @@ def insert_lessons(cursor, connection):
         ("Quad Digit Addition", "Quad Digit Addition"),
         ("Double Digit Subtraction", "Double Digit Subtraction"),
         ("Triple Digit Subtraction", "Triple Digit Subtraction"),
-        ("Quad Digit Subtraction", "Quad Digit Subtraction")
+        ("Quad Digit Subtraction", "Quad Digit Subtraction"),
+        ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
+        ("Double Digit Multiplication", "Double Digit Multiplication")
     ]
 
     try:
@@ -1341,13 +1343,6 @@ def apply_theme(theme_name):
         log_entry = create_log_message(f"Theme {theme_name} not found. Defaulting to light theme.")
         log_message(log_entry)
         apply_theme("light")
-
-
-# def check_exit_click(mouse_pos, exit_rect):
-#     """Check if the 'X' exit button was clicked."""
-#     if exit_rect.collidepoint(mouse_pos):
-#         pygame.quit()
-#         sys.exit()
 
 
 def check_continue_click(mouse_pos, continue_rect):
@@ -3544,8 +3539,292 @@ def single_digit_multiplication(session_id):
     return total_questions, correct_answers, average_time
 
 
+def single_by_double_multiplication(session_id):
+    """Presents a single-by-double-digit multiplication quiz and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Single by Double Digit Multiplication
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single by Double Digit Multiplication',))
+    result = cursor.fetchone()
+    
+    if result:
+        multiplication_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Single by Double Digit Multiplication lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)
+    draw_text(
+        "Let's work on Single by Double-Digit Multiplication!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        # Generate the multiplication problem with one number in range 10-99 and the other in range 1-9
+        num1 = random.randint(10, 99)
+        num2 = random.randint(1, 9)
+        answer = num1 * num2
+
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)
+
+            # Draw the math problem
+            display_math_problem(num1, num2, user_input, first_input, operation="mul")
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()
+                        problem_count += 1
+                        question_complete = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 4:  # Limit input to four digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    try:
+        add_session_lesson(
+            session_id,
+            multiplication_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    screen.fill(screen_color)
+
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+
+    return total_questions, correct_answers, average_time
 
 
+
+
+def double_digit_multiplication(session_id):
+    """Presents a double-digit multiplication quiz and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Double Digit Multiplication
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Double Digit Multiplication',))
+    result = cursor.fetchone()
+    
+    if result:
+        multiplication_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Double Digit Multiplication lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)
+    draw_text(
+        "Let's work on Double-Digit Multiplication!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        num1, num2, answer = generate_math_problem(10, 99, operation="mul")
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)
+
+            # Draw the math problem
+            display_math_problem(num1, num2, user_input, first_input, operation="mul")
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()
+                        problem_count += 1
+                        question_complete = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 5:  # Limit input to five digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    try:
+        add_session_lesson(
+            session_id,
+            multiplication_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    screen.fill(screen_color)
+
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+
+    return total_questions, correct_answers, average_time
 
 
 
@@ -3791,25 +4070,27 @@ def session_manager():
     #####################################
     ### Step 2: Logic for lesson flow ###
     #####################################
-    lessons_to_play = ["greet_student",             #JP
-                       "single_digit_multiplication",
-                       "streak_check",              #EN
-                       "day_of_the_week",           #J
-                       "month_of_the_year",         #J
-                       "skip_counting",             #E
-                       "hiragana_teach",            #J
-                       "rainbow_numbers",           #E
-                       "skip_counting_japanese",    #J
-                       "single_digit_addition",     #E
-                       "hiragana_quiz",             #J                       
-                       "single_digit_subtraction",  #E
-                       # "japanese_colors_teach     #J
+    lessons_to_play = ["greet_student",                 #JP
+                       # "single_digit_multiplication",
+                       "streak_check",                  #EN
+                       "day_of_the_week",               #J
+                       "month_of_the_year",             #J
+                       "skip_counting",                 #E
+                       "hiragana_teach",                #J
+                       "rainbow_numbers",               #E
+                       "skip_counting_japanese",        #J
+                       "single_digit_addition",         #E
+                       "hiragana_quiz",                 #J                       
+                       "single_digit_subtraction",      #E
+                       # "japanese_colors_teach         #J
                        "single_digit_multiplication",
                        # "japanese_colors_quiz",
                        "double_digit_addition",
                        "double_digit_subtraction",
+                       "single_by_double_multiplication",
                        "triple_digit_addition",
                        "triple_digit_subtraction",
+                       "double_digit_multiplication",
                        "quad_digit_addition",
                        "quad_digit_subtraction",
                        ] 
@@ -3979,6 +4260,34 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_digit_multiplication did not return a valid result.")
+        # single_by_double_multiplication
+        elif lesson == "single_by_double_multiplication":
+            print("Running single by double digit multiplication")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = single_by_double_multiplication(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: single_by_double_multiplication did not return a valid result.")
+        # double_digit_multiplication
+        elif lesson == "double_digit_multiplication":
+            print("Running double digit multiplication")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = double_digit_multiplication(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: double_digit_multiplication did not return a valid result.")
         elif lesson == "japanese_colors_teach":
             japanese_colors_teach()
         # elif lesson == "japanese_colors_quiz":
