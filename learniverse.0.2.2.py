@@ -4094,12 +4094,18 @@ def single_denominator_addition(session_id):
         user_input = ""
         first_input = True
         question_complete = False
+        invalid_input = False  # Track if the input was invalid
 
         # Start the timer for the question
         start_time = time.time()
 
         while not question_complete:
             screen.fill(screen_color)
+
+            # If input was invalid, prompt the user again
+            if invalid_input:
+                display_result("Invalid input. Please try again.", None)
+                invalid_input = False
 
             # Draw the math problem
             display_fraction_problem(numerator1, numerator2, denominator, user_input, first_input)
@@ -4117,23 +4123,31 @@ def single_denominator_addition(session_id):
                         completion_times.append(time_taken)
 
                         try:
+                            # Split the input into numerator and denominator
+                            num, denom = user_input.split("/")
+                            
+                            # Check if denominator is zero or missing
+                            if denom == "" or int(denom) == 0:
+                                raise ValueError("Invalid denominator")  # Trigger invalid input handling
+
+                            # Convert the input to a Fraction and check the answer
                             user_fraction = fractions.Fraction(user_input)
                             if user_fraction == fractions.Fraction(answer_numerator, denominator):
                                 correct_answers += 1
-
                                 if time_taken < 3:
                                     display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
                                 else:
                                     display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                                question_complete = True  # Move on to the next question
                             else:
+                                # Valid input but incorrect answer
                                 display_result(f"Sorry, the answer is {answer_numerator}/{denominator}")
+                                question_complete = True  # Move on to the next question
 
-                        except ValueError:
-                            display_result("Invalid input, please try again")
+                        except (ValueError, ZeroDivisionError):
+                            # Invalid input, prompt the user to try again
+                            invalid_input = True  # Allow the student to try again without moving on
 
-                        pygame.event.clear()
-                        problem_count += 1
-                        question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
                     elif event.unicode.isdigit() or event.unicode == "/":  # Allow digits and '/'
@@ -4141,6 +4155,9 @@ def single_denominator_addition(session_id):
                         first_input = False
 
             clock.tick(60)
+
+        if question_complete:
+            problem_count += 1  # Only increment after the question is fully processed
 
     # End of lesson timer
     lesson_end_time = time.time()
@@ -4186,6 +4203,8 @@ def single_denominator_addition(session_id):
         bonus_game_fat_tuna()
 
     return total_questions, correct_answers, average_time
+
+
 
 
 def generate_lcd_problem(numerator_min, numerator_max, denominator_min, denominator_max):
@@ -4512,6 +4531,7 @@ def draw_shape(shape_type):
     elif shape_type == "star":
         draw_star(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)
 
+
 def draw_regular_polygon(surface, color, center, radius, sides):
     """Draw a regular polygon with a specified number of sides."""
     points = []
@@ -4524,6 +4544,7 @@ def draw_regular_polygon(surface, color, center, radius, sides):
         points.append((x, y))
 
     pygame.draw.polygon(surface, color, points, 5)
+
 
 def draw_star(surface, color, center, radius, points):
     """Draw a star with the specified number of points."""
@@ -4587,8 +4608,6 @@ def display_basic_shapes_explanation():
 
     # After the explanation, return to the original introduction screen
     basic_shapes_quiz_intro()
-
-
 
 
 def basic_shapes_quiz_intro():
@@ -4715,8 +4734,6 @@ def draw_shapes_for_quiz(correct_shape):
     pygame.display.flip()
     
     return shape_rects
-
-
 
 
 def basic_shapes_quiz(session_id):
@@ -5083,7 +5100,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                 #JP
-                       "basic_shapes_quiz",
+                       
                        "single_denominator_addition",
                        "lowest_common_denominator_quiz",
                        # "hiragana_quiz",                 #JP   
@@ -5105,6 +5122,7 @@ def session_manager():
                        "double_digit_subtraction",
                        "single_denominator_addition",
                        "lowest_common_denominator_quiz",
+                       "basic_shapes_quiz",
                        # "single_by_double_multiplication",
                        # "triple_digit_addition",
                        # "triple_digit_subtraction",
