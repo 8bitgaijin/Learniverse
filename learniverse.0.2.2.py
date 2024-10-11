@@ -4492,7 +4492,59 @@ def draw_shape(shape_type):
         pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 150, 150), 5)
     elif shape_type == "rectangle":
         pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 200, 100), 5)
+    elif shape_type == "triangle":
+        pygame.draw.polygon(screen, text_color, [(WIDTH // 2, HEIGHT // 4), (WIDTH // 3, HEIGHT // 2), (2 * WIDTH // 3, HEIGHT // 2)], 5)
+    elif shape_type == "pentagon":
+        draw_regular_polygon(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)  # Pentagon with 5 sides
+    elif shape_type == "hexagon":
+        draw_regular_polygon(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 6)  # Hexagon with 6 sides
+    elif shape_type == "parallelogram":
+        pygame.draw.polygon(screen, text_color, [(WIDTH // 4, HEIGHT // 2), (WIDTH // 2, HEIGHT // 2), (3 * WIDTH // 4, HEIGHT // 3), (WIDTH // 2, HEIGHT // 3)], 5)
+    elif shape_type == "rhombus":
+        pygame.draw.polygon(screen, text_color, [
+            (WIDTH // 2, HEIGHT // 4),           # Top vertex
+            (WIDTH // 3, HEIGHT // 2),           # Left vertex
+            (WIDTH // 2, 3 * HEIGHT // 4),       # Bottom vertex
+            (2 * WIDTH // 3, HEIGHT // 2)        # Right vertex
+        ], 5)
+    elif shape_type == "trapezoid":
+        pygame.draw.polygon(screen, text_color, [(WIDTH // 3, HEIGHT // 2), (2 * WIDTH // 3, HEIGHT // 2), (3 * WIDTH // 4, HEIGHT // 3), (WIDTH // 4, HEIGHT // 3)], 5)
+    elif shape_type == "star":
+        draw_star(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)
 
+def draw_regular_polygon(surface, color, center, radius, sides):
+    """Draw a regular polygon with a specified number of sides."""
+    points = []
+    angle_step = 2 * math.pi / sides  # Full circle divided by number of sides
+
+    for i in range(sides):
+        angle = i * angle_step
+        x = center[0] + radius * math.cos(angle)  # X coordinate
+        y = center[1] + radius * math.sin(angle)  # Y coordinate
+        points.append((x, y))
+
+    pygame.draw.polygon(surface, color, points, 5)
+
+def draw_star(surface, color, center, radius, points):
+    """Draw a star with the specified number of points."""
+    outer_points = []
+    inner_points = []
+    angle_step = 2 * math.pi / (2 * points)  # Angle between outer and inner points
+
+    for i in range(2 * points):
+        angle = i * angle_step
+        if i % 2 == 0:
+            # Outer point
+            x = center[0] + radius * math.cos(angle)
+            y = center[1] + radius * math.sin(angle)
+        else:
+            # Inner point, reduced radius
+            x = center[0] + (radius / 2) * math.cos(angle)
+            y = center[1] + (radius / 2) * math.sin(angle)
+        outer_points.append((x, y))
+
+    pygame.draw.polygon(surface, color, outer_points, 5)
+    
 
 def display_basic_shapes_explanation():
     """
@@ -4503,6 +4555,13 @@ def display_basic_shapes_explanation():
         ("An oval is a stretched-out circle, like an egg shape.", "oval"),
         ("A square has four equal sides and four right angles.", "square"),
         ("A rectangle also has four right angles, but two sides are longer than the other two.", "rectangle"),
+        ("A triangle has three sides and three angles.", "triangle"),
+        ("A pentagon has five equal sides and five angles.", "pentagon"),
+        ("A hexagon has six sides and six angles.", "hexagon"),
+        ("A parallelogram has opposite sides that are parallel.", "parallelogram"),
+        ("A rhombus has all four sides of equal length, but with slanted angles.", "rhombus"),
+        ("A trapezoid has one pair of parallel sides.", "trapezoid"),
+        ("A star has five points and looks like a typical star shape.", "star"),
         ("Let's practice identifying these basic shapes!", None)
     ]
 
@@ -4528,6 +4587,7 @@ def display_basic_shapes_explanation():
 
     # After the explanation, return to the original introduction screen
     basic_shapes_quiz_intro()
+
 
 
 
@@ -4598,10 +4658,20 @@ def basic_shapes_quiz_intro():
 
 
 def draw_shapes_for_quiz(correct_shape):
-    """Draw multiple shapes on the screen for the student to choose from. Only one is the correct answer."""
-    # Randomize the position of shapes
-    shapes = ["circle", "oval", "square", "rectangle"]
-    random.shuffle(shapes)
+    """Draw multiple shapes on the screen for the student to choose from. Ensure the correct shape is drawn."""
+    shapes = ["circle", "oval", "square", "rectangle", "triangle", "pentagon", "hexagon", "parallelogram", "rhombus", "trapezoid", "star"]
+    
+    # Remove the correct shape from the shapes list temporarily to avoid duplication
+    shapes.remove(correct_shape)
+
+    # Randomly select three shapes (not including the correct shape)
+    random_shapes = random.sample(shapes, 3)
+
+    # Add the correct shape to the list
+    random_shapes.append(correct_shape)
+
+    # Shuffle the shapes so the correct one appears in a random position
+    random.shuffle(random_shapes)
     
     # Store rects for each shape for click detection
     shape_rects = {}
@@ -4614,7 +4684,7 @@ def draw_shapes_for_quiz(correct_shape):
         (3 * WIDTH // 4, 3 * HEIGHT // 4)
     ]
     
-    for i, shape in enumerate(shapes):
+    for i, shape in enumerate(random_shapes):
         x, y = positions[i]
         if shape == "circle":
             shape_rect = pygame.draw.circle(screen, text_color, (x, y), 50, 5)
@@ -4624,13 +4694,29 @@ def draw_shapes_for_quiz(correct_shape):
             shape_rect = pygame.draw.rect(screen, text_color, (x - 50, y - 50, 100, 100), 5)
         elif shape == "rectangle":
             shape_rect = pygame.draw.rect(screen, text_color, (x - 75, y - 50, 150, 100), 5)
-        
+        elif shape == "triangle":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x, y - 50), (x - 50, y + 50), (x + 50, y + 50)], 5)
+        elif shape == "pentagon":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x, y - 50), (x - 50, y), (x - 30, y + 50), (x + 30, y + 50), (x + 50, y)], 5)
+        elif shape == "hexagon":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x - 50, y), (x - 25, y - 50), (x + 25, y - 50), (x + 50, y), (x + 25, y + 50), (x - 25, y + 50)], 5)
+        elif shape == "parallelogram":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x - 50, y + 50), (x + 50, y + 50), (x + 25, y - 50), (x - 75, y - 50)], 5)
+        elif shape == "rhombus":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x, y - 50), (x - 50, y), (x, y + 50), (x + 50, y)], 5)
+        elif shape == "trapezoid":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x - 50, y + 50), (x + 50, y + 50), (x + 25, y - 50), (x - 25, y - 50)], 5)
+        elif shape == "star":
+            shape_rect = pygame.draw.polygon(screen, text_color, [(x, y - 50), (x - 20, y - 20), (x - 50, y), (x - 20, y + 20), (x, y + 50), (x + 20, y + 20), (x + 50, y), (x + 20, y - 20)], 5)
+
         # Store the rect for this shape for click detection
         shape_rects[shape] = shape_rect
     
     pygame.display.flip()
     
     return shape_rects
+
+
 
 
 def basic_shapes_quiz(session_id):
@@ -4676,7 +4762,14 @@ def basic_shapes_quiz(session_id):
         {"name": "circle", "description": "Click the circle."},
         {"name": "oval", "description": "Click the oval."},
         {"name": "square", "description": "Click the square."},
-        {"name": "rectangle", "description": "Click the rectangle."}
+        {"name": "rectangle", "description": "Click the rectangle."},
+        {"name": "triangle", "description": "Click the triangle."},
+        {"name": "pentagon", "description": "Click the pentagon."},
+        {"name": "hexagon", "description": "Click the hexagon."},
+        {"name": "parallelogram", "description": "Click the parallelogram."},
+        {"name": "rhombus", "description": "Click the rhombus."},
+        {"name": "trapezoid", "description": "Click the trapezoid."},
+        {"name": "star", "description": "Click the star."}
     ]
 
     while problem_count < total_questions:
@@ -4770,6 +4863,7 @@ def basic_shapes_quiz(session_id):
     draw_and_wait_continue_button()
 
     return total_questions, correct_answers, average_time
+
 
 
 
