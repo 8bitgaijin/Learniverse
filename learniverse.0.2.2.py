@@ -19,9 +19,9 @@ import sys
 import time
 
 
-######################################
-### 1. Constants and Configuration ###
-######################################
+###################################
+### Constants and Configuration ###
+###################################
 
 # Set the title of the window
 pygame.display.set_caption("Learniverse")
@@ -153,21 +153,9 @@ ALPHA_MULTIPLIER = 2.5  # Control how quickly alpha ramps up for denser clouds
 CLOUD_SPEED = 0.5  # Speed of the cloud movement (pixels per frame)
 x_offset = 0  # Horizontal offset for cloud movement
 
-
-###################################
-### 2. Global Variables (State) ###
-###################################
-
 # Global variable to store the last generated problem
 last_problem = None
 
-# Global state variables
-##################################
-# TODO
-# CAN I REMOVE THESE TWO SOMEHOW?
-REFERENCE_RESOLUTION = (1080, 1080)
-BASE_RESOLUTION = (1080, 1080)
-##################################
 BASE_FONT_SIZE = 90  # Define a base font size 
 current_font_name_or_path = "timesnewroman"  # Set to the default font initially
 music_volume = 0.5  # Start at 50% volume
@@ -179,10 +167,16 @@ current_student = None  # Global variable to store the currently selected studen
 # Icon will be loaded later, initialized as None for now
 icon = None
 
+##################################
+# TODO
+# CAN I REMOVE THESE TWO SOMEHOW?
+REFERENCE_RESOLUTION = (1080, 1080)
+BASE_RESOLUTION = (1080, 1080)
+##################################
 
-###########################
-### 3. Helper Functions ###
-###########################
+########################
+### Helper Functions ###
+########################
 
 def create_log_message(message):
     """
@@ -296,9 +290,85 @@ def center_window(width, height):
         log_message(log_entry)
         
 
-###############################################################################
-### 3.1 DATABASE FUNCTIONS                                                  ###
-###############################################################################
+##############################################
+### Pygame Initialization and Window Setup ###
+##############################################
+
+# Try to load and set the window icon from a specified file
+try:
+    icon = pygame.image.load('assets/images/LLRN.ico')
+    pygame.display.set_icon(icon)
+except FileNotFoundError as e:
+    log_entry = create_log_message(f"Icon file not found: {e}")
+    log_message(log_entry)
+    print("Icon file not found, continuing without a custom icon.")
+except pygame.error as e:
+    log_entry = create_log_message(f"Failed to load icon: {e}")
+    log_message(log_entry)
+    print("Failed to load icon, continuing without a custom icon.")
+
+# Pygame initialization
+# Initialize Pygame's main modules. If there's an issue, log the error and exit.
+try:
+    pygame.init()
+    pygame.mixer.init()
+except pygame.error as e:
+    log_entry = create_log_message(f"Error initializing Pygame: {e}")
+    log_message(log_entry)
+    sys.exit(1)
+
+# Define available windowed resolutions
+# This list contains the resolutions that can be used by the game in windowed mode.
+WINDOWED_RESOLUTIONS = [
+    (640, 640), (768, 768), (800, 800), (900, 900), (1000, 1000), (1080, 1080)
+]
+
+# Get the display information from the system
+# MAX_DISPLAY_RESOLUTION will store the width and height of the current display, 
+# allowing the game to adapt to the user's monitor.
+info = pygame.display.Info() 
+MAX_DISPLAY_RESOLUTION = (info.current_w, info.current_h)
+
+# Filter available resolutions to match the current display
+# The AVAILABLE_RESOLUTIONS list only includes resolutions smaller than or 
+# equal to the user's maximum screen size, ensuring compatibility with 
+# different displays.
+AVAILABLE_RESOLUTIONS = [
+    res for res in WINDOWED_RESOLUTIONS if res[0] <= MAX_DISPLAY_RESOLUTION[0] and res[1] <= MAX_DISPLAY_RESOLUTION[1]
+]
+
+# Try to load the current resolution index from options, else default 800x800
+try:
+    with open("options.json", "r") as file:
+        options = json.load(file)
+        current_resolution_index = options.get("current_resolution_index", AVAILABLE_RESOLUTIONS.index((800, 800)))
+        WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
+except (FileNotFoundError, ValueError):
+    # Default to 800x800 resolution if options.json is missing or invalid
+    current_resolution_index = AVAILABLE_RESOLUTIONS.index((800, 800))
+    WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
+
+# Center the window before creating the Pygame window
+center_window(WIDTH, HEIGHT)
+
+# Initialize in windowed mode
+screen = pygame.display.set_mode((WIDTH, HEIGHT))  
+
+# Create a clock object to manage the frame rate of the game
+clock = pygame.time.Clock()
+
+# Load background images for different menus
+# These images are selected randomly from the specified folders and will be used
+# as backgrounds for the main menu and options menu.
+main_menu_background = select_random_background("assets/images/main_menu/")
+options_background = select_random_background("assets/images/options/")
+
+# Initialize Text to Speech
+engine = pyttsx3.init()
+
+##########################
+### DATABASE FUNCTIONS ###
+##########################
 
 def check_database_initialization():
     """
@@ -446,7 +516,9 @@ def insert_lessons(cursor, connection):
         ("Quad Digit Subtraction", "Quad Digit Subtraction"),
         ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
         ("Double Digit Multiplication", "Double Digit Multiplication"),
-        ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition")
+        ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
+        ("Lowest Common Denominator", "Lowest Common Denominator"),
+        ("Basic Geometric Shapes", "Basic Geometric Shapes")
     ]
 
     try:
@@ -910,89 +982,9 @@ def fetch_lesson_id(lesson_title):
         return None
 
 
-#################################################
-### 4. Pygame Initialization and Window Setup ###
-#################################################
-
-# Try to load and set the window icon from a specified file
-try:
-    icon = pygame.image.load('assets/images/LLRN.ico')
-    pygame.display.set_icon(icon)
-except FileNotFoundError as e:
-    log_entry = create_log_message(f"Icon file not found: {e}")
-    log_message(log_entry)
-    print("Icon file not found, continuing without a custom icon.")
-except pygame.error as e:
-    log_entry = create_log_message(f"Failed to load icon: {e}")
-    log_message(log_entry)
-    print("Failed to load icon, continuing without a custom icon.")
-
-# Pygame initialization
-# Initialize Pygame's main modules. If there's an issue, log the error and exit.
-try:
-    pygame.init()
-    pygame.mixer.init()
-except pygame.error as e:
-    log_entry = create_log_message(f"Error initializing Pygame: {e}")
-    log_message(log_entry)
-    sys.exit(1)
-
-# Define available windowed resolutions
-# This list contains the resolutions that can be used by the game in windowed mode.
-WINDOWED_RESOLUTIONS = [
-    (640, 640), (768, 768), (800, 800), (900, 900), (1000, 1000), (1080, 1080)
-]
-
-# Get the display information from the system
-# MAX_DISPLAY_RESOLUTION will store the width and height of the current display, 
-# allowing the game to adapt to the user's monitor.
-info = pygame.display.Info() 
-MAX_DISPLAY_RESOLUTION = (info.current_w, info.current_h)
-
-# Filter available resolutions to match the current display
-# The AVAILABLE_RESOLUTIONS list only includes resolutions smaller than or 
-# equal to the user's maximum screen size, ensuring compatibility with 
-# different displays.
-AVAILABLE_RESOLUTIONS = [
-    res for res in WINDOWED_RESOLUTIONS if res[0] <= MAX_DISPLAY_RESOLUTION[0] and res[1] <= MAX_DISPLAY_RESOLUTION[1]
-]
-
-# Try to load the current resolution index from options, else default 800x800
-try:
-    with open("options.json", "r") as file:
-        options = json.load(file)
-        current_resolution_index = options.get("current_resolution_index", AVAILABLE_RESOLUTIONS.index((800, 800)))
-        WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
-except (FileNotFoundError, ValueError):
-    # Default to 800x800 resolution if options.json is missing or invalid
-    current_resolution_index = AVAILABLE_RESOLUTIONS.index((800, 800))
-    WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
-
-# Center the window before creating the Pygame window
-center_window(WIDTH, HEIGHT)
-
-# Initialize in windowed mode
-screen = pygame.display.set_mode((WIDTH, HEIGHT))  
-
-# Create a clock object to manage the frame rate of the game
-clock = pygame.time.Clock()
-
-# Load background images for different menus
-# These images are selected randomly from the specified folders and will be used
-# as backgrounds for the main menu and options menu.
-main_menu_background = select_random_background("assets/images/main_menu/")
-options_background = select_random_background("assets/images/options/")
-
-# Initialize Text to Speech
-engine = pyttsx3.init()
-
-
-############################
-### Function Definitions ###
-############################
-############################
-### 1. Utility Functions ###
-############################
+######################
+### Font Functions ###
+######################
 
 def get_dynamic_font_size():
     """
@@ -1115,6 +1107,36 @@ def get_filtered_fonts():
     return filtered_fonts
 
 
+###############################
+### MP3 and Music Functions ###
+###############################
+
+def decrease_volume(step=0.1):
+    global music_volume
+    music_volume = max(0.0, music_volume - step)  # Floor volume at 0.0 (mute)
+    pygame.mixer.music.set_volume(music_volume)
+
+
+def increase_volume(step=0.1):
+    global music_volume
+    music_volume = min(1.0, music_volume + step)  # Cap volume at 1.0 (100%)
+    pygame.mixer.music.set_volume(music_volume)
+
+
+def load_mp3(mp3):
+    try:
+        pygame.mixer.music.load(mp3)
+        return True  # Indicate success
+    except pygame.error as e:
+        log_entry = create_log_message(f"Failed to load {mp3}: {e}")
+        log_message(log_entry)
+        return False  # Indicate failure
+    except Exception as e:
+        log_entry = create_log_message(f"Unexpected error loading {mp3}: {e}")
+        log_message(log_entry)
+        return False  # Indicate failure
+    
+
 def get_random_mp3(directory):
     """Get a random MP3 file from the specified directory."""
     try:
@@ -1135,20 +1157,6 @@ def get_random_mp3(directory):
         log_message(log_entry)
         return None
 
-
-def load_mp3(mp3):
-    try:
-        pygame.mixer.music.load(mp3)
-        return True  # Indicate success
-    except pygame.error as e:
-        log_entry = create_log_message(f"Failed to load {mp3}: {e}")
-        log_message(log_entry)
-        return False  # Indicate failure
-    except Exception as e:
-        log_entry = create_log_message(f"Unexpected error loading {mp3}: {e}")
-        log_message(log_entry)
-        return False  # Indicate failure
-    
     
 def play_mp3(volume=None):
     global music_volume
@@ -1169,24 +1177,10 @@ def stop_mp3():
     # Stop the music
     pygame.mixer.music.stop()    
     
-    
-def set_haruka_slow(engine):
-    """
-    Set the voice properties for the text-to-speech engine to use the 
-    Haruka voice at a slow speaking rate.
 
-    Parameters:
-    engine (pyttsx3.Engine): The text-to-speech engine instance.
-    """
-    # Set the voice to Haruka (Japanese) using the registry path
-    engine.setProperty(
-        'voice', 
-        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
-    )
-    
-    # Set the speech rate to 100 (slow)
-    engine.setProperty('rate', 100)
-    
+###########
+### SFX ###
+###########
 
 def draw_branch(screen, start_pos, end_pos, thickness, color):
     # Function to draw a branch segment
@@ -1228,10 +1222,10 @@ def grow_tree(screen, start_x, start_y, max_depth, max_branches):
         branch_thickness = max(1, branch_thickness - 1)  # Decrease thickness with each level
 
     
-def draw_lightning(screen, start_pos, end_pos, background_image):
+def draw_lightning(screen, start_pos, end_pos, background_image, font, text_color, correct_message="CORRECT!"):
     """
     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
-    while keeping the background image intact.
+    while keeping the background image and 'CORRECT!' text intact, using the student's personalized settings.
     """
     # Prepare colors for the lightning
     start_color = (173, 216, 230)  # Light blue
@@ -1244,11 +1238,26 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
     # Load the background image (which will always exist in this version)
     bg_image = pygame.image.load(background_image)
 
+    # Resize the background image to fit the screen size
+    bg_image = pygame.transform.scale(bg_image, (screen.get_width(), screen.get_height()))
+
     for _ in range(3):  # Number of flash bursts
         # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
         screen.blit(bg_image, (0, 0))
 
-        # Step 2: Draw multiple lightning bolts in this frame
+        # Step 2: Draw the "CORRECT!" message using the draw_text function
+        draw_text(
+            text=correct_message,
+            font=font,
+            color=text_color,
+            x=0,  # X position is set to 0 for centering later
+            y=screen.get_height() * 0.2,  # Y position places the text above the image
+            center=True,
+            enable_shadow=True,  # Optionally enable shadow
+            shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
+        )
+
+        # Step 3: Draw multiple lightning bolts in this frame
         for _ in range(FLASH_COUNT):
             current_pos = start_pos
             for i in range(BOLT_SEGMENTS):
@@ -1270,24 +1279,44 @@ def draw_lightning(screen, start_pos, end_pos, background_image):
             # Draw the final segment of the bolt
             pygame.draw.line(screen, end_color, current_pos, end_pos, 2)
 
-        # Step 3: Display the lightning on top of the background
+        # Step 4: Display the lightning on top of the background and "CORRECT!" message
         pygame.display.flip()
 
-        # Step 4: Hold the lightning flash for a brief moment
+        # Step 5: Hold the lightning flash for a brief moment
         pygame.time.delay(BOLT_FLASH_DURATION)
 
-        # Step 5: Clear the screen by redrawing the background (erasing previous bolts)
+        # Step 6: Clear the screen by redrawing the background and the "CORRECT!" message (erasing previous bolts)
         screen.blit(bg_image, (0, 0))
+        draw_text(
+            text=correct_message,
+            font=font,
+            color=text_color,
+            x=0,  # X position is set to 0 for centering later
+            y=screen.get_height() * 0.2,  # Y position places the text above the image
+            center=True,
+            enable_shadow=True,  # Optionally enable shadow
+            shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
+        )
 
-        # Step 6: Refresh the screen to apply the cleared frame
+        # Step 7: Refresh the screen to apply the cleared frame
         pygame.display.flip()
 
         # Short delay before the next flash burst
         pygame.time.delay(20)
 
-    # Step 7: Redraw the background to ensure it persists after the lightning effect
+    # Step 8: Redraw the background and "CORRECT!" message after the lightning effect
     screen.blit(bg_image, (0, 0))
-    pygame.display.flip()  # Final refresh with background intact
+    draw_text(
+        text=correct_message,
+        font=font,
+        color=text_color,
+        x=0,  # X position is set to 0 for centering later
+        y=screen.get_height() * 0.2,  # Y position places the text above the image
+        center=True,
+        enable_shadow=True,  # Optionally enable shadow
+        shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
+    )
+    pygame.display.flip()  # Final refresh with background and text intact
 
 
 def generate_perlin_cloud(x_offset):
@@ -1352,12 +1381,6 @@ def check_continue_click(mouse_pos, continue_rect):
     if continue_rect.collidepoint(mouse_pos):
         return True  # Indicate that the button was clicked
     return False
-
-
-def decrease_volume(step=0.1):
-    global music_volume
-    music_volume = max(0.0, music_volume - step)  # Floor volume at 0.0 (mute)
-    pygame.mixer.music.set_volume(music_volume)
 
 
 def draw_background(image_path):
@@ -1453,12 +1476,6 @@ def display_text_and_wait(text):
         pygame.display.flip()
 
     pygame.time.delay(200)  # Optional: Delay to prevent accidental double clicks
-
-
-def increase_volume(step=0.1):
-    global music_volume
-    music_volume = min(1.0, music_volume + step)  # Cap volume at 1.0 (100%)
-    pygame.mixer.music.set_volume(music_volume)
 
 
 def draw_text(
@@ -1642,9 +1659,68 @@ def update_positions():
     resolution_plus_rect = font.render("+", True, text_color).get_rect(center=(WIDTH * 0.85, HEIGHT * 0.60))
 
 
-###############################
-### 3. Game Logic Functions ###
-###############################
+################################
+### Text-to-Speech Functions ###
+################################
+
+def speak_english(text):
+    """
+    Set up the text-to-speech engine to use the English voice and speak the given text.
+
+    Parameters:
+    text (str): The text to speak out loud in English.
+    """
+    global engine  # Ensure we use the global engine
+
+    # Set the voice to Zira (English) using the registry path
+    engine.setProperty('voice', "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_EN-US_ZIRA_11.0")
+    
+    # Optionally adjust the speech rate, for example, to slow down or speed up the voice
+    engine.setProperty('rate', 150)  # 150 is the default rate, adjust as needed
+    
+    # Use the engine to say the given text
+    engine.say(text)
+    engine.runAndWait()  # Block while the speech finishes
+    
+    
+def set_haruka_slow(engine):
+    """
+    Set the voice properties for the text-to-speech engine to use the 
+    Haruka voice at a slow speaking rate.
+
+    Parameters:
+    engine (pyttsx3.Engine): The text-to-speech engine instance.
+    """
+    # Set the voice to Haruka (Japanese) using the registry path
+    engine.setProperty(
+        'voice', 
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
+    )
+    
+    # Set the speech rate to 100 (slow)
+    engine.setProperty('rate', 100)
+    
+    
+def speak_japanese(text):
+    """
+    Set up the text-to-speech engine to use the Japanese voice and speak the given text.
+
+    Parameters:
+    text (str): The text to speak out loud in Japanese.
+    """
+    global engine  # Ensure we use the global engine
+
+    # Set the voice to Haruka (Japanese) and slow down the rate
+    set_haruka_slow(engine)
+    
+    # Use the engine to say the given text
+    engine.say(text)
+    engine.runAndWait()  # Block while the speech finishes
+
+
+############################
+### Bonus Game Functions ###
+############################
 
 def bonus_game_fat_tuna():
     # Check if the assets/images directory exists
@@ -1899,6 +1975,10 @@ def bonus_game_fat_tuna():
                     waiting = False  # Continue after the "Continue..." button is clicked
 
 
+##############################
+### Math Problem Functions ###
+##############################
+
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
     screen.fill(screen_color)
     
@@ -1975,7 +2055,8 @@ def display_result(result_text, image_folder=None, use_lightning=False):
     if use_lightning:
         # Show lightning effect if the fast answer condition is met
         for _ in range(3):  # Increased number of lightning bolts for dramatic effect
-            draw_lightning(screen, (random.randint(0, WIDTH), 0), (random.randint(0, WIDTH), HEIGHT), image_path)
+            draw_lightning(screen, (random.randint(0, WIDTH), 0), (random.randint(0, WIDTH), HEIGHT), 
+                           image_path, font, text_color, correct_message=result_text)
             pygame.display.flip()
             pygame.time.delay(150)  # Slight delay between lightning bolts
     else:
@@ -3875,6 +3956,103 @@ def display_fraction_problem(numerator1, numerator2, denominator, user_input, fi
     pygame.display.flip()
 
 
+def display_same_denominator_explanation():
+    """
+    Display a multi-step explanation for adding fractions with the same denominator and why it's an important first step.
+    """
+    explanation_lines = [
+        "When adding fractions, they need to have the same denominator (bottom number).",
+        "Fractions like 3/4 and 5/4 can be added because they have the same denominator.",
+        "This lesson will help you practice adding fractions that already have the same denominator.",
+        "Once you've mastered this, you'll be ready for the next challenge: finding the Lowest Common Denominator.",
+        "This is an important step toward doing all fraction addition on your own!"
+    ]
+    
+    for line in explanation_lines:
+        screen.fill(screen_color)
+        draw_text(line, font, text_color, x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True)
+        pygame.display.flip()
+
+        # Wait for a mouse click to move to the next explanation line
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False  # Move to the next line
+
+    # After the explanation, return to the original introduction screen
+    single_denominator_addition_intro()
+
+
+def single_denominator_addition_intro():
+    """
+    Display the initial introduction for the Single Denominator Addition quiz with
+    two clickable buttons: "What is Same Denominator?" and "Continue".
+    """
+    screen.fill(screen_color)
+
+    # Draw the main instructional text
+    draw_text(
+        "Let's work on Fraction Addition!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw the "What is Same Denominator?" clickable text
+    explanation_button_rect = draw_text(
+        "What is Same Denominator?",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    # Draw the "Continue" button
+    continue_button_rect = draw_text(
+        "Continue",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.9,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    pygame.display.flip()
+
+    # Wait for a click on either the explanation button or the Continue button
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if explanation_button_rect.collidepoint(mouse_pos):
+                    # Show the explanation if "What is Same Denominator?" is clicked
+                    display_same_denominator_explanation()
+                    waiting = False
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    # Move to the next part of the quiz if "Continue" is clicked
+                    waiting = False
+
+
 def single_denominator_addition(session_id):
     """Presents an addition quiz of fractions with the same denominator and updates the session results."""
     global current_student  # Access the global current student
@@ -3897,21 +4075,8 @@ def single_denominator_addition(session_id):
     cursor.close()
     connection.close()
 
-    # Display the introductory message
-    screen.fill(screen_color)
-    draw_text(
-        "Let's work on Fraction Addition!",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.4,
-        max_width=WIDTH * 0.95,
-        center=True,
-        enable_shadow=True,
-        shadow_color=shadow_color
-    )
-
-    draw_and_wait_continue_button()
+    # Start by displaying the introduction and clickable LCD explanation
+    single_denominator_addition_intro()
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -4023,6 +4188,590 @@ def single_denominator_addition(session_id):
     return total_questions, correct_answers, average_time
 
 
+def generate_lcd_problem(numerator_min, numerator_max, denominator_min, denominator_max):
+    """Generates two fractions with different denominators and returns the problem and the LCD."""
+    numerator1 = random.randint(numerator_min, numerator_max)
+    numerator2 = random.randint(numerator_min, numerator_max)
+    denominator1 = random.randint(denominator_min, denominator_max)
+    denominator2 = random.randint(denominator_min, denominator_max)
+
+    # Ensure the denominators are different
+    while denominator1 == denominator2:
+        denominator2 = random.randint(denominator_min, denominator_max)
+
+    # Find the lowest common denominator (LCD)
+    lcd = math.lcm(denominator1, denominator2)
+
+    return numerator1, denominator1, numerator2, denominator2, lcd
+
+
+def display_lcd_problem(numerator1, denominator1, numerator2, denominator2, user_input, first_input, line_length_factor=1.9):
+    screen.fill(screen_color)
+
+    # Dynamically calculate positions based on screen size
+    right_x = WIDTH * 0.55  # Right edge for alignment
+    num1_y = HEIGHT * 0.35
+    num2_y = HEIGHT * 0.5
+    line_y = HEIGHT * 0.57
+    sum_y = HEIGHT * 0.63
+
+    # Draw the first fraction (right-aligned)
+    fraction1_str = f"{numerator1}/{denominator1}"
+    fraction1_surface = font.render(fraction1_str, True, text_color)
+    fraction1_rect = fraction1_surface.get_rect(right=right_x, centery=num1_y)
+    screen.blit(fraction1_surface, fraction1_rect)
+
+    # Draw the plus sign (right-aligned with some offset)
+    plus_sign_x = right_x - fraction1_surface.get_width() - WIDTH * 0.05
+    plus_surface = font.render("+", True, text_color)
+    plus_rect = plus_surface.get_rect(right=plus_sign_x, centery=num2_y)
+    screen.blit(plus_surface, plus_rect)
+
+    # Draw the second fraction (right-aligned)
+    fraction2_str = f"{numerator2}/{denominator2}"
+    fraction2_surface = font.render(fraction2_str, True, text_color)
+    fraction2_rect = fraction2_surface.get_rect(right=right_x, centery=num2_y)
+    screen.blit(fraction2_surface, fraction2_rect)
+
+    # Draw the line (this can represent the denominator line if needed)
+    line_width = max(fraction1_surface.get_width(), fraction2_surface.get_width()) * line_length_factor
+    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+
+    # Draw the answer placeholder or the input from the student (right-aligned)
+    if first_input:
+        input_text = "?"  # Show "?" for the LCD answer the student needs to enter
+    else:
+        input_text = user_input
+
+    input_surface = font.render(input_text, True, text_color)
+    input_rect = input_surface.get_rect(right=right_x, centery=sum_y)
+    screen.blit(input_surface, input_rect)
+
+    pygame.display.flip()
+
+
+def display_lcd_explanation():
+    """
+    Display a multi-step explanation of what the Lowest Common Denominator is and
+    why it's important for adding fractions.
+    """
+    explanation_lines = [
+        "The Lowest Common Denominator is the smallest number that two denominators divide into evenly.",
+        "When adding fractions with different denominators, you need to find the LCD first.",
+        "Once both fractions have the same denominator, you can add them more easily.",
+        "The LCD helps simplify fraction addition and keeps the math easier to manage.",
+        "Now that you know what LCD is, let's practice finding it!"
+    ]
+    
+    for line in explanation_lines:
+        screen.fill(screen_color)
+        draw_text(line, font, text_color, x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True)
+        pygame.display.flip()
+
+        # Wait for a mouse click to move to the next explanation line
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False  # Move to the next line
+
+    # After the explanation, return to the original introduction screen
+    lowest_common_denominator_quiz_intro()
+
+
+def lowest_common_denominator_quiz_intro():
+    """
+    Display the initial introduction for the Lowest Common Denominator quiz with
+    two clickable buttons: "Lowest Common Denominator?" and "Continue".
+    """
+    screen.fill(screen_color)
+
+    # Draw the main instructional text
+    draw_text(
+        "Let's work on finding the Lowest Common Denominator!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw the "Lowest Common Denominator?" clickable text
+    lcd_button_rect = draw_text(
+        "Lowest Common Denominator?",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    # Draw the "Continue" button
+    continue_button_rect = draw_text(
+        "Continue",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.9,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    pygame.display.flip()
+
+    # Wait for a click on either the LCD button or the Continue button
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if lcd_button_rect.collidepoint(mouse_pos):
+                    # Show the LCD explanation if "Lowest Common Denominator?" is clicked
+                    display_lcd_explanation()
+                    waiting = False
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    # Move to the next part of the quiz if "Continue" is clicked
+                    waiting = False
+
+
+def lowest_common_denominator_quiz(session_id):
+    """Presents a quiz on solving for the lowest common denominator and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for LCD Problems
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Lowest Common Denominator',))
+    result = cursor.fetchone()
+    
+    if result:
+        lcd_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Lowest Common Denominator lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Start by displaying the introduction and clickable LCD explanation
+    lowest_common_denominator_quiz_intro()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        numerator1, denominator1, numerator2, denominator2, lcd = generate_lcd_problem(1, 9, 2, 12)
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)
+
+            # Draw the math problem
+            display_lcd_problem(numerator1, denominator1, numerator2, denominator2, user_input, first_input)
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER):
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)
+                        completion_times.append(time_taken)
+
+                        try:
+                            user_answer = int(user_input)
+                            if user_answer == lcd:
+                                correct_answers += 1
+
+                                if time_taken < 3:
+                                    display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                                else:
+                                    display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                            else:
+                                display_result(f"Sorry, the correct LCD is {lcd}")
+
+                        except ValueError:
+                            display_result("Invalid input, please try again")
+
+                        pygame.event.clear()
+                        problem_count += 1
+                        question_complete = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit():
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            lcd_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    # Display final score
+    screen.fill(screen_color)
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+
+    return total_questions, correct_answers, average_time
+
+
+def draw_shape(shape_type):
+    """Draw a specific shape on the screen based on the shape type."""
+    if shape_type == "circle":
+        pygame.draw.circle(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)
+    elif shape_type == "oval":
+        pygame.draw.ellipse(screen, text_color, (WIDTH // 3, HEIGHT // 3, 200, 100), 5)
+    elif shape_type == "square":
+        pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 150, 150), 5)
+    elif shape_type == "rectangle":
+        pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 200, 100), 5)
+
+
+def display_basic_shapes_explanation():
+    """
+    Display a multi-step explanation of basic geometric shapes and draw them on the screen.
+    """
+    explanation_steps = [
+        ("A circle is a round shape where every point is the same distance from the center.", "circle"),
+        ("An oval is a stretched-out circle, like an egg shape.", "oval"),
+        ("A square has four equal sides and four right angles.", "square"),
+        ("A rectangle also has four right angles, but two sides are longer than the other two.", "rectangle"),
+        ("Let's practice identifying these basic shapes!", None)
+    ]
+
+    for text, shape in explanation_steps:
+        screen.fill(screen_color)
+        draw_text(text, font, text_color, x=0, y=HEIGHT * 0.1, max_width=WIDTH * 0.95, center=True, enable_shadow=True)
+        
+        # Draw the shape if it's part of this step
+        if shape:
+            draw_shape(shape)
+
+        pygame.display.flip()
+
+        # Wait for a mouse click to move to the next explanation step
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False  # Move to the next step
+
+    # After the explanation, return to the original introduction screen
+    basic_shapes_quiz_intro()
+
+
+
+def basic_shapes_quiz_intro():
+    """
+    Display the introduction for the basic geometric shapes quiz with
+    two clickable buttons: "What are basic shapes?" and "Continue".
+    """
+    screen.fill(screen_color)
+
+    # Draw the main instructional text
+    draw_text(
+        "Let's work on identifying basic geometric shapes!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw the "What are basic shapes?" clickable text
+    explanation_button_rect = draw_text(
+        "What are basic shapes?",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    # Draw the "Continue" button
+    continue_button_rect = draw_text(
+        "Continue",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.9,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    pygame.display.flip()
+
+    # Wait for a click on either the explanation button or the Continue button
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if explanation_button_rect.collidepoint(mouse_pos):
+                    # Show the explanation if "What are basic shapes?" is clicked
+                    display_basic_shapes_explanation()
+                    waiting = False
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    # Move to the next part of the quiz if "Continue" is clicked
+                    waiting = False
+
+
+def draw_shapes_for_quiz(correct_shape):
+    """Draw multiple shapes on the screen for the student to choose from. Only one is the correct answer."""
+    # Randomize the position of shapes
+    shapes = ["circle", "oval", "square", "rectangle"]
+    random.shuffle(shapes)
+    
+    # Store rects for each shape for click detection
+    shape_rects = {}
+
+    # Define positions for each shape
+    positions = [
+        (WIDTH // 4, HEIGHT // 2),
+        (3 * WIDTH // 4, HEIGHT // 2),
+        (WIDTH // 4, 3 * HEIGHT // 4),
+        (3 * WIDTH // 4, 3 * HEIGHT // 4)
+    ]
+    
+    for i, shape in enumerate(shapes):
+        x, y = positions[i]
+        if shape == "circle":
+            shape_rect = pygame.draw.circle(screen, text_color, (x, y), 50, 5)
+        elif shape == "oval":
+            shape_rect = pygame.draw.ellipse(screen, text_color, (x - 50, y - 25, 100, 50), 5)
+        elif shape == "square":
+            shape_rect = pygame.draw.rect(screen, text_color, (x - 50, y - 50, 100, 100), 5)
+        elif shape == "rectangle":
+            shape_rect = pygame.draw.rect(screen, text_color, (x - 75, y - 50, 150, 100), 5)
+        
+        # Store the rect for this shape for click detection
+        shape_rects[shape] = shape_rect
+    
+    pygame.display.flip()
+    
+    return shape_rects
+
+
+def basic_shapes_quiz(session_id):
+    """
+    Presents a quiz on identifying basic geometric shapes and updates the session results.
+    The student will have to click on the correct shape.
+    """
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Basic Geometric Shapes
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Basic Geometric Shapes',))
+    result = cursor.fetchone()
+    
+    if result:
+        shapes_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Basic Geometric Shapes lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Start by displaying the introduction
+    basic_shapes_quiz_intro()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    # Define basic shapes for the quiz
+    shapes = [
+        {"name": "circle", "description": "Click the circle."},
+        {"name": "oval", "description": "Click the oval."},
+        {"name": "square", "description": "Click the square."},
+        {"name": "rectangle", "description": "Click the rectangle."}
+    ]
+
+    while problem_count < total_questions:
+        # Select a random shape question
+        shape_question = random.choice(shapes)
+        correct_shape = shape_question["name"]
+
+        # Draw the question
+        screen.fill(screen_color)
+        draw_text(
+            shape_question['description'],
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.15,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True
+        )
+
+        # Draw shapes and get rects for click detection
+        shape_rects = draw_shapes_for_quiz(correct_shape)
+        pygame.display.flip()
+
+        question_complete = False
+
+        while not question_complete:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    # Check if the student clicked any shape
+                    clicked_shape = None
+                    for shape_name, rect in shape_rects.items():
+                        if rect.collidepoint(mouse_pos):
+                            clicked_shape = shape_name
+                            break
+
+                    # If they clicked a shape, check if it's correct or not
+                    if clicked_shape:
+                        if clicked_shape == correct_shape:
+                            correct_answers += 1
+                            display_result("CORRECT!", "assets/images/cats")
+                        else:
+                            display_result(f"Sorry, the correct answer was {correct_shape}")
+                        
+                        question_complete = True
+
+            clock.tick(60)
+
+        problem_count += 1
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    # Record the lesson performance in the database
+    try:
+        add_session_lesson(
+            session_id,
+            shapes_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    # Display final score
+    screen.fill(screen_color)
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+
+    return total_questions, correct_answers, average_time
+
+
 
 
 
@@ -4041,44 +4790,8 @@ def introduction(font):
     fade_text_in_and_out("Developed by:", "Alvadore Retro Technology", font)
 
 
-def speak_japanese(text):
-    """
-    Set up the text-to-speech engine to use the Japanese voice and speak the given text.
-
-    Parameters:
-    text (str): The text to speak out loud in Japanese.
-    """
-    global engine  # Ensure we use the global engine
-
-    # Set the voice to Haruka (Japanese) and slow down the rate
-    set_haruka_slow(engine)
-    
-    # Use the engine to say the given text
-    engine.say(text)
-    engine.runAndWait()  # Block while the speech finishes
-
-
-def speak_english(text):
-    """
-    Set up the text-to-speech engine to use the English voice and speak the given text.
-
-    Parameters:
-    text (str): The text to speak out loud in English.
-    """
-    global engine  # Ensure we use the global engine
-
-    # Set the voice to Zira (English) using the registry path
-    engine.setProperty('voice', "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_EN-US_ZIRA_11.0")
-    
-    # Optionally adjust the speech rate, for example, to slow down or speed up the voice
-    engine.setProperty('rate', 150)  # 150 is the default rate, adjust as needed
-    
-    # Use the engine to say the given text
-    engine.say(text)
-    engine.runAndWait()  # Block while the speech finishes
-
-
 def load_options():
+    """Load and apply saved options from JSON file. """
     global current_font_name_or_path, music_volume, current_resolution_index, current_theme
     
     try:
@@ -4276,29 +4989,34 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                 #JP
+                       "basic_shapes_quiz",
                        "single_denominator_addition",
-                       # "single_digit_multiplication",
+                       "lowest_common_denominator_quiz",
+                       # "hiragana_quiz",                 #JP   
+                       # "rainbow_numbers",               #EN
                        "streak_check",                  #EN
-                       "day_of_the_week",               #J
-                       "month_of_the_year",             #J
-                       "skip_counting",                 #E
-                       "hiragana_teach",                #J
-                       "rainbow_numbers",               #E
-                       "skip_counting_japanese",        #J
-                       "single_digit_addition",         #E
-                       "hiragana_quiz",                 #J                       
-                       "single_digit_subtraction",      #E
-                       # "japanese_colors_teach         #J
+                       "day_of_the_week",               #JP
+                       "month_of_the_year",             #JP
+                       "skip_counting",                 #EN
+                       "hiragana_teach",                #JP
+                       "rainbow_numbers",               #EN
+                       "skip_counting_japanese",        #JP
+                       "single_digit_addition",         #EN
+                       "hiragana_quiz",                 #JP                      
+                       "single_digit_subtraction",      #EN
+                       # "japanese_colors_teach         #JP
                        "single_digit_multiplication",
                        # "japanese_colors_quiz",
                        "double_digit_addition",
                        "double_digit_subtraction",
-                       "single_by_double_multiplication",
-                       "triple_digit_addition",
-                       "triple_digit_subtraction",
-                       "double_digit_multiplication",
-                       "quad_digit_addition",
-                       "quad_digit_subtraction",
+                       "single_denominator_addition",
+                       "lowest_common_denominator_quiz",
+                       # "single_by_double_multiplication",
+                       # "triple_digit_addition",
+                       # "triple_digit_subtraction",
+                       # "double_digit_multiplication",
+                       # "quad_digit_addition",
+                       # "quad_digit_subtraction",
                        ] 
     total_questions = 0
     total_correct = 0
@@ -4508,6 +5226,34 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_denominator_addition did not return a valid result.")
+        # lowest_common_denominator_quiz
+        elif lesson == "lowest_common_denominator_quiz":
+            print("Running lowest_common_denominator_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = lowest_common_denominator_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: lowest_common_denominator_quiz did not return a valid result.")
+        # basic_shapes_quiz
+        elif lesson == "basic_shapes_quiz":
+            print("Running basic_shapes_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = basic_shapes_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: basic_shapes_quiz did not return a valid result.")
         elif lesson == "japanese_colors_teach":
             japanese_colors_teach()
         # elif lesson == "japanese_colors_quiz":
@@ -4534,7 +5280,6 @@ def session_manager():
 
     # Return to main menu after all lessons are done
     return "main_menu"
-
 
 
 def greet_student():
@@ -4567,6 +5312,10 @@ def greet_student():
     # Generate and blit Perlin clouds
     cloud_surface = generate_perlin_cloud(0)  # Use zero offset for static clouds
     screen.blit(cloud_surface, (0, 0))
+    
+    # Start growing tree from the exact bottom center
+    grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
+    grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
 
     # Draw the English greeting message
     draw_text(
@@ -4594,10 +5343,6 @@ def greet_student():
         shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can detect clicks
     )
-    
-    # Start growing tree from the exact bottom center
-    grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
-    grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
     
     # Draw the "Continue..." button wihtout draw_and_wait_continue_button()
     # As we do special stuff while waiting
@@ -5918,7 +6663,9 @@ class Platform:
         screen.blit(self.image, self.rect.topleft)
 
 
-# Main function that reads like a recipe
+#################
+# Main function #
+#################
 def main():
     # Load user options first to apply settings like font and resolution
     load_options()
