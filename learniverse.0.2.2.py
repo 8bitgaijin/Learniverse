@@ -5100,7 +5100,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                 #JP
-                       
+                       "japanese_colors_teach",         #JP
                        "single_denominator_addition",
                        "lowest_common_denominator_quiz",
                        # "hiragana_quiz",                 #JP   
@@ -5115,7 +5115,7 @@ def session_manager():
                        "single_digit_addition",         #EN
                        "hiragana_quiz",                 #JP                      
                        "single_digit_subtraction",      #EN
-                       # "japanese_colors_teach         #JP
+                       "japanese_colors_teach",         #JP
                        "single_digit_multiplication",
                        # "japanese_colors_quiz",
                        "double_digit_addition",
@@ -5367,7 +5367,7 @@ def session_manager():
             else:
                 log_message("Error: basic_shapes_quiz did not return a valid result.")
         elif lesson == "japanese_colors_teach":
-            japanese_colors_teach()
+            japanese_colors_teach(session_id)
         # elif lesson == "japanese_colors_quiz":
             # Run the lesson, passing session_id
             # lesson_result = japanese_colors_quiz(session_id)
@@ -6162,11 +6162,98 @@ def katakana_quiz(session_id):
     
     return total_questions, correct_answers, average_time
 
+colors1 = {
+  "quiz_title": "Colors 1",
+  "questions": [
+    {
+      "furigana": "あか",
+      "kanji": "赤",
+      "translation": "red",
+      "image": "GFX/colors/red.png"
+    },
+    {
+      "furigana": "あお",
+      "kanji": "青",
+      "translation": "blue",
+      "image": "GFX/colors/blue.png"
+    },
+    {
+      "furigana": "しろ",
+      "kanji": "白",
+      "translation": "white",
+      "image": "GFX/colors/white.png"
+    },
+    {
+      "furigana": "くろ",
+      "kanji": "黒",
+      "translation": "black",
+      "image": "GFX/colors/black.png"
+    },
+    {
+      "furigana": "みどり",
+      "kanji": "緑",
+      "translation": "green",
+      "image": "GFX/colors/green.png"
+    }
+  ]
+}
+
+def japanese_colors_teach(session_id):
+    """Displays Japanese colors (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Define fonts for the furigana, kanji, and translation
+    furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
+    kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+    translation_font = pygame.font.Font(None, 50)
+
+    # Clear the screen and inform the student about the lesson
+    screen.fill(screen_color)
+    intro_message = "Let's learn Japanese colors!"
+    draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+
+    # Display "Continue..." button and wait for user input
+    draw_and_wait_continue_button()
+
+    # Loop through the colors and display each one
+    for color in colors1['questions']:
+        screen.fill(screen_color)
+
+        # Display furigana
+        draw_text(color['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color)
+
+        # Display kanji
+        draw_text(color['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color)
+
+        # Display translation
+        draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color)
+
+        # Show the color image
+        color_image = pygame.image.load(color['image'])
+        screen.blit(color_image, (WIDTH // 2 - color_image.get_width() // 2, HEIGHT * 0.7))
+
+        pygame.display.flip()
+
+        # Speak the furigana (the reading of the kanji)
+        speak_japanese(color['furigana'])
+        time.sleep(1)
+
+    # Show completion message and wait for "Continue..."
+    screen.fill(screen_color)
+    draw_text("Great job!", translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color)
+    draw_and_wait_continue_button()
 
 
-def japanese_colors_teach():
-    pass
 
+
+
+
+ 
 
 
 def japanese_colors_quiz(session_id):
