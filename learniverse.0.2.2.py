@@ -4178,12 +4178,12 @@ def single_denominator_addition_intro():
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        shadow_color=shadow_color,
     )
 
     # Draw the "What is Same Denominator?" clickable text
     explanation_button_rect = draw_text(
-        "What is Same Denominator?",
+        "Same Denominator?",
         font,
         text_color,
         x=0,
@@ -4495,7 +4495,7 @@ def lowest_common_denominator_quiz_intro():
 
     # Draw the "Lowest Common Denominator?" clickable text
     lcd_button_rect = draw_text(
-        "Lowest Common Denominator?",
+        "LCD?",
         font,
         text_color,
         x=0,
@@ -4721,7 +4721,7 @@ def draw_regular_polygon(surface, color, center, radius, sides):
 def draw_star(surface, color, center, radius, points):
     """Draw a star with the specified number of points."""
     outer_points = []
-    inner_points = []
+    # inner_points = []
     angle_step = 2 * math.pi / (2 * points)  # Angle between outer and inner points
 
     for i in range(2 * points):
@@ -5208,7 +5208,14 @@ def skip_counting_fibonacci():
     # After completing the Fibonacci sequence, show a completion message using the default font
     completion_message = f"Great job! You counted the Fibonacci sequence {COUNT_TO} times!"
     screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(completion_message, 
+              font, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
 
     # Update the screen before speaking
     pygame.display.flip()
@@ -5374,7 +5381,15 @@ def skip_counting_primes():
     # After completing the prime number counting, show a completion message
     completion_message = f"Great job! You counted the first {COUNT_TO} prime numbers!"
     screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(completion_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
 
     # Update the screen before speaking
     pygame.display.flip()
@@ -5546,14 +5561,15 @@ def main_menu():
 def student_select_menu():
     global font, current_student  # Make font and current_student global so they can be used across the function
 
+    # Ensure font is initialized correctly
+    if not font:
+        font = pygame.font.SysFont('Arial', 32)  # Initialize font if it's not set
+
     # Initial variables for text input
     input_active = False  # Whether the text input box is active
     student_input = ''  # The current input from the user
 
     while True:
-        # Recalculate the font size dynamically based on the current resolution
-        # font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Use the global font
-
         # Draw the background for the student select menu
         draw_background(main_menu_background)
 
@@ -5572,10 +5588,15 @@ def student_select_menu():
             student_rects.append((student_rect, student_name))
 
         # Display the input box for adding new students
-        input_box_rect = pygame.Rect(WIDTH * 0.55, HEIGHT * 0.74, WIDTH * 0.4, 80)  # The size of the input box
-        pygame.draw.rect(screen, text_color, input_box_rect, 2)  # Draw the input box
+        input_box_rect = pygame.Rect(WIDTH * 0.60, HEIGHT * 0.75, WIDTH * 0.3, 80)  # The size of the input box
+        input_box_color = (255, 0, 0) if input_active else text_color  # Highlight input box when active
+        pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box
+
+        # Draw the "New Student" label
         draw_text("New Student:", font, text_color, WIDTH * 0.05, HEIGHT * 0.75, screen, enable_shadow=True)
-        draw_text(student_input, font, text_color, WIDTH * 0.56, HEIGHT * 0.74, screen, enable_shadow=True)
+
+        # Draw the current student input text in the input box
+        draw_text(student_input, font, text_color, WIDTH * 0.62, HEIGHT * 0.74, screen, enable_shadow=True)
 
         pygame.display.flip()  # Update the display
 
@@ -5595,21 +5616,43 @@ def student_select_menu():
                 # Check if the input box is clicked to activate text input
                 if input_box_rect.collidepoint(mouse_pos):
                     input_active = True
+                else:
+                    input_active = False  # Deactivate text input if clicked outside the box
 
-            elif event.type == pygame.KEYDOWN:
-                if input_active:
-                    # Handle text input for the new student name
-                    if event.key == pygame.K_RETURN:  # Enter key to submit
-                        if student_input.strip():  # Only add if the input is not empty
-                            add_student(student_input.strip())  # Add the student to the database
-                            student_input = ''  # Clear the input after submission
-                            input_active = False  # Deactivate the text input
-                    elif event.key == pygame.K_BACKSPACE:  # Handle backspace to delete characters
-                        student_input = student_input[:-1]
-                    else:
-                        student_input += event.unicode  # Append new character to the input
+            elif event.type == pygame.KEYDOWN and input_active:
+                # Handle text input for the new student name
+                if event.key == pygame.K_RETURN:  # Enter key to submit
+                    if student_input.strip():  # Only add if the input is not empty
+                        add_student(student_input.strip())  # Add the student to the database
+                        student_input = ''  # Clear the input after submission
+                        input_active = False  # Deactivate the text input
+                elif event.key == pygame.K_BACKSPACE:  # Handle backspace to delete characters
+                    student_input = student_input[:-1]
+                else:
+                    student_input += event.unicode  # Append new character to the input
+
+                # Redraw the screen after updating the input
+                draw_background(main_menu_background)  # Redraw the background
+                draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
+
+                # Redraw students
+                for index, student in enumerate(students):
+                    student_name = student[1]
+                    student_y = HEIGHT * (0.2 + 0.1 * index)
+                    draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True)
+
+                # Redraw input box and input text
+                pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Redraw the input box
+                draw_text("New Student:", font, text_color, WIDTH * 0.05, HEIGHT * 0.75, screen, enable_shadow=True)
+                draw_text(student_input, font, text_color, WIDTH * 0.62, HEIGHT * 0.74, screen, enable_shadow=True)
+
+                # Update the screen
+                pygame.display.flip()
 
         clock.tick(60)
+
+
+
 
 
 def learniverse_explanation():
@@ -5656,7 +5699,9 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       "japanese_colors4_quiz",             #JP
                        # "rainbow_numbers",                   #Math
+                       # "japanese_colors1_teach",             #JP
                        "japanese_colors1_quiz",             #JP
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
@@ -6272,9 +6317,6 @@ def display_bible_verse(greeting_message,
     draw_and_wait_continue_button()
 
 
-
-
-
 def john_3_16():
     """Greets the student and introduces the Bible verse John 3:16 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
@@ -6289,7 +6331,6 @@ def john_13_34():
     verse_title = "John 13:34"
     verse_text = "A new commandment I give to you, that you love one another; as I have loved you, that you also love one another."
     display_bible_verse(greeting_message, verse_title, verse_text)
-
 
 
 def psalm_23():
@@ -6325,10 +6366,6 @@ def ephesians_4_32():
     verse_title = "Ephesians 4:32"
     verse_text = "And be kind to one another, tenderhearted, forgiving one another, even as God in Christ forgave you."
     display_bible_verse(greeting_message, verse_title, verse_text)
-
-
-
-
 
 
 ##########################
@@ -6970,7 +7007,7 @@ def japanese_colors_teach(session_id, color_to_teach):
 
         # Display English translation (below kanji)
         draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color)
+                  enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
         pygame.display.flip()
 
@@ -7003,7 +7040,7 @@ def japanese_colors_teach(session_id, color_to_teach):
             draw_text(color['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
                       enable_shadow=True, shadow_color=shadow_color)
             draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
-                      enable_shadow=True, shadow_color=shadow_color)
+                      enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
             pygame.display.flip()
 
@@ -7015,7 +7052,7 @@ def japanese_colors_teach(session_id, color_to_teach):
     screen.fill(screen_color)
     completion_message = "Great job! You just learned Japanese colors!"
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color)
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
 
 
@@ -7119,6 +7156,24 @@ def japanese_colors_quiz(session_id, color_data):
     """Presents a quiz on Japanese colors (furigana, kanji, and translation) and tracks performance."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
 
+    # Step 1: Intro screen to inform the student that it's time for a Japanese color quiz
+    screen.fill(screen_color)
+    intro_message = "It's time for a Japanese Colors Quiz!"
+    draw_text(
+        intro_message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+    
+    # Display the continue button and wait for the student to click
+    draw_and_wait_continue_button()
+
     # Extract the quiz name from color_data
     quiz_name = color_data.get('quiz_title')
     if quiz_name is None:
@@ -7142,9 +7197,16 @@ def japanese_colors_quiz(session_id, color_data):
     correct_answers = 0
     completion_times = []
 
+    # Create a list to track remaining questions (removing each question after it's asked)
+    remaining_questions = color_questions[:]
+
     # Quiz loop
     for problem_count in range(total_questions):
-        question = color_questions[problem_count % len(color_questions)]
+        if not remaining_questions:
+            break  # Exit if no more questions are left
+
+        # Pick a question and remove it from the list to avoid repetition
+        question = remaining_questions.pop(0)
         correct_answer = question['translation']
 
         # Generate 3 incorrect answers
@@ -7220,6 +7282,8 @@ def japanese_colors_quiz(session_id, color_data):
 
     # Return the results of the quiz
     return total_questions, correct_answers, average_time
+
+
 
 
 
