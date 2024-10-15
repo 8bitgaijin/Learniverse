@@ -1672,6 +1672,7 @@ def draw_text(
     """
     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
     word wrapping, centering, and optional rect return. Optionally use Japanese font or override font size.
+    This version respects explicit line breaks (\n).
     """
 
     # Use the screen as the default surface if none is provided
@@ -1685,21 +1686,24 @@ def draw_text(
     # Select the font to use, prioritize font_override, then Japanese or default font
     selected_font = font_override if font_override else (j_font if use_japanese_font else font)
 
-    # Split text into lines based on max_width for word wrapping
+    # Split text into lines explicitly, using \n as a line break
+    lines = text.split('\n')
+
+    # Further split long lines into multiple lines if max_width is provided
     if max_width:
-        lines = []
-        words = text.split(' ')
-        current_line = []
-        for word in words:
-            test_line = ' '.join(current_line + [word])
-            if selected_font.size(test_line)[0] <= max_width:
-                current_line.append(word)
-            else:
-                lines.append(' '.join(current_line))
-                current_line = [word]
-        lines.append(' '.join(current_line))
-    else:
-        lines = [text]
+        wrapped_lines = []
+        for line in lines:
+            words = line.split(' ')
+            current_line = []
+            for word in words:
+                test_line = ' '.join(current_line + [word])
+                if selected_font.size(test_line)[0] <= max_width:
+                    current_line.append(word)
+                else:
+                    wrapped_lines.append(' '.join(current_line))
+                    current_line = [word]
+            wrapped_lines.append(' '.join(current_line))
+        lines = wrapped_lines
 
     text_rect = None
 
@@ -1728,6 +1732,7 @@ def draw_text(
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
+
 
 
 
@@ -5230,6 +5235,7 @@ def generate_primes(n):
         candidate += 1
     return primes
 
+
 def show_prime_explanation(COUNT_TO):
     """Displays Prime Number explanation one sentence at a time."""
     prime_explanation = [
@@ -5380,6 +5386,69 @@ def skip_counting_primes():
     draw_and_wait_continue_button()
 
 
+def skip_counting():
+    """Randomly selects a number between 2-9 and performs skip counting up to 100."""
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+    # Define a larger size for the skip-counted numbers
+    large_font_size = 200  # Adjust size as necessary
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
+
+    # Select a random number from 2-9
+    skip_number = random.randint(2, 9)
+
+    # Clear the screen and inform the student about the starting number
+    screen.fill(screen_color)
+    intro_message = f"Let's skip count by {skip_number}!"
+    
+    # Display the intro message and update the screen
+    draw_text(intro_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
+    
+    # Draw the "Continue..." button after intro message
+    draw_and_wait_continue_button()
+
+    # Start counting by the selected number, stopping at 100
+    for i in range(skip_number, 101, skip_number):
+        # Clear the screen before displaying each number
+        screen.fill(screen_color)
+
+        # Convert the number to string for display
+        number_str = str(i)
+
+        # Display the number in the center of the screen using the larger font size
+        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen after drawing the number
+        pygame.display.flip()
+
+        # Speak the number aloud in English
+        speak_english(number_str)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the skip counting, show a completion message using the default font
+    completion_message = "Great job!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after the completion message
+    draw_and_wait_continue_button()
+    
+    
 ########################################
 ### 4. Menu and Navigation Functions ###
 ########################################
@@ -5587,36 +5656,45 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "month_of_the_year",                 #JP
-                       "skip_counting",                     #ENG
+                       "skip_counting",                     #Math
                        "hiragana_teach",                    #JP
-                       "rainbow_numbers",                   #ENG
+                       "rainbow_numbers",                   #Math
                        "skip_counting_japanese",            #JP
-                       "single_digit_addition",             #ENG
+                       "single_digit_addition",             #Math
+                       "john_3_16",                         #ENG
                        "hiragana_quiz",                     #JP                      
-                       "single_digit_subtraction",          #ENG
+                       "single_digit_subtraction",          #Math
+                       "john_13_34",                        #ENG
                        "japanese_colors1_teach",            #JP
-                       "single_digit_multiplication",       #ENG
+                       "single_digit_multiplication",       #Math
+                       "hebrews_11_1",                      #ENG
                        "japanese_colors1_quiz",             #JP
-                       "double_digit_subtraction",          #ENG
+                       "double_digit_subtraction",          #Math
+                       "philippians_4_6",                   #ENG
                        "japanese_colors2_teach",            #JP
-                       "double_digit_addition",             #ENG
+                       "double_digit_addition",             #Math
+                       "ephesians_4_32",                    #ENG
                        "japanese_colors2_quiz",             #JP
-                       "single_denominator_addition",       #ENG
+                       "single_denominator_addition",       #Math
                        "japanese_colors3_teach",            #JP
-                       "lowest_common_denominator_quiz",    #ENG
+                       "lowest_common_denominator_quiz",    #Math
                        "japanese_colors3_quiz",             #JP
-                       "basic_shapes_quiz",                 #ENG
+                       "basic_shapes_quiz",                 #Math
                        "japanese_colors4_teach",            #JP
-                       "single_by_double_multiplication",   #ENG
+                       "single_by_double_multiplication",   #Math
                        "japanese_colors4_quiz",             #JP
-                       "skip_counting_fibonacci",           #ENG
+                       "skip_counting_fibonacci",           #Math
                        "japanese_colors5_teach",            #JP
-                       "skip_counting_primes",              #ENG
-                       # "japanese_colors5_quiz",         #JP
+                       "skip_counting_primes",              #Math
+                       "japanese_colors5_quiz",             #JP
+                       
+                       "psalm_23",                          #ENG
+                       
+                       
+                       
                        
                        
                        # "triple_digit_addition",
@@ -5645,6 +5723,18 @@ def session_manager():
             skip_counting_fibonacci()
         elif lesson == "skip_counting_primes":
             skip_counting_primes()
+        elif lesson == "john_3_16":
+            john_3_16()
+        elif lesson == "john_13_34":
+            john_13_34()
+        elif lesson == "psalm_23":
+            psalm_23()
+        elif lesson == "hebrews_11_1":
+            hebrews_11_1()
+        elif lesson == "philippians_4_6":
+             philippians_4_6()
+        elif lesson == "ephesians_4_32":
+            ephesians_4_32()
         elif lesson == "hiragana_teach":
             hiragana_teach(session_id)
         elif lesson == "katakana_teach":
@@ -6082,70 +6172,162 @@ def streak_check():
     draw_and_wait_continue_button()
 
 
+############################
+### Jr. Church Functions ###
+############################
 
+def display_bible_verse(greeting_message, 
+                        verse_title, 
+                        verse_text, 
+                        split_text=None):
+    """Displays a Bible verse with an optional split for larger texts."""
+    global screen_color, text_color, shadow_color, font
+    
+    # Define a larger font size for the Bible verse
+    large_font_size = 60  # Adjust size as necessary
+    large_font = pygame.font.Font(None, large_font_size)
 
-
-def skip_counting():
-    """Randomly selects a number between 2-9 and performs skip counting up to 100."""
-    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
-
-    # Define a larger size for the skip-counted numbers
-    large_font_size = 200  # Adjust size as necessary
-
-    # Initialize the larger font based on whether the current font is a file or system font
-    if os.path.isfile(current_font_name_or_path):
-        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
-    else:
-        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
-
-    # Select a random number from 2-9
-    skip_number = random.randint(2, 9)
-
-    # Clear the screen and inform the student about the starting number
+    # Clear the screen and display the greeting message
     screen.fill(screen_color)
-    intro_message = f"Let's skip count by {skip_number}!"
-    
-    # Display the intro message and update the screen
-    draw_text(intro_message, 
-              font, 
-              text_color, 
-              x=0, 
-              y=HEIGHT * 0.4, 
-              center=True, 
-              enable_shadow=True, 
-              shadow_color=shadow_color,
-              max_width=WIDTH)
-    
-    # Draw the "Continue..." button after intro message
+    draw_text(
+        greeting_message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
+    # Draw the "Continue" button and wait for the student to click
     draw_and_wait_continue_button()
 
-    # Start counting by the selected number, stopping at 100
-    for i in range(skip_number, 101, skip_number):
-        # Clear the screen before displaying each number
+    # If there is a split text (for long verses like Psalm 23), handle it in two parts
+    if split_text:
+        # Display and read the first part of the verse
         screen.fill(screen_color)
+        draw_text(
+            verse_title + "\n" + split_text[0],
+            font,  
+            text_color,
+            x=0,
+            y=HEIGHT * 0.1,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            max_width=WIDTH * 0.95,
+            font_override=large_font
+        )
 
-        # Convert the number to string for display
-        number_str = str(i)
-
-        # Display the number in the center of the screen using the larger font size
-        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-
-        # Update the screen after drawing the number
+        # Update the screen before speaking
         pygame.display.flip()
+        speak_english(verse_title + " " + split_text[0])
 
-        # Speak the number aloud in English
-        speak_english(number_str)
+        # Draw the "Continue" button again and wait for the student to click
+        draw_and_wait_continue_button()
 
-        # Pause for a second before showing the next number
-        time.sleep(1)
+        # Display and read the second part of the verse
+        screen.fill(screen_color)
+        draw_text(
+            split_text[1],
+            font,  
+            text_color,
+            x=0,
+            y=HEIGHT * 0.1,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            max_width=WIDTH * 0.95,
+            font_override=large_font
+        )
 
-    # After completing the skip counting, show a completion message using the default font
-    completion_message = "Great job!"
-    screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-    
-    # Draw the "Continue..." button after the completion message
+        # Update the screen before speaking
+        pygame.display.flip()
+        speak_english(split_text[1])
+
+    else:
+        # Display and read the entire verse if there's no split text
+        screen.fill(screen_color)
+        draw_text(
+            verse_title + "\n" + verse_text,
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.1,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            max_width=WIDTH * 0.95,
+            font_override=large_font
+        )
+
+        # Update the screen before speaking
+        pygame.display.flip()
+        speak_english(verse_title + " " + verse_text)
+
+    # Draw the "Continue" button again after displaying the verse
     draw_and_wait_continue_button()
+
+
+
+
+
+def john_3_16():
+    """Greets the student and introduces the Bible verse John 3:16 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "John 3:16"
+    verse_text = "For God so loved the world, that He gave His only begotten Son, that whosoever believeth in Him should not perish, but have everlasting life."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+def john_13_34():
+    """Greets the student and introduces the Bible verse John 13:34 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "John 13:34"
+    verse_text = "A new commandment I give to you, that you love one another; as I have loved you, that you also love one another."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+
+def psalm_23():
+    """Greets the student and introduces the Bible verse Psalm 23 (KJV) in two parts."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "Psalm 23"
+    split_text = [
+        "The Lord is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+        "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the Lord for ever."
+    ]
+    display_bible_verse(greeting_message, verse_title, "", split_text)
+
+
+def hebrews_11_1(): 
+    """Greets the student and introduces the Bible verse Hebrews 11:1 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "Hebrews 11:1"
+    verse_text = "Now faith is the substance of things hoped for, the evidence of things not seen."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+def philippians_4_6():
+    """Greets the student and introduces the Bible verse Philippians 4:6 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "Philippians 4:6"
+    verse_text = "Be anxious for nothing, but in everything by prayer and supplication, with thanksgiving, let your requests be made known to God."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+def ephesians_4_32():
+    """Greets the student and introduces the Bible verse Ephesians 4:32 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "Ephesians 4:32"
+    verse_text = "And be kind to one another, tenderhearted, forgiving one another, even as God in Christ forgave you."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+
+
 
 
 ##########################
