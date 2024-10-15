@@ -5656,6 +5656,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       "japanese_colors1_quiz",             #JP
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "month_of_the_year",                 #JP
@@ -5690,7 +5691,6 @@ def session_manager():
                        "japanese_colors5_teach",            #JP
                        "skip_counting_primes",              #Math
                        "japanese_colors5_quiz",             #JP
-                       
                        "psalm_23",                          #ENG
                        
                        
@@ -7145,9 +7145,15 @@ def japanese_colors_quiz(session_id, color_data):
         random.shuffle(options)
 
         # Display the quiz options and get option rects
-        option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
+        kanji_rect, furigana_rect, option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
 
-        # Wait for the student to click on an option
+        # Update the screen before speaking the furigana
+        pygame.display.flip()
+
+        # Speak the furigana aloud in Japanese after drawing the screen
+        speak_japanese(question['furigana'])
+
+        # Wait for the student to click on an option or on the kanji/furigana to hear it again
         start_time = time.time()
         question_complete = False
         while not question_complete:
@@ -7157,6 +7163,13 @@ def japanese_colors_quiz(session_id, color_data):
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = event.pos
+
+                    # Check if the student clicked the kanji or furigana to replay the audio
+                    if kanji_rect.collidepoint(mouse_pos) or furigana_rect.collidepoint(mouse_pos):
+                        speak_japanese(question['furigana'])  # Replay the furigana audio
+                        break  # Stay on the same question, wait for another click
+
+                    # Check if an option was clicked
                     for rect, option in option_rects:
                         if rect.collidepoint(mouse_pos):
                             time_taken = round(time.time() - start_time, 1)
@@ -7198,11 +7211,20 @@ def japanese_colors_quiz(session_id, color_data):
     return total_questions, correct_answers, average_time
 
 
+
+
+
+
+
 def display_color_quiz(screen, kanji, furigana, options):
+    """
+    Draws the kanji, furigana, and multiple-choice options on the screen.
+    Returns the rects for kanji, furigana, and the option rects for handling clicks.
+    """
     screen.fill(NAVY_BLUE)
 
     # Draw the Kanji on the screen
-    draw_text(
+    kanji_rect = draw_text(
         kanji,
         j_font,  # Assuming you have a separate kanji font loaded
         WHITE,
@@ -7211,11 +7233,11 @@ def display_color_quiz(screen, kanji, furigana, options):
         center=True,
         enable_shadow=True,
         shadow_color=BLACK,
-        use_japanese_font=True
+        return_rect=True
     )
 
     # Draw the Furigana above the Kanji
-    draw_text(
+    furigana_rect = draw_text(
         furigana,
         j_font,
         WHITE,
@@ -7224,7 +7246,7 @@ def display_color_quiz(screen, kanji, furigana, options):
         center=True,
         enable_shadow=True,
         shadow_color=BLACK,
-        use_japanese_font=True
+        return_rect=True
     )
 
     # Draw the multiple-choice options
@@ -7247,7 +7269,9 @@ def display_color_quiz(screen, kanji, furigana, options):
         option_rects.append((option_rect, option))
 
     pygame.display.flip()
-    return option_rects
+
+    return kanji_rect, furigana_rect, option_rects
+
 
 def japanese_colors1_quiz(session_id):
     japanese_colors_quiz(session_id, colors1)
