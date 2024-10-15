@@ -1672,27 +1672,8 @@ def draw_text(
     """
     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
     word wrapping, centering, and optional rect return. Optionally use Japanese font or override font size.
-
-    Arguments:
-    text -- The text to display.
-    font -- The font to use for rendering.
-    color -- The color of the text.
-    x, y -- The top-left coordinates for drawing the text.
-    surface -- The surface to draw the text on (defaults to screen if None).
-    max_width -- The maximum width for word wrapping (optional).
-    center -- Whether to center the text horizontally (optional).
-    enable_shadow -- Whether to enable a drop shadow (optional).
-    shadow_color -- The color of the drop shadow (optional, defaults to BLACK).
-    x_shadow_offset -- The X offset for the drop shadow (optional, defaults to 2).
-    y_shadow_offset -- The Y offset for the drop shadow (optional, defaults to 2).
-    return_rect -- Whether to return the rect of the drawn text (optional).
-    use_japanese_font -- Whether to use the Japanese font (optional, defaults to False).
-    font_override -- Optionally pass a different font for this draw call (optional).
-
-    Returns:
-    If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
     """
-    
+
     # Use the screen as the default surface if none is provided
     if surface is None:
         surface = screen
@@ -1739,14 +1720,15 @@ def draw_text(
         text_surface = selected_font.render(line, True, color)
         surface.blit(text_surface, (draw_x, y))
         
-        # Calculate rect for the first line
+        # Calculate rect for the first line (ensure it accounts for centering)
         if i == 0 and return_rect:
-            text_rect = pygame.Rect(draw_x, y, selected_font.size(line)[0], selected_font.size(line)[1])
-        
+            text_rect = pygame.Rect(draw_x, y, selected_font.size(line)[0], selected_font.get_linesize())
+
         # Move down to the next line
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
+
 
 
 def fade_text_in_and_out(line1, line2, font, max_width=None):
@@ -5063,6 +5045,9 @@ def basic_shapes_quiz(session_id):
         draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
 
     draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
 
     return total_questions, correct_answers, average_time
 
@@ -5075,6 +5060,7 @@ def fibonacci_sequence(n):
         sequence.append(a)
         a, b = b, a + b
     return sequence
+
 
 def show_fibonacci_explanation(COUNT_TO):
     """Displays Fibonacci explanation one sentence at a time."""
@@ -5112,44 +5098,66 @@ def show_fibonacci_explanation(COUNT_TO):
 
 def skip_counting_fibonacci_intro(COUNT_TO):
     """Displays the intro to Fibonacci counting with clickable 'Fibonacci numbers?' text."""
-    # Clear the screen and inform the student about the Fibonacci sequence
     screen.fill(screen_color)
+
+    # Draw the main instructional text
     intro_message = f"Let's count using the Fibonacci sequence {COUNT_TO} times!"
-    
-    # Display the intro message
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-    
-    # Update the screen before speaking
+    draw_text(
+        intro_message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
+    # Draw the "Fibonacci numbers?" clickable text and get its rect
+    explanation_button_rect = draw_text(
+        "Fibonacci numbers?",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    # Draw the "Continue" button and get its rect
+    continue_button_rect = draw_text(
+        "Continue",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.9,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
     pygame.display.flip()
 
-    # Speak the intro message aloud
-    speak_english(intro_message)
-
-    # Display clickable "Fibonacci numbers?" text at the bottom and get its rect
-    fib_rect = draw_text("Fibonacci numbers?", font, text_color, x=0, y=HEIGHT * 0.8, center=True, 
-                         enable_shadow=True, shadow_color=shadow_color, return_rect=True)
-
-    # Display the "Continue..." button
-    draw_and_wait_continue_button()
-
-    pygame.display.flip()
-
-    # Wait for click events for either explanation or continue
-    waiting_for_continue = True
-    while waiting_for_continue:
+    # Wait for a click on either the explanation button or the Continue button
+    waiting = True
+    while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = event.pos
-                if fib_rect and fib_rect.collidepoint(mouse_pos):  # Check if "Fibonacci numbers?" is clicked
-                    show_fibonacci_explanation(COUNT_TO)  # Pass COUNT_TO to show_fibonacci_explanation
-                    return
-                else:
-                    waiting_for_continue = False  # Continue to the Fibonacci counting
-
+                mouse_pos = pygame.mouse.get_pos()  # Use get_pos to ensure accurate click position
+                if explanation_button_rect.collidepoint(mouse_pos):
+                    # Show the explanation if "Fibonacci numbers?" is clicked
+                    show_fibonacci_explanation(COUNT_TO)
+                    waiting = False
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    # Move to the next part if "Continue" is clicked
+                    waiting = False
 
 
 def skip_counting_fibonacci():
@@ -5207,6 +5215,169 @@ def skip_counting_fibonacci():
     draw_and_wait_continue_button()
 
 
+def generate_primes(n):
+    """Generates the first n prime numbers."""
+    primes = []
+    candidate = 2  # Start with the first prime number
+    while len(primes) < n:
+        is_prime = True
+        for p in primes:
+            if candidate % p == 0:
+                is_prime = False
+                break
+        if is_prime:
+            primes.append(candidate)
+        candidate += 1
+    return primes
+
+def show_prime_explanation(COUNT_TO):
+    """Displays Prime Number explanation one sentence at a time."""
+    prime_explanation = [
+        "Prime numbers are numbers greater than 1 that have no divisors other than 1 and themselves.",
+        "For example, 2 is prime because it can only be divided by 1 and 2.",
+        "Prime numbers play a fundamental role in mathematics and are used in cryptography.",
+        "Now, let's count some prime numbers!"
+    ]
+    
+    sentence_index = 0
+    while sentence_index < len(prime_explanation):
+        # Clear the screen and show the current explanation sentence
+        screen.fill(screen_color)
+        draw_text(prime_explanation[sentence_index], font, text_color, x=0, y=HEIGHT * 0.4, 
+                  center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+        pygame.display.flip()
+
+        # Wait for a mouse click to move to the next sentence
+        waiting_for_click = True
+        while waiting_for_click:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting_for_click = False
+
+        # Move to the next sentence
+        sentence_index += 1
+
+    # After the explanation, return to the intro screen
+    skip_counting_primes_intro(COUNT_TO)
+
+
+def skip_counting_primes_intro(COUNT_TO):
+    """Displays the intro to prime number counting with clickable 'Prime numbers?' text."""
+    screen.fill(screen_color)
+
+    # Draw the main instructional text
+    intro_message = f"Let's count the first {COUNT_TO} prime numbers!"
+    draw_text(
+        intro_message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
+    # Draw the "Prime numbers?" clickable text and get its rect
+    explanation_button_rect = draw_text(
+        "Prime numbers?",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    # Draw the "Continue" button and get its rect
+    continue_button_rect = draw_text(
+        "Continue",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.9,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect so we can check if it's clicked
+    )
+
+    pygame.display.flip()
+
+    # Wait for a click on either the explanation button or the Continue button
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()  # Use get_pos to ensure accurate click position
+                if explanation_button_rect.collidepoint(mouse_pos):
+                    # Show the explanation if "Prime numbers?" is clicked
+                    show_prime_explanation(COUNT_TO)
+                    waiting = False
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    # Move to the next part if "Continue" is clicked
+                    waiting = False
+
+
+def skip_counting_primes():
+    """Displays prime numbers, reads them aloud, and shows the number on screen."""
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+    COUNT_TO = 10  # Number of prime numbers to display
+    large_font_size = 150  # Adjust font size as necessary
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
+
+    # Show the intro screen with the "Prime numbers?" button
+    skip_counting_primes_intro(COUNT_TO)
+
+    # Get prime numbers up to COUNT_TO
+    prime_numbers = generate_primes(COUNT_TO)
+
+    # Loop through the prime numbers and display each one
+    for prime in prime_numbers:
+        # Clear the screen before displaying each number
+        screen.fill(screen_color)
+
+        # Display the prime number in the center of the screen using the larger font size
+        prime_str = str(prime)
+        draw_text(prime_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen before speaking
+        pygame.display.flip()
+
+        # Speak the prime number aloud in English
+        speak_english(prime_str)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the prime number counting, show a completion message
+    completion_message = f"Great job! You counted the first {COUNT_TO} prime numbers!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    # Update the screen before speaking
+    pygame.display.flip()
+
+    # Speak the completion message aloud
+    speak_english(completion_message)
+    
+    # Draw the "Continue..." button after the completion message
+    draw_and_wait_continue_button()
 
 
 ########################################
@@ -5415,35 +5586,36 @@ def session_manager():
     #####################################
     ### Step 2: Logic for lesson flow ###
     #####################################
-    lessons_to_play = ["greet_student",                 #JP
-                       "skip_counting_fibonacci",
+    lessons_to_play = ["greet_student",                     #JP
                        
-                       "streak_check",                  #EN
-                       "day_of_the_week",               #JP
-                       "month_of_the_year",             #JP
-                       "skip_counting",                 #EN
-                       "hiragana_teach",                #JP
-                       "rainbow_numbers",               #EN
-                       "skip_counting_japanese",        #JP
-                       "single_digit_addition",         #EN
-                       "hiragana_quiz",                 #JP                      
-                       "single_digit_subtraction",      #EN
-                       "japanese_colors1_teach",        #JP
-                       "single_digit_multiplication",   #EN
-                       "japanese_colors1_quiz",         #JP
-                       "double_digit_subtraction",      #EN
-                       "japanese_colors2_teach",        #JP
-                       "double_digit_addition",         #EN
-                       "japanese_colors2_quiz",         #JP
-                       "single_denominator_addition",   #EN
-                       "japanese_colors3_teach",        #JP
-                       "lowest_common_denominator_quiz",#EN
-                       "japanese_colors3_quiz",         #JP
-                       "basic_shapes_quiz",             #EN
-                       "japanese_colors4_teach",        #JP
-                       "single_by_double_multiplication",
-                       "japanese_colors4_quiz",         #JP
-                       # "japanese_colors5_teach",        #JP
+                       "streak_check",                      #ENG
+                       "day_of_the_week",                   #JP
+                       "month_of_the_year",                 #JP
+                       "skip_counting",                     #ENG
+                       "hiragana_teach",                    #JP
+                       "rainbow_numbers",                   #ENG
+                       "skip_counting_japanese",            #JP
+                       "single_digit_addition",             #ENG
+                       "hiragana_quiz",                     #JP                      
+                       "single_digit_subtraction",          #ENG
+                       "japanese_colors1_teach",            #JP
+                       "single_digit_multiplication",       #ENG
+                       "japanese_colors1_quiz",             #JP
+                       "double_digit_subtraction",          #ENG
+                       "japanese_colors2_teach",            #JP
+                       "double_digit_addition",             #ENG
+                       "japanese_colors2_quiz",             #JP
+                       "single_denominator_addition",       #ENG
+                       "japanese_colors3_teach",            #JP
+                       "lowest_common_denominator_quiz",    #ENG
+                       "japanese_colors3_quiz",             #JP
+                       "basic_shapes_quiz",                 #ENG
+                       "japanese_colors4_teach",            #JP
+                       "single_by_double_multiplication",   #ENG
+                       "japanese_colors4_quiz",             #JP
+                       "skip_counting_fibonacci",           #ENG
+                       "japanese_colors5_teach",            #JP
+                       "skip_counting_primes",              #ENG
                        # "japanese_colors5_quiz",         #JP
                        
                        
@@ -5471,6 +5643,8 @@ def session_manager():
             skip_counting()
         elif lesson == "skip_counting_fibonacci":
             skip_counting_fibonacci()
+        elif lesson == "skip_counting_primes":
+            skip_counting_primes()
         elif lesson == "hiragana_teach":
             hiragana_teach(session_id)
         elif lesson == "katakana_teach":
@@ -5701,8 +5875,6 @@ def session_manager():
             japanese_colors4_teach(session_id)
         elif lesson == "japanese_colors5_teach":
             japanese_colors5_teach(session_id)
-        
-        # japanese_colors1_quiz
         elif lesson == "japanese_colors1_quiz":
             print("Running japanese_colors1_quiz")
             # Run the lesson, passing session_id, and capture the return values
