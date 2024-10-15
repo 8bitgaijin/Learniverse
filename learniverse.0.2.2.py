@@ -5656,6 +5656,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       # "rainbow_numbers",                   #Math
                        "japanese_colors1_quiz",             #JP
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
@@ -7033,11 +7034,16 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
     # Initialize particle list
     particles = []
 
+    # Define a variable for particle delay (adjustable)
+    PARTICLE_DELAY_MS = 20  # Delay in milliseconds between each frame of particle rendering
+
     # Attempt to load the image if provided
     bg_image = None
     if image_file:
         try:
             bg_image = pygame.image.load(image_file)
+            # Resize the image to the screen dimensions
+            bg_image = pygame.transform.scale(bg_image, (WIDTH, HEIGHT))
         except FileNotFoundError:
             log_message(f"Image not found: {image_file}. Displaying text only.")
             # If the image is not found, bg_image remains None
@@ -7080,6 +7086,9 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
                         particles.remove(particle)
                     else:
                         particle.draw(screen)
+
+                # Add delay to control the speed of particle rendering
+                pygame.time.delay(PARTICLE_DELAY_MS)
             else:
                 # For incorrect answers or if no image is available, fill the screen with the current screen color
                 screen.fill(screen_color)
@@ -7101,6 +7110,8 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
 
     # Clear the event queue again after displaying the result
     pygame.event.clear()
+
+
 
 
 
