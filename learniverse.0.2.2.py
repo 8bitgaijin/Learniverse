@@ -167,6 +167,188 @@ current_student = None  # Global variable to store the currently selected studen
 # Icon will be loaded later, initialized as None for now
 icon = None
 
+# Japanese colors data
+colors1 = {
+  "quiz_title": "Colors 1",
+  "questions": [
+    {
+      "furigana": "あか",
+      "kanji": "赤",
+      "translation": "red",
+      "image": "GFX/colors/red.png"
+    },
+    {
+      "furigana": "あお",
+      "kanji": "青",
+      "translation": "blue",
+      "image": "GFX/colors/blue.png"
+    },
+    {
+      "furigana": "しろ",
+      "kanji": "白",
+      "translation": "white",
+      "image": "GFX/colors/white.png"
+    },
+    {
+      "furigana": "くろ",
+      "kanji": "黒",
+      "translation": "black",
+      "image": "GFX/colors/black.png"
+    },
+    {
+      "furigana": "みどり",
+      "kanji": "緑",
+      "translation": "green",
+      "image": "GFX/colors/green.png"
+    }
+  ]
+}
+
+colors2 = {
+  "quiz_title": "Colors 2",
+  "questions": [
+    {
+      "furigana": "きいろ",
+      "kanji": "黄色",
+      "translation": "yellow",
+      "image": "GFX/colors/yellow.png"
+    },
+    {
+      "furigana": "ちゃいろ",
+      "kanji": "茶色",
+      "translation": "brown",
+      "image": "GFX/colors/brown.png"
+    },
+    {
+      "furigana": "むらさき",
+      "kanji": "紫",
+      "translation": "purple",
+      "image": "GFX/colors/purple.png"
+    },
+    {
+      "furigana": "はいいろ",
+      "kanji": "灰色",
+      "translation": "gray",
+      "image": "GFX/colors/gray.png"
+    },
+    {
+      "furigana": "きんいろ",
+      "kanji": "金色",
+      "translation": "gold",
+      "image": "GFX/colors/gold.png"
+    }
+  ]
+}
+
+colors3 = {
+  "quiz_title": "Colors 3",
+  "questions": [
+    {
+      "furigana": "だいだいいろ",
+      "kanji": "橙色",
+      "translation": "orange",
+      "image": "GFX/colors/orange.png"
+    },
+    {
+      "furigana": "ももいろ",
+      "kanji": "桃色",
+      "translation": "pink",
+      "image": "GFX/colors/pink.png"
+    },
+    # {
+    #   "furigana": "きんいろ",
+    #   "kanji": "金色",
+    #   "translation": "gold",
+    #   "image": "GFX/colors/gold.png"
+    # },
+    {
+      "furigana": "ぎんいろ",
+      "kanji": "銀色",
+      "translation": "silver",
+      "image": "GFX/colors/silver.png"
+    },
+    {
+      "furigana": "こんいろ",
+      "kanji": "紺色",
+      "translation": "navy blue",
+      "image": "GFX/colors/navy_blue.png"
+    }
+  ]
+}
+
+colors4 = {
+  "quiz_title": "Colors 4",
+  "questions": [
+    {
+      "furigana": "みずいろ",
+      "kanji": "水色",
+      "translation": "light blue",
+      "image": "GFX/colors/light_blue.png"
+    },
+    {
+      "furigana": "しこう",
+      "kanji": "紫紅",
+      "translation": "crimson",
+      "image": "GFX/colors/crimson.png"
+    },
+    {
+      "furigana": "きみどり",
+      "kanji": "黄緑",
+      "translation": "yellow-green",
+      "image": "GFX/colors/yellow_green.png"
+    },
+    {
+      "furigana": "わかくさいろ",
+      "kanji": "若草色",
+      "translation": "light green",
+      "image": "GFX/colors/light_green.png"
+    },
+    {
+      "furigana": "あさぎいろ",
+      "kanji": "浅葱色",
+      "translation": "light blue-green",
+      "image": "GFX/colors/light_blue_green.png"
+    }
+  ]
+}
+
+colors5 = {
+  "quiz_title": "Colors 5",
+  "questions": [
+    {
+      "furigana": "さくらいろ",
+      "kanji": "桜色",
+      "translation": "cherry blossom pink",
+      "image": "GFX/colors/cherry_blossom_pink.png"
+    },
+    {
+      "furigana": "れんがいろ",
+      "kanji": "煉瓦色",
+      "translation": "brick red",
+      "image": "GFX/colors/brick_red.png"
+    },
+    {
+      "furigana": "おうどいろ",
+      "kanji": "黄土色",
+      "translation": "ochre",
+      "image": "GFX/colors/ochre.png"
+    },
+    {
+      "furigana": "とびいろ",
+      "kanji": "鳶色",
+      "translation": "dark reddish-brown",
+      "image": "GFX/colors/dark_reddish_brown.png"
+    },
+    {
+      "furigana": "ぶどういろ",
+      "kanji": "葡萄色",
+      "translation": "grape color",
+      "image": "GFX/colors/grape.png"
+    }
+  ]
+}
+
+
 ##################################
 # TODO
 # CAN I REMOVE THESE TWO SOMEHOW?
@@ -518,7 +700,12 @@ def insert_lessons(cursor, connection):
         ("Double Digit Multiplication", "Double Digit Multiplication"),
         ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
         ("Lowest Common Denominator", "Lowest Common Denominator"),
-        ("Basic Geometric Shapes", "Basic Geometric Shapes")
+        ("Basic Geometric Shapes", "Basic Geometric Shapes"),
+        ("Colors 1", "Quiz to master Colors 1"),
+        ("Colors 2", "Quiz to master Colors 2"),
+        ("Colors 3", "Quiz to master Colors 3"),
+        ("Colors 4", "Quiz to master Colors 4"),
+        ("Colors 5", "Quiz to master Colors 5")
     ]
 
     try:
@@ -4205,8 +4392,6 @@ def single_denominator_addition(session_id):
     return total_questions, correct_answers, average_time
 
 
-
-
 def generate_lcd_problem(numerator_min, numerator_max, denominator_min, denominator_max):
     """Generates two fractions with different denominators and returns the problem and the LCD."""
     numerator1 = random.randint(numerator_min, numerator_max)
@@ -4882,13 +5067,144 @@ def basic_shapes_quiz(session_id):
     return total_questions, correct_answers, average_time
 
 
+def fibonacci_sequence(n):
+    """Generates the Fibonacci sequence up to the nth term."""
+    sequence = []
+    a, b = 0, 1
+    while len(sequence) < n:
+        sequence.append(a)
+        a, b = b, a + b
+    return sequence
+
+def show_fibonacci_explanation(COUNT_TO):
+    """Displays Fibonacci explanation one sentence at a time."""
+    fibonacci_explanation = [
+        "Fibonacci numbers are a sequence of numbers starting with 0 and 1.",
+        "Each number in the sequence is the sum of the two preceding ones.",
+        "This sequence is found in nature, art, and architecture.",
+        "Now, let's see how the Fibonacci sequence works!"
+    ]
+    
+    sentence_index = 0
+    while sentence_index < len(fibonacci_explanation):
+        # Clear the screen and show the current explanation sentence
+        screen.fill(screen_color)
+        draw_text(fibonacci_explanation[sentence_index], font, text_color, x=0, y=HEIGHT * 0.4, 
+                  center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+        pygame.display.flip()
+
+        # Wait for a mouse click to move to the next sentence
+        waiting_for_click = True
+        while waiting_for_click:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting_for_click = False
+
+        # Move to the next sentence
+        sentence_index += 1
+
+    # After the explanation, return to the intro screen
+    skip_counting_fibonacci_intro(COUNT_TO)
+
+
+def skip_counting_fibonacci_intro(COUNT_TO):
+    """Displays the intro to Fibonacci counting with clickable 'Fibonacci numbers?' text."""
+    # Clear the screen and inform the student about the Fibonacci sequence
+    screen.fill(screen_color)
+    intro_message = f"Let's count using the Fibonacci sequence {COUNT_TO} times!"
+    
+    # Display the intro message
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+    
+    # Update the screen before speaking
+    pygame.display.flip()
+
+    # Speak the intro message aloud
+    speak_english(intro_message)
+
+    # Display clickable "Fibonacci numbers?" text at the bottom and get its rect
+    fib_rect = draw_text("Fibonacci numbers?", font, text_color, x=0, y=HEIGHT * 0.8, center=True, 
+                         enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+
+    # Display the "Continue..." button
+    draw_and_wait_continue_button()
+
+    pygame.display.flip()
+
+    # Wait for click events for either explanation or continue
+    waiting_for_continue = True
+    while waiting_for_continue:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                if fib_rect and fib_rect.collidepoint(mouse_pos):  # Check if "Fibonacci numbers?" is clicked
+                    show_fibonacci_explanation(COUNT_TO)  # Pass COUNT_TO to show_fibonacci_explanation
+                    return
+                else:
+                    waiting_for_continue = False  # Continue to the Fibonacci counting
 
 
 
+def skip_counting_fibonacci():
+    """Displays Fibonacci sequence and equations, reads them aloud, and shows the number on screen."""
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
 
+    COUNT_TO = 10  # Number of Fibonacci iterations
+    large_font_size = 150  # Adjust font size as necessary
 
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
 
+    # Show the intro screen with the "Fibonacci numbers?" button
+    skip_counting_fibonacci_intro(COUNT_TO)
 
+    # Get Fibonacci sequence up to COUNT_TO
+    fibonacci_numbers = fibonacci_sequence(COUNT_TO)
+
+    # Loop through the Fibonacci numbers and display each equation and result
+    for i in range(2, len(fibonacci_numbers)):
+        # Clear the screen before displaying each equation and number
+        screen.fill(screen_color)
+
+        # Get the equation and result for the current Fibonacci number
+        a, b, result = fibonacci_numbers[i - 2], fibonacci_numbers[i - 1], fibonacci_numbers[i]
+        equation_str = f"{a} + {b} = {result}"
+
+        # Display the equation in the center of the screen using the larger font size
+        draw_text(equation_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen before speaking
+        pygame.display.flip()
+
+        # Speak the equation aloud in English
+        speak_english(equation_str)
+
+        # Pause for a second before showing the next equation
+        time.sleep(1)
+
+    # After completing the Fibonacci sequence, show a completion message using the default font
+    completion_message = f"Great job! You counted the Fibonacci sequence {COUNT_TO} times!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    # Update the screen before speaking
+    pygame.display.flip()
+
+    # Speak the completion message aloud
+    speak_english(completion_message)
+    
+    # Draw the "Continue..." button after the completion message
+    draw_and_wait_continue_button()
 
 
 
@@ -5100,11 +5416,8 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                 #JP
-                       "japanese_colors_teach",         #JP
-                       "single_denominator_addition",
-                       "lowest_common_denominator_quiz",
-                       # "hiragana_quiz",                 #JP   
-                       # "rainbow_numbers",               #EN
+                       "skip_counting_fibonacci",
+                       
                        "streak_check",                  #EN
                        "day_of_the_week",               #JP
                        "month_of_the_year",             #JP
@@ -5115,15 +5428,25 @@ def session_manager():
                        "single_digit_addition",         #EN
                        "hiragana_quiz",                 #JP                      
                        "single_digit_subtraction",      #EN
-                       "japanese_colors_teach",         #JP
-                       "single_digit_multiplication",
-                       # "japanese_colors_quiz",
-                       "double_digit_addition",
-                       "double_digit_subtraction",
-                       "single_denominator_addition",
-                       "lowest_common_denominator_quiz",
-                       "basic_shapes_quiz",
-                       # "single_by_double_multiplication",
+                       "japanese_colors1_teach",        #JP
+                       "single_digit_multiplication",   #EN
+                       "japanese_colors1_quiz",         #JP
+                       "double_digit_subtraction",      #EN
+                       "japanese_colors2_teach",        #JP
+                       "double_digit_addition",         #EN
+                       "japanese_colors2_quiz",         #JP
+                       "single_denominator_addition",   #EN
+                       "japanese_colors3_teach",        #JP
+                       "lowest_common_denominator_quiz",#EN
+                       "japanese_colors3_quiz",         #JP
+                       "basic_shapes_quiz",             #EN
+                       "japanese_colors4_teach",        #JP
+                       "single_by_double_multiplication",
+                       "japanese_colors4_quiz",         #JP
+                       # "japanese_colors5_teach",        #JP
+                       # "japanese_colors5_quiz",         #JP
+                       
+                       
                        # "triple_digit_addition",
                        # "triple_digit_subtraction",
                        # "double_digit_multiplication",
@@ -5146,6 +5469,8 @@ def session_manager():
             month_of_the_year()
         elif lesson == "skip_counting":
             skip_counting()
+        elif lesson == "skip_counting_fibonacci":
+            skip_counting_fibonacci()
         elif lesson == "hiragana_teach":
             hiragana_teach(session_id)
         elif lesson == "katakana_teach":
@@ -5366,17 +5691,84 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: basic_shapes_quiz did not return a valid result.")
-        elif lesson == "japanese_colors_teach":
-            japanese_colors_teach(session_id)
-        # elif lesson == "japanese_colors_quiz":
-            # Run the lesson, passing session_id
-            # lesson_result = japanese_colors_quiz(session_id)
+        elif lesson == "japanese_colors1_teach":
+            japanese_colors1_teach(session_id)
+        elif lesson == "japanese_colors2_teach":
+            japanese_colors2_teach(session_id)
+        elif lesson == "japanese_colors3_teach":
+            japanese_colors3_teach(session_id)
+        elif lesson == "japanese_colors4_teach":
+            japanese_colors4_teach(session_id)
+        elif lesson == "japanese_colors5_teach":
+            japanese_colors5_teach(session_id)
+        
+        # japanese_colors1_quiz
+        elif lesson == "japanese_colors1_quiz":
+            print("Running japanese_colors1_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors1_quiz(session_id)
             
-            # # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            # questions_asked, correct_answers, avg_time = lesson_result
-            # total_questions += questions_asked
-            # total_correct += correct_answers
-            # total_times.append(avg_time)
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors1_quiz did not return a valid result.")
+        elif lesson == "japanese_colors2_quiz":
+            print("Running japanese_colors2_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors2_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors2_quiz did not return a valid result.")
+        elif lesson == "japanese_colors3_quiz":
+            print("Running japanese_colors3_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors3_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors3_quiz did not return a valid result.")
+        elif lesson == "japanese_colors4_quiz":
+            print("Running japanese_colors4_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors4_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors4_quiz did not return a valid result.")
+        elif lesson == "japanese_colors5_quiz":
+            print("Running japanese_colors5_quiz")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors5_quiz(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors5_quiz did not return a valid result.")
+        
         # Check if there's another lesson or handle lesson completion here
         # You can add more lessons to `lessons_to_play` and logic here
         
@@ -5517,6 +5909,76 @@ def streak_check():
     # Draw the "Continue..." button
     draw_and_wait_continue_button()
 
+
+
+
+
+def skip_counting():
+    """Randomly selects a number between 2-9 and performs skip counting up to 100."""
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+    # Define a larger size for the skip-counted numbers
+    large_font_size = 200  # Adjust size as necessary
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
+
+    # Select a random number from 2-9
+    skip_number = random.randint(2, 9)
+
+    # Clear the screen and inform the student about the starting number
+    screen.fill(screen_color)
+    intro_message = f"Let's skip count by {skip_number}!"
+    
+    # Display the intro message and update the screen
+    draw_text(intro_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
+    
+    # Draw the "Continue..." button after intro message
+    draw_and_wait_continue_button()
+
+    # Start counting by the selected number, stopping at 100
+    for i in range(skip_number, 101, skip_number):
+        # Clear the screen before displaying each number
+        screen.fill(screen_color)
+
+        # Convert the number to string for display
+        number_str = str(i)
+
+        # Display the number in the center of the screen using the larger font size
+        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen after drawing the number
+        pygame.display.flip()
+
+        # Speak the number aloud in English
+        speak_english(number_str)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the skip counting, show a completion message using the default font
+    completion_message = "Great job!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    
+    # Draw the "Continue..." button after the completion message
+    draw_and_wait_continue_button()
+
+
+##########################
+### Japanese Functions ###
+##########################
 
 def day_of_the_week():
     global text_color, shadow_color, screen_color  # Access the theme-related globals
@@ -5682,69 +6144,6 @@ def month_of_the_year():
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Exit the loop when "Continue..." is clicked
-
-
-def skip_counting():
-    """Randomly selects a number between 2-9 and performs skip counting up to 100."""
-    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
-
-    # Define a larger size for the skip-counted numbers
-    large_font_size = 200  # Adjust size as necessary
-
-    # Initialize the larger font based on whether the current font is a file or system font
-    if os.path.isfile(current_font_name_or_path):
-        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
-    else:
-        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
-
-    # Select a random number from 2-9
-    skip_number = random.randint(2, 9)
-
-    # Clear the screen and inform the student about the starting number
-    screen.fill(screen_color)
-    intro_message = f"Let's skip count by {skip_number}!"
-    
-    # Display the intro message and update the screen
-    draw_text(intro_message, 
-              font, 
-              text_color, 
-              x=0, 
-              y=HEIGHT * 0.4, 
-              center=True, 
-              enable_shadow=True, 
-              shadow_color=shadow_color,
-              max_width=WIDTH)
-    
-    # Draw the "Continue..." button after intro message
-    draw_and_wait_continue_button()
-
-    # Start counting by the selected number, stopping at 100
-    for i in range(skip_number, 101, skip_number):
-        # Clear the screen before displaying each number
-        screen.fill(screen_color)
-
-        # Convert the number to string for display
-        number_str = str(i)
-
-        # Display the number in the center of the screen using the larger font size
-        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-
-        # Update the screen after drawing the number
-        pygame.display.flip()
-
-        # Speak the number aloud in English
-        speak_english(number_str)
-
-        # Pause for a second before showing the next number
-        time.sleep(1)
-
-    # After completing the skip counting, show a completion message using the default font
-    completion_message = "Great job!"
-    screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-    
-    # Draw the "Continue..." button after the completion message
-    draw_and_wait_continue_button()
 
 
 def skip_counting_japanese():
@@ -6162,45 +6561,30 @@ def katakana_quiz(session_id):
     
     return total_questions, correct_answers, average_time
 
-colors1 = {
-  "quiz_title": "Colors 1",
-  "questions": [
-    {
-      "furigana": "あか",
-      "kanji": "赤",
-      "translation": "red",
-      "image": "GFX/colors/red.png"
-    },
-    {
-      "furigana": "あお",
-      "kanji": "青",
-      "translation": "blue",
-      "image": "GFX/colors/blue.png"
-    },
-    {
-      "furigana": "しろ",
-      "kanji": "白",
-      "translation": "white",
-      "image": "GFX/colors/white.png"
-    },
-    {
-      "furigana": "くろ",
-      "kanji": "黒",
-      "translation": "black",
-      "image": "GFX/colors/black.png"
-    },
-    {
-      "furigana": "みどり",
-      "kanji": "緑",
-      "translation": "green",
-      "image": "GFX/colors/green.png"
-    }
-  ]
-}
 
-def japanese_colors_teach(session_id):
+def japanese_colors1_teach(session_id):
+    japanese_colors_teach(session_id, colors1)
+
+    
+def japanese_colors2_teach(session_id):
+    japanese_colors_teach(session_id, colors2)
+
+
+def japanese_colors3_teach(session_id):
+    japanese_colors_teach(session_id, colors3)
+
+    
+def japanese_colors4_teach(session_id):
+    japanese_colors_teach(session_id, colors4)
+
+        
+def japanese_colors5_teach(session_id):
+    japanese_colors_teach(session_id, colors5)
+
+
+def japanese_colors_teach(session_id, color_to_teach):
     """Displays Japanese colors (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
+    global screen_color, text_color, shadow_color, WIDTH, HEIGHT  # Access theme-related globals
 
     # Define fonts for the furigana, kanji, and translation
     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
@@ -6217,34 +6601,65 @@ def japanese_colors_teach(session_id):
     draw_and_wait_continue_button()
 
     # Loop through the colors and display each one
-    for color in colors1['questions']:
+    for color in color_to_teach['questions']:
+        # Step 1: Show furigana, kanji, and translation, and read aloud
         screen.fill(screen_color)
 
-        # Display furigana
+        # Display furigana (above kanji)
         draw_text(color['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
                   enable_shadow=True, shadow_color=shadow_color)
 
-        # Display kanji
+        # Display kanji (below furigana)
         draw_text(color['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
                   enable_shadow=True, shadow_color=shadow_color)
 
-        # Display translation
+        # Display English translation (below kanji)
         draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
                   enable_shadow=True, shadow_color=shadow_color)
-
-        # Show the color image
-        color_image = pygame.image.load(color['image'])
-        screen.blit(color_image, (WIDTH // 2 - color_image.get_width() // 2, HEIGHT * 0.7))
 
         pygame.display.flip()
 
         # Speak the furigana (the reading of the kanji)
         speak_japanese(color['furigana'])
-        time.sleep(1)
+        time.sleep(1)  # Wait for the audio to finish
+
+        # Step 2: Try to show the color image, fallback to showing kanji, furigana, and translation if image is missing
+        try:
+            # Try to load and resize the color image to the current window size
+            color_image = pygame.image.load(color['image'])
+            color_image = pygame.transform.scale(color_image, (WIDTH, HEIGHT))
+
+            # Blit the image on the screen
+            screen.blit(color_image, (0, 0))  # Blit image at top left (fills entire screen)
+            pygame.display.flip()
+
+            # Speak the furigana again (in the background, no text)
+            speak_japanese(color['furigana'])
+            time.sleep(1)  # Wait for the audio to finish
+
+        except FileNotFoundError:
+            # If image is not found, display kanji, furigana, and translation again
+            log_message(f"Image not found: {color['image']}. Displaying text instead.")
+            screen.fill(screen_color)
+
+            # Display furigana, kanji, and translation again as fallback
+            draw_text(color['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
+                      enable_shadow=True, shadow_color=shadow_color)
+            draw_text(color['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
+                      enable_shadow=True, shadow_color=shadow_color)
+            draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
+                      enable_shadow=True, shadow_color=shadow_color)
+
+            pygame.display.flip()
+
+            # Speak the furigana again
+            speak_japanese(color['furigana'])
+            time.sleep(1)  # Wait for the audio to finish
 
     # Show completion message and wait for "Continue..."
     screen.fill(screen_color)
-    draw_text("Great job!", translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+    completion_message = "Great job! You just learned Japanese colors!"
+    draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color)
     draw_and_wait_continue_button()
 
@@ -6252,12 +6667,249 @@ def japanese_colors_teach(session_id):
 
 
 
+def display_result_with_image(result_text, image_file=None, use_lightning=False):
+    """
+    Display the result text and an optional image from a given file.
+    If an image is provided and 'use_lightning' is True, show lightning instead of particles.
+    If 'use_lightning' is False, show a particle effect.
+    """
+    # Clear the event queue to avoid any unwanted inputs
+    pygame.event.clear()
 
- 
+    # Initialize particle list
+    particles = []
+
+    # Attempt to load the image if provided
+    bg_image = None
+    if image_file:
+        try:
+            bg_image = pygame.image.load(image_file)
+        except FileNotFoundError:
+            log_message(f"Image not found: {image_file}. Displaying text only.")
+            # If the image is not found, bg_image remains None
+
+    # If the image loaded successfully, blit it to the screen
+    if bg_image:
+        screen.blit(bg_image, (0, 0))
+
+        if not use_lightning:
+            # Generate particles for the effect (only if use_lightning is False)
+            for _ in range(500):  # Number of particles to generate
+                x = random.randint(0, WIDTH)
+                y = random.randint(0, HEIGHT)
+                color = random.choice([NAVY_BLUE, (255, 255, 255), ROYAL_BLUE, LIGHT_BLUE])
+                particles.append(Particle(x, y, color))
+    else:
+        # If no image file is provided or failed to load, fill the screen with the current screen color
+        screen.fill(screen_color)
+
+    # Display loop for particle effect or lightning effect
+    if use_lightning and bg_image:
+        # Show lightning effect if the fast answer condition is met
+        for _ in range(3):  # Increased number of lightning bolts for dramatic effect
+            draw_lightning(screen, (random.randint(0, WIDTH), 0), (random.randint(0, WIDTH), HEIGHT), 
+                           image_file, font, text_color, correct_message=result_text)
+            pygame.display.flip()
+            pygame.time.delay(150)  # Slight delay between lightning bolts
+    else:
+        # Show particle effect for slower answers or if no image is available
+        for _ in range(50):  # Run the particle effect for 50 frames
+            if bg_image:
+                # Transparent fill to allow particles to fade
+                screen.fill((0, 0, 0, 0))
+                screen.blit(bg_image, (0, 0))
+
+                # Update and draw each particle
+                for particle in particles[:]:
+                    particle.update()
+                    if particle.lifetime <= 0:
+                        particles.remove(particle)
+                    else:
+                        particle.draw(screen)
+            else:
+                # For incorrect answers or if no image is available, fill the screen with the current screen color
+                screen.fill(screen_color)
+
+            # Draw the result text on top of the particles or background
+            draw_text(result_text, 
+                      font, 
+                      text_color, 
+                      WIDTH // 2, 
+                      HEIGHT // 2, 
+                      center=True, 
+                      enable_shadow=True,
+                      max_width=WIDTH)
+            pygame.display.flip()
+
+    # Final display and pause before exiting the function
+    pygame.display.flip()
+    time.sleep(1)  # Pause for 1 second
+
+    # Clear the event queue again after displaying the result
+    pygame.event.clear()
 
 
-def japanese_colors_quiz(session_id):
-    pass
+
+def japanese_colors_quiz(session_id, color_data):
+    """Presents a quiz on Japanese colors (furigana, kanji, and translation) and tracks performance."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Extract the quiz name from color_data
+    quiz_name = color_data.get('quiz_title')
+    if quiz_name is None:
+        log_message("Error: quiz_title missing in color_data.")
+        return -1  # Exit if quiz_title is missing
+
+    # Fetch the unique lesson ID for the specific color quiz (e.g., "Colors 1")
+    color_lesson_id = fetch_lesson_id(quiz_name)
+    if color_lesson_id is None:
+        log_message(f"Lesson '{quiz_name}' not found in the database.")
+        return -1  # Exit if lesson_id not found
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    # Shuffle the questions
+    color_questions = color_data['questions']
+    random.shuffle(color_questions)
+
+    total_questions = 5  # Set the number of questions
+    correct_answers = 0
+    completion_times = []
+
+    # Quiz loop
+    for problem_count in range(total_questions):
+        question = color_questions[problem_count % len(color_questions)]
+        correct_answer = question['translation']
+
+        # Generate 3 incorrect answers
+        incorrect_answers = random.sample(
+            [q['translation'] for q in color_questions if q['translation'] != correct_answer], 3)
+
+        # Create the multiple-choice options
+        options = [correct_answer] + incorrect_answers
+        random.shuffle(options)
+
+        # Display the quiz options and get option rects
+        option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
+
+        # Wait for the student to click on an option
+        start_time = time.time()
+        question_complete = False
+        while not question_complete:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = event.pos
+                    for rect, option in option_rects:
+                        if rect.collidepoint(mouse_pos):
+                            time_taken = round(time.time() - start_time, 1)
+                            completion_times.append(time_taken)
+
+                            if option == correct_answer:
+                                correct_answers += 1
+                                if time_taken < 3:
+                                    display_result_with_image("Correct!", question['image'], use_lightning=True)
+                                else:
+                                    display_result_with_image("Correct!", question['image'])
+                            else:
+                                display_result_with_image(f"Sorry, the correct answer is {correct_answer}")
+                            question_complete = True
+
+            pygame.time.Clock().tick(60)
+
+    # Final score and performance
+    lesson_end_time = time.time()
+    average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
+    add_session_lesson(session_id, color_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+
+    # Display the final score
+    screen.fill(screen_color)
+    draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+        set_student_progress(session_id, 'Japanese Colors')  # Level up on perfect score
+
+    draw_and_wait_continue_button()
+
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()  # Trigger bonus game for perfect score
+
+    # Return the results of the quiz
+    return total_questions, correct_answers, average_time
+
+
+def display_color_quiz(screen, kanji, furigana, options):
+    screen.fill(NAVY_BLUE)
+
+    # Draw the Kanji on the screen
+    draw_text(
+        kanji,
+        j_font,  # Assuming you have a separate kanji font loaded
+        WHITE,
+        x=WIDTH // 2,
+        y=HEIGHT // 3,
+        center=True,
+        enable_shadow=True,
+        shadow_color=BLACK,
+        use_japanese_font=True
+    )
+
+    # Draw the Furigana above the Kanji
+    draw_text(
+        furigana,
+        j_font,
+        WHITE,
+        x=WIDTH // 2,
+        y=HEIGHT // 5,
+        center=True,
+        enable_shadow=True,
+        shadow_color=BLACK,
+        use_japanese_font=True
+    )
+
+    # Draw the multiple-choice options
+    option_rects = []
+    y_pos = HEIGHT * 0.6
+    answer_buffer = HEIGHT * 0.1
+
+    for i, option in enumerate(options):
+        option_rect = draw_text(
+            option,
+            font,  # Use your default or specific font here
+            WHITE,
+            x=WIDTH // 2,
+            y=y_pos + i * answer_buffer,
+            center=True,
+            enable_shadow=True,
+            shadow_color=BLACK,
+            return_rect=True
+        )
+        option_rects.append((option_rect, option))
+
+    pygame.display.flip()
+    return option_rects
+
+def japanese_colors1_quiz(session_id):
+    japanese_colors_quiz(session_id, colors1)
+
+def japanese_colors2_quiz(session_id):
+    japanese_colors_quiz(session_id, colors2)
+
+def japanese_colors3_quiz(session_id):
+    japanese_colors_quiz(session_id, colors3)
+
+def japanese_colors4_quiz(session_id):
+    japanese_colors_quiz(session_id, colors4)
+
+def japanese_colors5_quiz(session_id):
+    japanese_colors_quiz(session_id, colors5)
+
 
 
 
