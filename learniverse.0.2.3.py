@@ -1692,7 +1692,7 @@ def draw_text(
     Returns:
     If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
     """
-    
+
     # Use the screen as the default surface if none is provided
     if surface is None:
         surface = screen
@@ -1704,21 +1704,24 @@ def draw_text(
     # Select the font to use, prioritize font_override, then Japanese or default font
     selected_font = font_override if font_override else (j_font if use_japanese_font else font)
 
-    # Split text into lines based on max_width for word wrapping
+    # First split text by \n to handle explicit new lines
+    lines = text.split('\n')
+
+    # Then handle word wrapping if max_width is provided
     if max_width:
-        lines = []
-        words = text.split(' ')
-        current_line = []
-        for word in words:
-            test_line = ' '.join(current_line + [word])
-            if selected_font.size(test_line)[0] <= max_width:
-                current_line.append(word)
-            else:
-                lines.append(' '.join(current_line))
-                current_line = [word]
-        lines.append(' '.join(current_line))
-    else:
-        lines = [text]
+        wrapped_lines = []
+        for line in lines:
+            words = line.split(' ')
+            current_line = []
+            for word in words:
+                test_line = ' '.join(current_line + [word])
+                if selected_font.size(test_line)[0] <= max_width:
+                    current_line.append(word)
+                else:
+                    wrapped_lines.append(' '.join(current_line))
+                    current_line = [word]
+            wrapped_lines.append(' '.join(current_line))
+        lines = wrapped_lines
 
     text_rect = None
 
@@ -1747,6 +1750,7 @@ def draw_text(
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
+
 
 
 
@@ -5226,6 +5230,7 @@ def skip_counting_fibonacci():
     screen.fill(screen_color)
     draw_text(completion_message, 
               font, 
+              text_color,  # Added the missing color argument here
               x=0, 
               y=HEIGHT * 0.4, 
               center=True, 
@@ -5241,6 +5246,7 @@ def skip_counting_fibonacci():
     
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
+
 
 
 def generate_primes(n):
@@ -5715,10 +5721,13 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       
+                       # "psalm_23",                          #ENG
                        # "japanese_colors4_quiz",             #JP
                        # "rainbow_numbers",                   #Math
-                       # "japanese_colors1_teach",             #JP
+                       "japanese_colors1_teach",             #JP
                        # "japanese_colors1_quiz",             #JP
+                       
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "month_of_the_year",                 #JP
@@ -6243,17 +6252,22 @@ def display_bible_verse(greeting_message,
                         verse_text, 
                         split_text=None):
     """Displays a Bible verse with an optional split for larger texts."""
-    global screen_color, text_color, shadow_color, font
+    global screen_color, text_color, shadow_color, font  # Use global font
     
     # Define a larger font size for the Bible verse
     large_font_size = 60  # Adjust size as necessary
-    large_font = pygame.font.Font(None, large_font_size)
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
 
     # Clear the screen and display the greeting message
     screen.fill(screen_color)
     draw_text(
         greeting_message,
-        font,
+        font,  # Use the global font for the greeting
         text_color,
         x=0,
         y=HEIGHT * 0.4,
@@ -6272,7 +6286,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             verse_title + "\n" + split_text[0],
-            font,  
+            font,  # Use the global font for the title
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6280,7 +6294,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6294,7 +6308,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             split_text[1],
-            font,  
+            font,  # Use the global font
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6302,7 +6316,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6314,7 +6328,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             verse_title + "\n" + verse_text,
-            font,
+            font,  # Use the global font
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6322,7 +6336,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6331,6 +6345,7 @@ def display_bible_verse(greeting_message,
 
     # Draw the "Continue" button again after displaying the verse
     draw_and_wait_continue_button()
+
 
 
 def john_3_16():
@@ -6992,12 +7007,18 @@ def japanese_colors5_teach(session_id):
 
 def japanese_colors_teach(session_id, color_to_teach):
     """Displays Japanese colors (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
-    global screen_color, text_color, shadow_color, WIDTH, HEIGHT  # Access theme-related globals
+    global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
     # Define fonts for the furigana, kanji, and translation
     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
     kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
-    translation_font = pygame.font.Font(None, 50)
+    
+    # Use the global font for translations
+    translation_font_size = 50
+    if os.path.isfile(current_font_name_or_path):
+        translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
+    else:
+        translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
 
     # Clear the screen and inform the student about the lesson
     screen.fill(screen_color)
@@ -7022,7 +7043,7 @@ def japanese_colors_teach(session_id, color_to_teach):
                   enable_shadow=True, shadow_color=shadow_color)
 
         # Display English translation (below kanji)
-        draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
+        draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
                   enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
         pygame.display.flip()
@@ -7070,6 +7091,7 @@ def japanese_colors_teach(session_id, color_to_teach):
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
+
 
 
 
