@@ -1427,6 +1427,9 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
 
     # Resize the background image to fit the screen size
     bg_image = pygame.transform.scale(bg_image, (screen.get_width(), screen.get_height()))
+    
+    # Load the thunder sound effect
+    thunder_sound = pygame.mixer.Sound('assets/SFX/loud-thunder-192165.wav')
 
     for _ in range(3):  # Number of flash bursts
         # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
@@ -1444,7 +1447,10 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
         )
 
-        # Step 3: Draw multiple lightning bolts in this frame
+        # Step 3.1: Play the thunder sound effect for each lightning flash burst
+        thunder_sound.play()
+
+        # Step 3.2: Draw multiple lightning bolts in this frame
         for _ in range(FLASH_COUNT):
             current_pos = start_pos
             for i in range(BOLT_SEGMENTS):
@@ -1672,7 +1678,25 @@ def draw_text(
     """
     Draw text on the given surface (or screen if no surface is provided) with optional drop shadow,
     word wrapping, centering, and optional rect return. Optionally use Japanese font or override font size.
-    This version respects explicit line breaks (\n).
+
+    Arguments:
+    text -- The text to display.
+    font -- The font to use for rendering.
+    color -- The color of the text.
+    x, y -- The top-left coordinates for drawing the text.
+    surface -- The surface to draw the text on (defaults to screen if None).
+    max_width -- The maximum width for word wrapping (optional).
+    center -- Whether to center the text horizontally (optional).
+    enable_shadow -- Whether to enable a drop shadow (optional).
+    shadow_color -- The color of the drop shadow (optional, defaults to BLACK).
+    x_shadow_offset -- The X offset for the drop shadow (optional, defaults to 2).
+    y_shadow_offset -- The Y offset for the drop shadow (optional, defaults to 2).
+    return_rect -- Whether to return the rect of the drawn text (optional).
+    use_japanese_font -- Whether to use the Japanese font (optional, defaults to False).
+    font_override -- Optionally pass a different font for this draw call (optional).
+
+    Returns:
+    If return_rect is True, returns the rect of the first line of drawn text. Otherwise, returns None.
     """
 
     # Use the screen as the default surface if none is provided
@@ -1686,10 +1710,10 @@ def draw_text(
     # Select the font to use, prioritize font_override, then Japanese or default font
     selected_font = font_override if font_override else (j_font if use_japanese_font else font)
 
-    # Split text into lines explicitly, using \n as a line break
+    # First split text by \n to handle explicit new lines
     lines = text.split('\n')
 
-    # Further split long lines into multiple lines if max_width is provided
+    # Then handle word wrapping if max_width is provided
     if max_width:
         wrapped_lines = []
         for line in lines:
@@ -1724,16 +1748,14 @@ def draw_text(
         text_surface = selected_font.render(line, True, color)
         surface.blit(text_surface, (draw_x, y))
         
-        # Calculate rect for the first line (ensure it accounts for centering)
+        # Calculate rect for the first line
         if i == 0 and return_rect:
-            text_rect = pygame.Rect(draw_x, y, selected_font.size(line)[0], selected_font.get_linesize())
-
+            text_rect = pygame.Rect(draw_x, y, selected_font.size(line)[0], selected_font.size(line)[1])
+        
         # Move down to the next line
         y += selected_font.get_linesize()
 
     return text_rect if return_rect else None
-
-
 
 
 def fade_text_in_and_out(line1, line2, font, max_width=None):
@@ -3172,7 +3194,7 @@ def single_digit_subtraction(session_id):
                         question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
+                    elif event.unicode.isdigit() and len(user_input) < 1:  # Limit input to one digit
                         user_input += event.unicode
                         first_input = False
 
@@ -3313,7 +3335,7 @@ def double_digit_subtraction(session_id):
                         question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit() and len(user_input) < 3:  # Limit input to three digits
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
                         user_input += event.unicode
                         first_input = False
 
@@ -3736,7 +3758,7 @@ def single_digit_multiplication(session_id):
                         question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit() and len(user_input) < 3:  # Limit input to three digits
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
                         user_input += event.unicode
                         first_input = False
 
@@ -3881,7 +3903,7 @@ def single_by_double_multiplication(session_id):
                         question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit() and len(user_input) < 4:  # Limit input to four digits
+                    elif event.unicode.isdigit() and len(user_input) < 3:  # Limit input to three digits
                         user_input += event.unicode
                         first_input = False
 
@@ -4299,7 +4321,7 @@ def single_denominator_addition(session_id):
                         try:
                             # Split the input into numerator and denominator
                             num, denom = user_input.split("/")
-                            
+
                             # Check if denominator is zero or missing
                             if denom == "" or int(denom) == 0:
                                 raise ValueError("Invalid denominator")  # Trigger invalid input handling
@@ -4324,9 +4346,20 @@ def single_denominator_addition(session_id):
 
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit() or event.unicode == "/":  # Allow digits and '/'
-                        user_input += event.unicode
-                        first_input = False
+                    elif event.unicode.isdigit():
+                        if "/" not in user_input:
+                            # Before the slash, allow up to two digits for the numerator
+                            if len(user_input) < 2:
+                                user_input += event.unicode
+                        else:
+                            # After the slash, allow up to two digits for the denominator
+                            if len(user_input.split("/")[1]) < 2:
+                                user_input += event.unicode
+                    elif event.unicode == "/" and "/" not in user_input and len(user_input) > 0:
+                        # Allow the slash to be added only if it's not already present and there is something before it
+                        user_input += "/"
+
+                    first_input = False
 
             clock.tick(60)
 
@@ -4621,7 +4654,7 @@ def lowest_common_denominator_quiz(session_id):
                         question_complete = True
                     elif event.key == pygame.K_BACKSPACE:
                         user_input = user_input[:-1]
-                    elif event.unicode.isdigit():
+                    elif event.unicode.isdigit() and len(user_input) < 3:  # Limit input to three digits
                         user_input += event.unicode
                         first_input = False
 
@@ -4671,6 +4704,7 @@ def lowest_common_denominator_quiz(session_id):
         bonus_game_fat_tuna()
 
     return total_questions, correct_answers, average_time
+
 
 
 def draw_shape(shape_type):
@@ -5210,6 +5244,7 @@ def skip_counting_fibonacci():
     screen.fill(screen_color)
     draw_text(completion_message, 
               font, 
+              text_color,  # Added the missing color argument here
               x=0, 
               y=HEIGHT * 0.4, 
               center=True, 
@@ -5225,6 +5260,7 @@ def skip_counting_fibonacci():
     
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
+
 
 
 def generate_primes(n):
@@ -5699,10 +5735,16 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "japanese_colors4_quiz",             #JP
+                       "rainbow_numbers",                   #Math
+                       ### DEBUG TESTING ###
+                       # "lowest_common_denominator_quiz",       #Math
+                       # "psalm_23",                          #ENG
+                       # "japanese_colors4_quiz",             #JP
                        # "rainbow_numbers",                   #Math
                        # "japanese_colors1_teach",             #JP
-                       "japanese_colors1_quiz",             #JP
+                       # "japanese_colors1_quiz",             #JP
+                       ### DEBUG TESTING ###
+                       
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "month_of_the_year",                 #JP
@@ -6227,17 +6269,22 @@ def display_bible_verse(greeting_message,
                         verse_text, 
                         split_text=None):
     """Displays a Bible verse with an optional split for larger texts."""
-    global screen_color, text_color, shadow_color, font
+    global screen_color, text_color, shadow_color, font  # Use global font
     
     # Define a larger font size for the Bible verse
     large_font_size = 60  # Adjust size as necessary
-    large_font = pygame.font.Font(None, large_font_size)
+
+    # Initialize the larger font based on whether the current font is a file or system font
+    if os.path.isfile(current_font_name_or_path):
+        large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+    else:
+        large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
 
     # Clear the screen and display the greeting message
     screen.fill(screen_color)
     draw_text(
         greeting_message,
-        font,
+        font,  # Use the global font for the greeting
         text_color,
         x=0,
         y=HEIGHT * 0.4,
@@ -6256,7 +6303,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             verse_title + "\n" + split_text[0],
-            font,  
+            font,  # Use the global font for the title
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6264,7 +6311,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6278,7 +6325,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             split_text[1],
-            font,  
+            font,  # Use the global font
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6286,7 +6333,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6298,7 +6345,7 @@ def display_bible_verse(greeting_message,
         screen.fill(screen_color)
         draw_text(
             verse_title + "\n" + verse_text,
-            font,
+            font,  # Use the global font
             text_color,
             x=0,
             y=HEIGHT * 0.1,
@@ -6306,7 +6353,7 @@ def display_bible_verse(greeting_message,
             enable_shadow=True,
             shadow_color=shadow_color,
             max_width=WIDTH * 0.95,
-            font_override=large_font
+            font_override=large_font  # Override the font size for the verse
         )
 
         # Update the screen before speaking
@@ -6315,6 +6362,7 @@ def display_bible_verse(greeting_message,
 
     # Draw the "Continue" button again after displaying the verse
     draw_and_wait_continue_button()
+
 
 
 def john_3_16():
@@ -6976,12 +7024,18 @@ def japanese_colors5_teach(session_id):
 
 def japanese_colors_teach(session_id, color_to_teach):
     """Displays Japanese colors (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
-    global screen_color, text_color, shadow_color, WIDTH, HEIGHT  # Access theme-related globals
+    global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
     # Define fonts for the furigana, kanji, and translation
     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
     kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
-    translation_font = pygame.font.Font(None, 50)
+    
+    # Use the global font for translations
+    translation_font_size = 50
+    if os.path.isfile(current_font_name_or_path):
+        translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
+    else:
+        translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
 
     # Clear the screen and inform the student about the lesson
     screen.fill(screen_color)
@@ -7006,7 +7060,7 @@ def japanese_colors_teach(session_id, color_to_teach):
                   enable_shadow=True, shadow_color=shadow_color)
 
         # Display English translation (below kanji)
-        draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
+        draw_text(color['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
                   enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
         pygame.display.flip()
@@ -7054,6 +7108,7 @@ def japanese_colors_teach(session_id, color_to_teach):
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
+
 
 
 
@@ -7229,12 +7284,14 @@ def japanese_colors_quiz(session_id, color_data):
         # Wait for the student to click on an option or on the kanji/furigana to hear it again
         start_time = time.time()
         question_complete = False
+        answer_selected = False  # Flag to disable further input once an answer is selected
+
         while not question_complete:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and not answer_selected:
                     mouse_pos = event.pos
 
                     # Check if the student clicked the kanji or furigana to replay the audio
@@ -7247,6 +7304,7 @@ def japanese_colors_quiz(session_id, color_data):
                         if rect.collidepoint(mouse_pos):
                             time_taken = round(time.time() - start_time, 1)
                             completion_times.append(time_taken)
+                            answer_selected = True  # Disable further input once an option is clicked
 
                             if option == correct_answer:
                                 correct_answers += 1
@@ -7257,6 +7315,7 @@ def japanese_colors_quiz(session_id, color_data):
                             else:
                                 display_result_with_image(f"Sorry, the correct answer is {correct_answer}")
                             question_complete = True
+                            break  # Break the inner loop once an answer is clicked
 
             pygame.time.Clock().tick(60)
 
@@ -7282,6 +7341,7 @@ def japanese_colors_quiz(session_id, color_data):
 
     # Return the results of the quiz
     return total_questions, correct_answers, average_time
+
 
 
 
