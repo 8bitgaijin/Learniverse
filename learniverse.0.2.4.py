@@ -705,7 +705,8 @@ def insert_lessons(cursor, connection):
         ("Colors 2", "Quiz to master Colors 2"),
         ("Colors 3", "Quiz to master Colors 3"),
         ("Colors 4", "Quiz to master Colors 4"),
-        ("Colors 5", "Quiz to master Colors 5")
+        ("Colors 5", "Quiz to master Colors 5"),
+        ("Subtraction Borrowing", "Subtraction Borrowing")
     ]
 
     try:
@@ -3527,6 +3528,164 @@ def triple_digit_subtraction(session_id):
     return total_questions, correct_answers, average_time
 
 
+def subtraction_borrowing(session_id):
+    """Presents a double-digit subtraction quiz with borrowing and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Subtraction with Borrowing
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Subtraction Borrowing',))
+    result = cursor.fetchone()
+    
+    if result:
+        subtraction_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Subtraction Borrowing lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)
+    draw_text(
+        "Let's work on Subtraction Borrowing!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        # Generate a subtraction problem that requires borrowing
+        num1, num2, answer = generate_borrowing_problem()
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)
+
+            # Draw the math problem
+            display_math_problem(num1, num2, user_input, first_input, operation="sub")
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()
+                        problem_count += 1
+                        question_complete = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 2:  # Limit input to two digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    try:
+        add_session_lesson(
+            session_id,
+            subtraction_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    screen.fill(screen_color)
+
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+
+    return total_questions, correct_answers, average_time
+
+
+def generate_borrowing_problem():
+    """Generates a double-digit subtraction problem that requires borrowing."""
+    # Generate num1 ensuring it does not end in 9
+    num1 = random.randint(10, 99)
+    while num1 % 10 == 9:
+        num1 = random.randint(10, 99)
+
+    # Generate num2 ensuring it ends with a larger digit than num1 and is less than num1
+    num2 = random.randint(1, num1 - 1)
+    while (num2 % 10) <= (num1 % 10):
+        num2 = random.randint(1, num1 - 1)
+
+    answer = num1 - num2
+    return num1, num2, answer
+
+
 def quad_digit_subtraction(session_id):
     """Presents a quad-digit subtraction quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
@@ -4706,7 +4865,6 @@ def lowest_common_denominator_quiz(session_id):
     return total_questions, correct_answers, average_time
 
 
-
 def draw_shape(shape_type):
     """Draw a specific shape on the screen based on the shape type."""
     if shape_type == "circle":
@@ -5262,7 +5420,6 @@ def skip_counting_fibonacci():
     draw_and_wait_continue_button()
 
 
-
 def generate_primes(n):
     """Generates the first n prime numbers."""
     primes = []
@@ -5735,7 +5892,9 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "rainbow_numbers",                   #Math
+                       
+                       
+                       # "rainbow_numbers",                   #Math
                        ### DEBUG TESTING ###
                        # "lowest_common_denominator_quiz",       #Math
                        # "psalm_23",                          #ENG
@@ -5764,6 +5923,7 @@ def session_manager():
                        "double_digit_subtraction",          #Math
                        "philippians_4_6",                   #ENG
                        "japanese_colors2_teach",            #JP
+                       "subtraction_borrowing",             #Math
                        "double_digit_addition",             #Math
                        "ephesians_4_32",                    #ENG
                        "japanese_colors2_quiz",             #JP
@@ -5779,6 +5939,7 @@ def session_manager():
                        "japanese_colors5_teach",            #JP
                        "skip_counting_primes",              #Math
                        "japanese_colors5_quiz",             #JP
+                       "skip_counting_kanji",               #JP
                        "psalm_23",                          #ENG
                        
                        
@@ -5838,6 +5999,8 @@ def session_manager():
             total_times.append(avg_time)
         elif lesson == "skip_counting_japanese":
             skip_counting_japanese()
+        elif lesson == "skip_counting_kanji":
+            skip_counting_kanji()
         elif lesson == "hiragana_quiz":
             # Run the lesson, passing session_id
             lesson_result = hiragana_quiz(session_id)
@@ -5934,6 +6097,20 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 ("Error: double_digit_subtraction did not return a valid result.")
+        # subtraction_borrowing
+        elif lesson == "subtraction_borrowing":
+            print("Running double digit subtraction")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = subtraction_borrowing(session_id)
+            
+            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
+            if lesson_result is not None:  # Ensure the function returned something
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                ("Error: subtraction_borrowing did not return a valid result.")
         elif lesson == "triple_digit_subtraction":
             print("Running triple digit subtraction")
             # Run the lesson, passing session_id, and capture the return values
@@ -6644,6 +6821,86 @@ def skip_counting_japanese():
 
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
+
+
+def skip_counting_kanji():
+    """Performs skip counting from 1 to 30 using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
+    global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+    # Define a larger size for the kanji numerals and furigana
+    large_kanji_font_size = 200  # Adjust size as necessary
+    furigana_font_size = 60
+
+    # Initialize the fonts for kanji and furigana using a Japanese-supporting font
+    if os.path.isfile(current_font_name_or_path):
+        kanji_font = pygame.font.Font(current_font_name_or_path, large_kanji_font_size)
+        furigana_font = pygame.font.Font(current_font_name_or_path, furigana_font_size)
+    else:
+        kanji_font = pygame.font.SysFont('msgothic', large_kanji_font_size)  # Example: MS Gothic or another font that supports Kanji
+        furigana_font = pygame.font.SysFont('msgothic', furigana_font_size)
+
+    # Dictionary to map numbers (1 to 30) to their corresponding Kanji and Furigana
+    kanji_numbers = {
+        1: ("一", "いち"), 2: ("二", "に"), 3: ("三", "さん"), 4: ("四", "よん"), 5: ("五", "ご"),
+        6: ("六", "ろく"), 7: ("七", "なな"), 8: ("八", "はち"), 9: ("九", "きゅう"), 10: ("十", "じゅう"),
+        11: ("十一", "じゅういち"), 12: ("十二", "じゅうに"), 13: ("十三", "じゅうさん"), 14: ("十四", "じゅうよん"),
+        15: ("十五", "じゅうご"), 16: ("十六", "じゅうろく"), 17: ("十七", "じゅうなな"), 18: ("十八", "じゅうはち"),
+        19: ("十九", "じゅうきゅう"), 20: ("二十", "にじゅう"), 21: ("二十一", "にじゅういち"),
+        22: ("二十二", "にじゅうに"), 23: ("二十三", "にじゅうさん"), 24: ("二十四", "にじゅうよん"),
+        25: ("二十五", "にじゅうご"), 26: ("二十六", "にじゅうろく"), 27: ("二十七", "にじゅうなな"),
+        28: ("二十八", "にじゅうはち"), 29: ("二十九", "にじゅうきゅう"), 30: ("三十", "さんじゅう")
+    }
+
+
+    # Clear the screen and inform the student about the activity
+    screen.fill(screen_color)
+    intro_message = "Let's count using kanji!"
+
+    # Display the intro message and update the screen using the default global font
+    draw_text(intro_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
+
+    # Draw the "Continue..." button after the intro message
+    draw_and_wait_continue_button()
+
+    # Start counting from 1 to 30
+    for i in range(1, 31):
+        # Clear the screen before displaying each kanji
+        screen.fill(screen_color)
+
+        # Get the Kanji and Furigana for the current number
+        kanji, furigana = kanji_numbers[i]
+
+        # Display furigana above the kanji
+        draw_text(furigana, furigana_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Display the kanji in the center of the screen using the larger font size
+        draw_text(kanji, kanji_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+        # Update the screen after drawing the kanji and furigana
+        pygame.display.flip()
+
+        # Speak the number aloud in Japanese
+        speak_japanese(furigana)
+
+        # Pause for a second before showing the next number
+        time.sleep(1)
+
+    # After completing the skip counting, show a completion message using the default font
+    completion_message = "Great job counting with kanji!"
+    screen.fill(screen_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    # Draw the "Continue..." button after the completion message
+    draw_and_wait_continue_button()
+
 
 
 def get_hiragana_subset_by_level(student_level, hiragana_list):
