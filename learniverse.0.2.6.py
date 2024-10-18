@@ -800,7 +800,8 @@ def insert_lessons(cursor, connection):
         ("Colors 3", "Quiz to master Colors 3"),
         ("Colors 4", "Quiz to master Colors 4"),
         ("Colors 5", "Quiz to master Colors 5"),
-        ("Subtraction Borrowing", "Subtraction Borrowing")
+        ("Subtraction Borrowing", "Subtraction Borrowing"),
+        ("Japanese Colors", "Japanese Colors")
     ]
 
     try:
@@ -1746,9 +1747,6 @@ def draw_and_wait_continue_button():
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
     return
-
-
-
 
 
 def display_text_and_wait(text):
@@ -5942,9 +5940,6 @@ def student_select_menu():
         clock.tick(60)
 
 
-
-
-
 def learniverse_explanation():
     # Define the folder path for the background images
     folder_path = "assets/images/explanation"
@@ -5994,6 +5989,7 @@ def session_manager():
                        
                        
                        ### DEBUG TESTING ###
+                       "japanese_colors_quiz_selector",
                        # "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",       #Math
                        # "psalm_23",                          #ENG
@@ -6029,7 +6025,6 @@ def session_manager():
                        "numbers_6_24_26",                   #ENG
                        "japanese_colors3_teach",            #JP
                        "single_denominator_addition",       #Math
-                       
                        "lowest_common_denominator_quiz",    #Math
                        "japanese_colors3_quiz",             #JP
                        "basic_shapes_quiz",                 #Math
@@ -6037,9 +6032,9 @@ def session_manager():
                        "single_by_double_multiplication",   #Math
                        "japanese_colors4_quiz",             #JP
                        "skip_counting_fibonacci",           #Math
-                       "japanese_colors5_teach",            #JP
+                       # "japanese_colors5_teach",            #JP
                        "skip_counting_primes",              #Math
-                       "japanese_colors5_quiz",             #JP
+                       # "japanese_colors5_quiz",             #JP
                        "skip_counting_kanji",               #JP
                        "psalm_23",                          #ENG
                        
@@ -6398,6 +6393,20 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: japanese_colors5_quiz did not return a valid result.")
+        # japanese_colors_quiz_selector(session_id)
+        elif lesson == "japanese_colors_quiz_selector":
+            print("Running japanese_colors_quiz_selector")
+            # Run the lesson, passing session_id, and capture the return values
+            lesson_result = japanese_colors_quiz_selector(session_id)
+
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: japanese_colors_quiz_selector did not return a valid result.")
+
         
         # Check if there's another lesson or handle lesson completion here
         # You can add more lessons to `lessons_to_play` and logic here
@@ -6599,12 +6608,6 @@ def streak_check():
     return
 
 
-
-
-
-
-
-
 ############################
 ### Jr. Church Functions ###
 ############################
@@ -6707,7 +6710,6 @@ def display_bible_verse(greeting_message,
 
     # Draw the "Continue" button again after displaying the verse
     draw_and_wait_continue_button()
-
 
 
 def john_3_16():
@@ -7646,7 +7648,7 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
 
 
 def japanese_colors_quiz(session_id, color_data):
-    """Presents a quiz on Japanese colors (furigana, kanji, and translation) and tracks performance."""
+    """Presents a quiz on Japanese colors and returns the result."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
 
     # Step 1: Intro screen to inform the student that it's time for a Japanese color quiz
@@ -7664,42 +7666,26 @@ def japanese_colors_quiz(session_id, color_data):
         max_width=WIDTH
     )
     
-    # Display the continue button and wait for the student to click
     draw_and_wait_continue_button()
 
-    # Extract the quiz name from color_data
+    # Fetch the quiz name from color_data
     quiz_name = color_data.get('quiz_title')
-    if quiz_name is None:
+    if not quiz_name:
         log_message("Error: quiz_title missing in color_data.")
-        return -1  # Exit if quiz_title is missing
-
-    # Fetch the unique lesson ID for the specific color quiz (e.g., "Colors 1")
-    color_lesson_id = fetch_lesson_id(quiz_name)
-    if color_lesson_id is None:
-        log_message(f"Lesson '{quiz_name}' not found in the database.")
-        return -1  # Exit if lesson_id not found
-
-    # Start the lesson timer
-    lesson_start_time = time.time()
+        return -1  # Return error code
 
     # Shuffle the questions
     color_questions = color_data['questions']
     random.shuffle(color_questions)
 
-    total_questions = 5  # Set the number of questions
+    total_questions = 5  # Set number of questions
     correct_answers = 0
     completion_times = []
 
-    # Create a list to track remaining questions (removing each question after it's asked)
-    remaining_questions = color_questions[:]
-
     # Quiz loop
     for problem_count in range(total_questions):
-        if not remaining_questions:
-            break  # Exit if no more questions are left
-
-        # Pick a question and remove it from the list to avoid repetition
-        question = remaining_questions.pop(0)
+        # Pick a question
+        question = color_questions[problem_count]
         correct_answer = question['translation']
 
         # Generate 3 incorrect answers
@@ -7713,72 +7699,70 @@ def japanese_colors_quiz(session_id, color_data):
         # Display the quiz options and get option rects
         kanji_rect, furigana_rect, option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
 
-        # Update the screen before speaking the furigana
         pygame.display.flip()
 
-        # Speak the furigana aloud in Japanese after drawing the screen
+        # Speak the furigana aloud
         speak_japanese(question['furigana'])
 
-        # Wait for the student to click on an option or on the kanji/furigana to hear it again
         start_time = time.time()
         question_complete = False
-        answer_selected = False  # Flag to disable further input once an answer is selected
-
         while not question_complete:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN and not answer_selected:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = event.pos
-
-                    # Check if the student clicked the kanji or furigana to replay the audio
-                    if kanji_rect.collidepoint(mouse_pos) or furigana_rect.collidepoint(mouse_pos):
-                        speak_japanese(question['furigana'])  # Replay the furigana audio
-                        break  # Stay on the same question, wait for another click
-
-                    # Check if an option was clicked
                     for rect, option in option_rects:
                         if rect.collidepoint(mouse_pos):
                             time_taken = round(time.time() - start_time, 1)
                             completion_times.append(time_taken)
-                            answer_selected = True  # Disable further input once an option is clicked
 
                             if option == correct_answer:
                                 correct_answers += 1
-                                if time_taken < 3:
-                                    display_result_with_image("Correct!", question['image'], use_lightning=True)
-                                else:
-                                    display_result_with_image("Correct!", question['image'])
+                                # Use display_result_with_image to show the correct answer and image
+                                display_result_with_image("Correct!", question['image'], use_lightning=(time_taken < 3))
                             else:
                                 display_result_with_image(f"Sorry, the correct answer is {correct_answer}")
                             question_complete = True
-                            break  # Break the inner loop once an answer is clicked
 
             pygame.time.Clock().tick(60)
 
-    # Final score and performance
-    lesson_end_time = time.time()
-    average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
-    add_session_lesson(session_id, color_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+    # Calculate average time
+    avg_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
 
-    # Display the final score
-    screen.fill(screen_color)
-    draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+    # Return total questions, correct answers, and average time as a tuple
+    return total_questions, correct_answers, avg_time
 
-    if correct_answers == total_questions:
-        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
-        if average_time < 3.0:
-            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
-        set_student_progress(session_id, 'Japanese Colors')  # Level up on perfect score
 
-    draw_and_wait_continue_button()
 
-    if correct_answers == total_questions:
-        bonus_game_fat_tuna()  # Trigger bonus game for perfect score
 
-    # Return the results of the quiz
-    return total_questions, correct_answers, average_time
+
+
+
+def japanese_colors_quiz_selector(session_id):
+    """Presents the appropriate Japanese colors quiz based on the student's level."""
+    
+    # Fetch the student's current level for Japanese Colors
+    student_level = get_student_progress(session_id, 'Japanese Colors')
+
+    # Select the appropriate quiz data
+    if student_level == 1:
+        color_data = colors1
+    elif student_level == 2:
+        color_data = colors2
+    elif student_level == 3:
+        color_data = colors3
+    elif student_level == 4:
+        color_data = colors4
+    elif student_level == 5:
+        color_data = colors5
+    else:
+        log_message(f"Error: Invalid student level {student_level} for Japanese Colors.")
+        return None
+
+    # Run the quiz and return the results (tuple)
+    return japanese_colors_quiz(session_id, color_data)
 
 
 
@@ -7846,20 +7830,20 @@ def display_color_quiz(screen, kanji, furigana, options):
     return kanji_rect, furigana_rect, option_rects
 
 
-def japanese_colors1_quiz(session_id):
-    japanese_colors_quiz(session_id, colors1)
+# def japanese_colors1_quiz(session_id):
+#     japanese_colors_quiz(session_id, colors1)
 
-def japanese_colors2_quiz(session_id):
-    japanese_colors_quiz(session_id, colors2)
+# def japanese_colors2_quiz(session_id):
+#     japanese_colors_quiz(session_id, colors2)
 
-def japanese_colors3_quiz(session_id):
-    japanese_colors_quiz(session_id, colors3)
+# def japanese_colors3_quiz(session_id):
+#     japanese_colors_quiz(session_id, colors3)
 
-def japanese_colors4_quiz(session_id):
-    japanese_colors_quiz(session_id, colors4)
+# def japanese_colors4_quiz(session_id):
+#     japanese_colors_quiz(session_id, colors4)
 
-def japanese_colors5_quiz(session_id):
-    japanese_colors_quiz(session_id, colors5)
+# def japanese_colors5_quiz(session_id):
+#     japanese_colors_quiz(session_id, colors5)
 
 
 
