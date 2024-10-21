@@ -5814,11 +5814,21 @@ def skip_counting():
         # Pause for a second before showing the next number
         time.sleep(1)
 
-    # After completing the skip counting, show a completion message using the default font
-    completion_message = "Great job!"
+    # After completing the skip counting, show a dynamic completion message using the default font
+    completion_message = f"Great job! You just skip counted by {skip_number}!"
     screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-    
+    draw_text(
+        completion_message, 
+        font, 
+        text_color, 
+        x=0, 
+        y=HEIGHT * 0.4, 
+        center=True, 
+        enable_shadow=True, 
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
     
