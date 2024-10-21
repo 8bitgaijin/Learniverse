@@ -564,6 +564,329 @@ j_adjectives1 = {
   ]
 }
 
+j_animals1 = {
+  "quiz_title": "Animals",
+  "questions": [
+    {
+      "kanji": "犬",
+      "furigana": "いぬ",
+      "translation": "dog",
+      "image": "GFX/animals/dog.png"
+    },
+    {
+      "kanji": "猫",
+      "furigana": "ねこ",
+      "translation": "cat",
+      "image": "GFX/animals/cat.png"
+    },
+    {
+      "kanji": "象",
+      "furigana": "ぞう",
+      "translation": "elephant",
+      "image": "GFX/animals/elephant.png"
+    },
+    {
+      "kanji": "魚",
+      "furigana": "さかな",
+      "translation": "fish",
+      "image": "GFX/animals/fish.png"
+    },
+    {
+      "kanji": "鶏",
+      "furigana": "にわとり",
+      "translation": "chicken",
+      "image": "GFX/animals/chicken.png"
+    }
+  ]
+}
+
+j_animals2 = {
+  "quiz_title": "Animals 2",
+  "questions": [
+    {
+      "kanji": "馬",
+      "furigana": "うま",
+      "translation": "horse",
+      "image": "GFX/animals/horse.png"
+    },
+    {
+      "kanji": "鳥",
+      "furigana": "とり",
+      "translation": "bird",
+      "image": "GFX/animals/bird.png"
+    },
+    {
+      "kanji": "牛",
+      "furigana": "うし",
+      "translation": "cow",
+      "image": "GFX/animals/cow.png"
+    },
+    {
+      "kanji": "豚",
+      "furigana": "ぶた",
+      "translation": "pig",
+      "image": "GFX/animals/pig.png"
+    },
+    {
+      "kanji": "狐",
+      "furigana": "きつね",
+      "translation": "fox",
+      "image": "GFX/animals/fox.png"
+    }
+  ]
+}
+
+j_animals3 = {
+  "quiz_title": "Animals 3",
+  "questions": [
+    {
+      "kanji": "亀",
+      "furigana": "かめ",
+      "translation": "turtle",
+      "image": "GFX/animals/turtle.png"
+    },
+    {
+      "kanji": "狼",
+      "furigana": "おおかみ",
+      "translation": "wolf",
+      "image": "GFX/animals/wolf.png"
+    },
+    {
+      "kanji": "鼠",
+      "furigana": "ねずみ",
+      "translation": "mouse/rat",
+      "image": "GFX/animals/mouse.png"
+    },
+    {
+      "kanji": "蛇",
+      "furigana": "へび",
+      "translation": "snake",
+      "image": "GFX/animals/snake.png"
+    },
+    {
+      "kanji": "鴨",
+      "furigana": "かも",
+      "translation": "duck",
+      "image": "GFX/animals/duck.png"
+    }
+  ]
+}
+
+j_animals4 = {
+  "quiz_title": "Animals 4",
+  "questions": [
+    {
+      "kanji": "虎",
+      "furigana": "とら",
+      "translation": "tiger",
+      "image": "GFX/animals/tiger.png"
+    },
+    {
+      "kanji": "豹",
+      "furigana": "ひょう",
+      "translation": "leopard",
+      "image": "GFX/animals/leopard.png"
+    },
+    {
+      "kanji": "キリン",
+      "furigana": "きりん",
+      "translation": "giraffe",
+      "image": "GFX/animals/giraffe.png"
+    },
+    {
+      "kanji": "ラクダ",
+      "furigana": "らくだ",
+      "translation": "camel",
+      "image": "GFX/animals/camel.png"
+    },
+    {
+      "kanji": "パンダ",
+      "furigana": "ぱんだ",
+      "translation": "panda",
+      "image": "GFX/animals/panda.png"
+    }
+  ]
+}
+
+j_animals5 = {
+  "quiz_title": "Animals 5",
+  "questions": [
+    {
+      "kanji": "ゴリラ",
+      "furigana": "ごりら",
+      "translation": "gorilla",
+      "image": "GFX/animals/gorilla.png"
+    },
+    {
+      "kanji": "ペンギン",
+      "furigana": "ぺんぎん",
+      "translation": "penguin",
+      "image": "GFX/animals/penguin.png"
+    },
+    {
+      "kanji": "シマウマ",
+      "furigana": "しまうま",
+      "translation": "zebra",
+      "image": "GFX/animals/zebra.png"
+    },
+    {
+      "kanji": "ハリネズミ",
+      "furigana": "はりねずみ",
+      "translation": "hedgehog",
+      "image": "GFX/animals/hedgehog.png"
+    },
+    {
+      "kanji": "イルカ",
+      "furigana": "いるか",
+      "translation": "dolphin",
+      "image": "GFX/animals/dolphin.png"
+    }
+  ]
+}
+
+j_animals6 = {
+  "quiz_title": "Animals 6",
+  "questions": [
+    {
+      "kanji": "獅子",
+      "furigana": "ライオン",
+      "translation": "lion",
+      "image": "GFX/animals/lion.png"
+    },
+    {
+      "kanji": "烏",
+      "furigana": "からす",
+      "translation": "crow",
+      "image": "GFX/animals/crow.png"
+    },
+    {
+      "kanji": "鯨",
+      "furigana": "くじら",
+      "translation": "whale",
+      "image": "GFX/animals/whale.png"
+    },
+    {
+      "kanji": "烏賊",
+      "furigana": "イカ",
+      "translation": "squid",
+      "image": "GFX/animals/squid.png"
+    },
+    {
+      "kanji": "蛸",
+      "furigana": "タコ",
+      "translation": "octopus",
+      "image": "GFX/animals/octopus.png"
+    }
+  ]
+}
+
+j_animals7 = {
+  "quiz_title": "Animals 7",
+  "questions": [
+    {
+      "kanji": "羊",
+      "furigana": "ひつじ",
+      "translation": "sheep",
+      "image": "GFX/animals/sheep.png"
+    },
+    {
+      "kanji": "鹿",
+      "furigana": "しか",
+      "translation": "deer",
+      "image": "GFX/animals/deer.png"
+    },
+    {
+      "kanji": "熊",
+      "furigana": "くま",
+      "translation": "bear",
+      "image": "GFX/animals/bear.png"
+    },
+    {
+      "kanji": "猿",
+      "furigana": "さる",
+      "translation": "monkey",
+      "image": "GFX/animals/monkey.png"
+    },
+    {
+      "kanji": "兎",
+      "furigana": "うさぎ",
+      "translation": "rabbit",
+      "image": "GFX/animals/rabbit.png"
+    }
+  ]
+}
+
+j_animals8 = {
+  "quiz_title": "Animals 8",
+  "questions": [
+    {
+      "kanji": "カバ",
+      "furigana": "かば",
+      "translation": "hippopotamus",
+      "image": "GFX/animals/hippopotamus.png"
+    },
+    {
+      "kanji": "ワニ",
+      "furigana": "わに",
+      "translation": "crocodile",
+      "image": "GFX/animals/crocodile.png"
+    },
+    {
+      "kanji": "鷹",
+      "furigana": "たか",
+      "translation": "hawk",
+      "image": "GFX/animals/hawk.png"
+    },
+    {
+      "kanji": "フクロウ",
+      "furigana": "ふくろう",
+      "translation": "owl",
+      "image": "GFX/animals/owl.png"
+    },
+    {
+      "kanji": "コアラ",
+      "furigana": "こあら",
+      "translation": "koala",
+      "image": "GFX/animals/koala.png"
+    }
+  ]
+}
+
+j_animals9 = {
+  "quiz_title": "Animals 9",
+  "questions": [
+    {
+      "kanji": "リス",
+      "furigana": "りす",
+      "translation": "squirrel",
+      "image": "GFX/animals/squirrel.png"
+    },
+    {
+      "kanji": "ハムスター",
+      "furigana": "はむすたー",
+      "translation": "hamster",
+      "image": "GFX/animals/hamster.png"
+    },
+    {
+      "kanji": "蟻",
+      "furigana": "あり",
+      "translation": "ant",
+      "image": "GFX/animals/ant.png"
+    },
+    {
+      "kanji": "蜂",
+      "furigana": "はち",
+      "translation": "bee",
+      "image": "GFX/animals/bee.png"
+    },
+    {
+      "kanji": "蛙",
+      "furigana": "かえる",
+      "translation": "frog",
+      "image": "GFX/animals/frog.png"
+    }
+  ]
+}
 
 
 ##################################
@@ -695,7 +1018,7 @@ def center_window(width, height):
 
 # Try to load and set the window icon from a specified file
 try:
-    icon = pygame.image.load('assets/images/LLRN.ico')
+    icon = pygame.image.load('assets/images/Learniverse.ico')
     pygame.display.set_icon(icon)
 except FileNotFoundError as e:
     log_entry = create_log_message(f"Icon file not found: {e}")
@@ -1019,7 +1342,8 @@ def insert_lessons(cursor, connection):
         ("Subtraction Borrowing", "Subtraction Borrowing"),
         ("Japanese Colors", "Japanese Colors"),
         ("Japanese Body Parts", "Japanese Body Parts"),
-        ("Japanese Adjectives", "Japanese Adjectives")
+        ("Japanese Adjectives", "Japanese Adjectives"),
+        ("Japanese Animals", "Japanese Animals")
     ]
 
     try:
@@ -3841,6 +4165,147 @@ def triple_digit_subtraction(session_id):
     return total_questions, correct_answers, average_time
 
 
+def quad_digit_subtraction(session_id):
+    """Presents a quad-digit subtraction quiz with random numbers and updates the session results."""
+    global current_student  # Access the global current student
+
+    # Retrieve the lesson_id for Quad Digit Subtraction
+    connection = sqlite3.connect('learniverse.db')
+    cursor = connection.cursor()
+    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Quad Digit Subtraction',))
+    result = cursor.fetchone()
+    
+    if result:
+        subtraction_lesson_id = result[0]
+    else:
+        log_entry = create_log_message("Quad Digit Subtraction lesson not found in the database.")
+        log_message(log_entry)
+        cursor.close()
+        connection.close()
+        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+
+    cursor.close()
+    connection.close()
+
+    # Display the introductory message
+    screen.fill(screen_color)
+    draw_text(
+        "Let's work on Quad-Digit Subtraction!",
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    correct_answers = 0
+    problem_count = 0
+    total_questions = 5
+    completion_times = []
+
+    clock = pygame.time.Clock()
+
+    while problem_count < total_questions:
+        num1, num2, answer = generate_math_problem(1000, 9999, operation="sub")
+        user_input = ""
+        first_input = True
+        question_complete = False
+
+        # Start the timer for the question
+        start_time = time.time()
+
+        while not question_complete:
+            screen.fill(screen_color)
+
+            # Draw the math problem
+            display_math_problem(num1, num2, user_input, first_input, operation="sub")
+
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+                        end_time = time.time()
+                        time_taken = round(end_time - start_time, 1)
+                        completion_times.append(time_taken)
+
+                        if int(user_input) == answer:
+                            correct_answers += 1
+
+                            if time_taken < 3:
+                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+                            else:
+                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+                        else:
+                            display_result(f"Sorry, the answer is {answer}")
+
+                        pygame.event.clear()
+                        problem_count += 1
+                        question_complete = True
+                    elif event.key == pygame.K_BACKSPACE:
+                        user_input = user_input[:-1]
+                    elif event.unicode.isdigit() and len(user_input) < 5:  # Limit input to five digits
+                        user_input += event.unicode
+                        first_input = False
+
+            clock.tick(60)
+
+    # End of lesson timer
+    lesson_end_time = time.time()
+
+    if completion_times:
+        average_time = round(sum(completion_times) / len(completion_times), 1)
+    else:
+        average_time = 0
+
+    try:
+        add_session_lesson(
+            session_id,
+            subtraction_lesson_id,
+            lesson_start_time,
+            lesson_end_time,
+            total_questions,
+            correct_answers
+        )
+    except Exception as e:
+        log_entry = create_log_message(f"Error recording session lesson: {e}")
+        log_message(log_entry)
+        return total_questions, correct_answers, average_time
+
+    screen.fill(screen_color)
+
+    final_message = f"Final Score: {correct_answers}/{total_questions}"
+    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+    if completion_times:
+        average_time_message = f"Average Time: {average_time} seconds"
+        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+    if correct_answers == total_questions:
+        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+        if average_time < 3.0:
+            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+    draw_and_wait_continue_button()
+    
+    if correct_answers == total_questions:
+        bonus_game_fat_tuna()
+
+    return total_questions, correct_answers, average_time
+
+
 def subtraction_borrowing(session_id):
     """Presents a double-digit subtraction quiz with borrowing and updates the session results."""
     global current_student  # Access the global current student
@@ -3997,147 +4462,6 @@ def generate_borrowing_problem():
 
     answer = num1 - num2
     return num1, num2, answer
-
-
-def quad_digit_subtraction(session_id):
-    """Presents a quad-digit subtraction quiz with random numbers and updates the session results."""
-    global current_student  # Access the global current student
-
-    # Retrieve the lesson_id for Quad Digit Subtraction
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
-    cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Quad Digit Subtraction',))
-    result = cursor.fetchone()
-    
-    if result:
-        subtraction_lesson_id = result[0]
-    else:
-        log_entry = create_log_message("Quad Digit Subtraction lesson not found in the database.")
-        log_message(log_entry)
-        cursor.close()
-        connection.close()
-        return 0, 0, 0  # No questions asked, no correct answers, no time taken
-
-    cursor.close()
-    connection.close()
-
-    # Display the introductory message
-    screen.fill(screen_color)
-    draw_text(
-        "Let's work on Quad-Digit Subtraction!",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.4,
-        max_width=WIDTH * 0.95,
-        center=True,
-        enable_shadow=True,
-        shadow_color=shadow_color
-    )
-
-    draw_and_wait_continue_button()
-
-    # Start the lesson timer
-    lesson_start_time = time.time()
-
-    correct_answers = 0
-    problem_count = 0
-    total_questions = 5
-    completion_times = []
-
-    clock = pygame.time.Clock()
-
-    while problem_count < total_questions:
-        num1, num2, answer = generate_math_problem(1000, 9999, operation="sub")
-        user_input = ""
-        first_input = True
-        question_complete = False
-
-        # Start the timer for the question
-        start_time = time.time()
-
-        while not question_complete:
-            screen.fill(screen_color)
-
-            # Draw the math problem
-            display_math_problem(num1, num2, user_input, first_input, operation="sub")
-
-            pygame.display.flip()
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN:
-                    if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
-                        end_time = time.time()
-                        time_taken = round(end_time - start_time, 1)
-                        completion_times.append(time_taken)
-
-                        if int(user_input) == answer:
-                            correct_answers += 1
-
-                            if time_taken < 3:
-                                display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
-                            else:
-                                display_result("CORRECT!", "assets/images/cats", use_lightning=False)
-                        else:
-                            display_result(f"Sorry, the answer is {answer}")
-
-                        pygame.event.clear()
-                        problem_count += 1
-                        question_complete = True
-                    elif event.key == pygame.K_BACKSPACE:
-                        user_input = user_input[:-1]
-                    elif event.unicode.isdigit() and len(user_input) < 5:  # Limit input to five digits
-                        user_input += event.unicode
-                        first_input = False
-
-            clock.tick(60)
-
-    # End of lesson timer
-    lesson_end_time = time.time()
-
-    if completion_times:
-        average_time = round(sum(completion_times) / len(completion_times), 1)
-    else:
-        average_time = 0
-
-    try:
-        add_session_lesson(
-            session_id,
-            subtraction_lesson_id,
-            lesson_start_time,
-            lesson_end_time,
-            total_questions,
-            correct_answers
-        )
-    except Exception as e:
-        log_entry = create_log_message(f"Error recording session lesson: {e}")
-        log_message(log_entry)
-        return total_questions, correct_answers, average_time
-
-    screen.fill(screen_color)
-
-    final_message = f"Final Score: {correct_answers}/{total_questions}"
-    draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-
-    if completion_times:
-        average_time_message = f"Average Time: {average_time} seconds"
-        draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
-
-    if correct_answers == total_questions:
-        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
-        
-        if average_time < 3.0:
-            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
-
-    draw_and_wait_continue_button()
-    
-    if correct_answers == total_questions:
-        bonus_game_fat_tuna()
-
-    return total_questions, correct_answers, average_time
 
 
 def single_digit_multiplication(session_id):
@@ -5466,9 +5790,11 @@ def basic_shapes_quiz(session_id):
         {"name": "star", "description": "Click the star."}
     ]
 
-    while problem_count < total_questions:
-        # Select a random shape question
-        shape_question = random.choice(shapes)
+    # Select 5 unique random shapes without repeating
+    selected_shapes = random.sample(shapes, total_questions)
+
+    # Quiz loop
+    for shape_question in selected_shapes:
         correct_shape = shape_question["name"]
 
         # Draw the question
@@ -5490,6 +5816,8 @@ def basic_shapes_quiz(session_id):
 
         question_complete = False
 
+        start_time = time.time()  # Start timing for this question
+
         while not question_complete:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -5507,6 +5835,9 @@ def basic_shapes_quiz(session_id):
 
                     # If they clicked a shape, check if it's correct or not
                     if clicked_shape:
+                        time_taken = round(time.time() - start_time, 1)
+                        completion_times.append(time_taken)
+
                         if clicked_shape == correct_shape:
                             correct_answers += 1
                             display_result("CORRECT!", "assets/images/cats")
@@ -5560,6 +5891,7 @@ def basic_shapes_quiz(session_id):
         bonus_game_fat_tuna()
 
     return total_questions, correct_answers, average_time
+
 
 
 def fibonacci_sequence(n):
@@ -6215,27 +6547,19 @@ def session_manager():
                        
                                               
                        ### DEBUG TESTING ###
-                       "japanese_adjectives_teach",             #JP
+                       # "basic_shapes_quiz",
+                       
+                       
+                       
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       # "japanese_colors_teach",
                        # "rainbow_numbers",                   #Math
-                       # "lowest_common_denominator_quiz",       #Math
+                       # "lowest_common_denominator_quiz",      #Math
                        # "psalm_23",                          #ENG
-                       # "japanese_colors4_quiz",             #JP
                        # "japanese_body_parts_quiz",          #JP
                        # "skip_counting_kanji",               #JP
-                       # "japanese_colors_quiz_selector",     #JP
-                       # "japanese_colors2_quiz",             #JP
-                       # "japanese_colors2_teach",            #JP
-                       # "japanese_colors3_teach",            #JP
-                       # "japanese_colors3_quiz",             #JP
-                       # "japanese_colors4_teach",            #JP
-                       # "japanese_colors4_quiz",             #JP
-                       # "japanese_colors5_teach",            #JP
-                       # "japanese_colors5_quiz",             #JP
-                       ### DEBUG TESTING ###
+                       ## DEBUG TESTING ###
                        
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
@@ -6261,9 +6585,13 @@ def session_manager():
                        "japanese_body_parts_quiz",          #JP
                        "double_digit_addition",             #Math
                        "numbers_6_24_26",                   #ENG
+                       "japanese_animals_teach",            #JP
                        "single_denominator_addition",       #Math
+                       "japanese_animals_quiz",             #JP
                        "lowest_common_denominator_quiz",    #Math
+                       "japanese_adjectives_teach",         #JP
                        "basic_shapes_quiz",                 #Math
+                       "japanese_adjectives_quiz",          #JP
                        "single_by_double_multiplication",   #Math
                        "skip_counting_fibonacci",           #Math
                        "skip_counting_primes",              #Math
@@ -6533,6 +6861,8 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Body Parts') 
         elif lesson == "japanese_adjectives_teach":
             vocab_teach(session_id, 'Japanese Adjectives')
+        elif lesson == "japanese_animals_teach":
+            vocab_teach(session_id, 'Japanese Animals')
       
         ### J Quizzes
         elif lesson == "hiragana_quiz":
@@ -6567,6 +6897,26 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: Japanese Body Parts Quiz did not return a valid result.")
+        elif lesson == "japanese_adjectives_quiz":
+            print("Running Japanese Adjectives Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Adjectives')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: Japanese Adjectives Quiz did not return a valid result.")
+        elif lesson == "japanese_animals_quiz":
+            print("Running Japanese Animals Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Animals')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: Japanese Animals Quiz did not return a valid result.")
         
         
         
@@ -7647,6 +7997,8 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_body_parts{student_level}')
     elif lesson_title == 'Japanese Adjectives':
         lesson_data = globals().get(f'j_adjectives{student_level}')
+    elif lesson_title == 'Japanese Animals':
+        lesson_data = globals().get(f'j_animals{student_level}')
     else:
         return None
     return lesson_data
@@ -7871,6 +8223,14 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     mouse_pos = event.pos
+
+                    # Check if the kanji or furigana was clicked and repeat the audio if so
+                    if kanji_rect.collidepoint(mouse_pos):
+                        speak_japanese(question['furigana'])  # Play audio for the Kanji again
+                    elif furigana_rect.collidepoint(mouse_pos):
+                        speak_japanese(question['furigana'])  # Play audio for the Furigana again
+
+                    # Check if an answer option was clicked
                     for rect, option in option_rects:
                         if rect.collidepoint(mouse_pos):
                             time_taken = round(time.time() - start_time, 1)
@@ -7938,9 +8298,18 @@ def lesson_selector(session_id, lesson_title):
                             j_body_parts3, 
                             j_body_parts4, 
                             j_body_parts5]
-    # j_adjectives1
     elif lesson_title == 'Japanese Adjectives':
         lesson_data_sets = [j_adjectives1]
+    elif lesson_title == 'Japanese Animals':
+        lesson_data_sets = [j_animals1, 
+                            j_animals2, 
+                            j_animals3, 
+                            j_animals4, 
+                            j_animals5,
+                            j_animals6,
+                            j_animals7,
+                            j_animals8,
+                            j_animals9]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
@@ -8029,7 +8398,7 @@ def display_quiz(screen, kanji, furigana, options):
 
     # Draw the multiple-choice options
     option_rects = []
-    y_pos = HEIGHT * 0.6
+    y_pos = HEIGHT * 0.5
     answer_buffer = HEIGHT * 0.1
 
     for i, option in enumerate(options):
