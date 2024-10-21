@@ -6585,7 +6585,7 @@ def session_manager():
                        # "japanese_body_parts_teach",         #JP
                        "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
-                       # "japanese_animals_teach",            #JP
+                       "japanese_animals_teach",            #JP
                        "japanese_colors_quiz",              #JP
                        
                                               
@@ -8057,9 +8057,8 @@ def vocab_teach(session_id, lesson_title):
         log_message(f"Error: No lesson data found for {lesson_title} at level {student_level}")
         return
 
-    # Font initialization for furigana, kanji, and translation
+    # Font initialization for furigana and translation
     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
-    kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
     
     translation_font_size = 50
     if os.path.isfile(current_font_name_or_path):
@@ -8078,6 +8077,17 @@ def vocab_teach(session_id, lesson_title):
     for item in lesson_data['questions']:
         screen.fill(screen_color)
 
+        # Adjust the kanji font size dynamically based on kanji length
+        kanji_length = len(item['kanji'])
+        if kanji_length <= 3:
+            kanji_font_size = 300
+        else:
+            kanji_font_size = 150
+
+        # Initialize kanji font dynamically based on the determined size
+        kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
+
+        # Display furigana, kanji, and translation
         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
                   enable_shadow=True, shadow_color=shadow_color)
         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
@@ -8107,6 +8117,7 @@ def vocab_teach(session_id, lesson_title):
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
+
 
 
 def display_result_with_image(result_text, image_file=None, use_lightning=False):
@@ -8331,7 +8342,9 @@ def lesson_selector(session_id, lesson_title):
                             j_colors3, 
                             j_colors4, 
                             j_colors5,
-                            j_colors6]
+                            
+                            j_colors6
+                            ]
     elif lesson_title == 'Japanese Body Parts':
         lesson_data_sets = [j_body_parts1, 
                             j_body_parts2, 
