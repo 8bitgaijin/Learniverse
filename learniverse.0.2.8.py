@@ -6065,13 +6065,17 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       # "john_3_16",                         #ENG
+                       # "skip_counting_japanese",
+                       # "psalm_23",                          #ENG
                        
-                       # "japanese_colors_teach",
+                       
                        
                        
                        
                        
                        ### DEBUG TESTING ###
+                       # "japanese_colors_teach",
                        # "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",       #Math
                        # "psalm_23",                          #ENG
@@ -6105,13 +6109,13 @@ def session_manager():
                        "japanese_colors_teach",             #JP
                        "single_digit_multiplication",       #Math
                        "hebrews_11_1",                      #ENG
-                       "japanese_colors_quiz",
+                       "japanese_colors_quiz",              #JP
                        "double_digit_subtraction",          #Math
                        "philippians_4_6",                   #ENG
-                       "japanese_body_parts_teach",
+                       "japanese_body_parts_teach",         #JP
                        "subtraction_borrowing",             #Math
                        "ephesians_4_32",                    #ENG
-                       "japanese_body_parts_quiz",
+                       "japanese_body_parts_quiz",          #JP
                        "double_digit_addition",             #Math
                        "numbers_6_24_26",                   #ENG
                        "single_denominator_addition",       #Math
@@ -6787,7 +6791,7 @@ def display_bible_verse(greeting_message,
                         verse_title, 
                         verse_text, 
                         split_text=None):
-    """Displays a Bible verse with an optional split for larger texts."""
+    """Displays a Bible verse with support for any number of text splits."""
     global screen_color, text_color, shadow_color, font  # Use global font
     
     # Define a larger font size for the Bible verse
@@ -6816,49 +6820,41 @@ def display_bible_verse(greeting_message,
     # Draw the "Continue" button and wait for the student to click
     draw_and_wait_continue_button()
 
-    # If there is a split text (for long verses like Psalm 23), handle it in two parts
+    # If split_text is provided, loop through each part and display it
     if split_text:
-        # Display and read the first part of the verse
-        screen.fill(screen_color)
-        draw_text(
-            verse_title + "\n" + split_text[0],
-            font,  # Use the global font for the title
-            text_color,
-            x=0,
-            y=HEIGHT * 0.1,
-            center=True,
-            enable_shadow=True,
-            shadow_color=shadow_color,
-            max_width=WIDTH * 0.95,
-            font_override=large_font  # Override the font size for the verse
-        )
+        for index, part in enumerate(split_text):
+            # Clear the screen before each part
+            screen.fill(screen_color)
 
-        # Update the screen before speaking
-        pygame.display.flip()
-        speak_english(verse_title + " " + split_text[0])
+            # Adjust the y-position dynamically based on the index
+            y_position = HEIGHT * 0.1
 
-        # Draw the "Continue" button again and wait for the student to click
-        draw_and_wait_continue_button()
+            # Display the verse title on the first part and the content on each part
+            if index == 0:
+                display_text = verse_title + "\n" + part
+            else:
+                display_text = part
 
-        # Display and read the second part of the verse
-        screen.fill(screen_color)
-        draw_text(
-            split_text[1],
-            font,  # Use the global font
-            text_color,
-            x=0,
-            y=HEIGHT * 0.1,
-            center=True,
-            enable_shadow=True,
-            shadow_color=shadow_color,
-            max_width=WIDTH * 0.95,
-            font_override=large_font  # Override the font size for the verse
-        )
+            # Display the current part of the verse
+            draw_text(
+                display_text,
+                font,  # Use the global font for the title
+                text_color,
+                x=0,
+                y=y_position,
+                center=True,
+                enable_shadow=True,
+                shadow_color=shadow_color,
+                max_width=WIDTH * 0.955,
+                font_override=large_font  # Override the font size for the verse
+            )
 
-        # Update the screen before speaking
-        pygame.display.flip()
-        speak_english(split_text[1])
+            # Update the screen before speaking
+            pygame.display.flip()
+            speak_english(display_text)
 
+            # Draw the "Continue" button again and wait for the student to click
+            draw_and_wait_continue_button()
     else:
         # Display and read the entire verse if there's no split text
         screen.fill(screen_color)
@@ -6883,6 +6879,7 @@ def display_bible_verse(greeting_message,
     draw_and_wait_continue_button()
 
 
+
 def john_3_16():
     """Greets the student and introduces the Bible verse John 3:16 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
@@ -6904,7 +6901,8 @@ def psalm_23():
     greeting_message = "It's time to work on a Bible verse!"
     verse_title = "Psalm 23"
     split_text = [
-        "The Lord is my shepherd; I shall not want. He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+        "The Lord is my shepherd; I shall not want.",
+        "He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
         "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the Lord for ever."
     ]
     display_bible_verse(greeting_message, verse_title, "", split_text)
@@ -7118,8 +7116,8 @@ def month_of_the_year():
                     waiting = False  # Exit the loop when "Continue..." is clicked
 
 
-def skip_counting_japanese():
-    """Performs skip counting in Arabic numerals from 1 to 30, while speaking the numbers in Japanese."""
+def skip_counting_japanese(COUNT_TO=30):
+    """Performs skip counting in Arabic numerals up to COUNT_TO, while speaking the numbers in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
 
     # Define a larger size for the Arabic numerals
@@ -7133,8 +7131,8 @@ def skip_counting_japanese():
 
     # Clear the screen and inform the student about the activity
     screen.fill(screen_color)
-    intro_message = "Let's count in Japanese!"
-    
+    intro_message = f"Let's count in Japanese, up to {COUNT_TO}!"
+
     # Display the intro message and update the screen using the default global font
     draw_text(intro_message, 
               font, 
@@ -7149,8 +7147,8 @@ def skip_counting_japanese():
     # Draw the "Continue..." button after the intro message
     draw_and_wait_continue_button()
 
-    # Start counting from 1 to 30
-    for i in range(1, 31):
+    # Start counting from 1 to COUNT_TO
+    for i in range(1, COUNT_TO + 1):
         # Clear the screen before displaying each number
         screen.fill(screen_color)
 
@@ -7169,13 +7167,22 @@ def skip_counting_japanese():
         # Pause for a second before showing the next number
         time.sleep(1)
 
-    # After completing the skip counting, show a completion message using the default font
-    completion_message = "Great job!"
+    # After completing the skip counting, show a dynamic completion message using the default font
+    completion_message = f"Great job! You counted up to {COUNT_TO}!"
     screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(completion_message, 
+              font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              shadow_color=shadow_color,
+              max_width=WIDTH)
 
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
+
 
 
 def skip_counting_kanji():
