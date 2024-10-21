@@ -5893,7 +5893,6 @@ def basic_shapes_quiz(session_id):
     return total_questions, correct_answers, average_time
 
 
-
 def fibonacci_sequence(n):
     """Generates the Fibonacci sequence up to the nth term."""
     sequence = []
@@ -6436,15 +6435,15 @@ def student_select_menu():
             student_rects.append((student_rect, student_name))
 
         # Display the input box for adding new students
-        input_box_rect = pygame.Rect(WIDTH * 0.60, HEIGHT * 0.75, WIDTH * 0.3, 80)  # The size of the input box
+        input_box_rect = pygame.Rect(WIDTH * 0.33, HEIGHT * 0.80, WIDTH * 0.4, HEIGHT * 0.1)  # The size of the input box
         input_box_color = (255, 0, 0) if input_active else text_color  # Highlight input box when active
         pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box
 
         # Draw the "New Student" label
-        draw_text("New Student:", font, text_color, WIDTH * 0.05, HEIGHT * 0.75, screen, enable_shadow=True)
+        draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
 
         # Draw the current student input text in the input box
-        draw_text(student_input, font, text_color, WIDTH * 0.62, HEIGHT * 0.74, screen, enable_shadow=True)
+        draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
 
         pygame.display.flip()  # Update the display
 
@@ -6491,8 +6490,8 @@ def student_select_menu():
 
                 # Redraw input box and input text
                 pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Redraw the input box
-                draw_text("New Student:", font, text_color, WIDTH * 0.05, HEIGHT * 0.75, screen, enable_shadow=True)
-                draw_text(student_input, font, text_color, WIDTH * 0.62, HEIGHT * 0.74, screen, enable_shadow=True)
+                draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
+                draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
 
                 # Update the screen
                 pygame.display.flip()
