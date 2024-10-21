@@ -2995,45 +2995,82 @@ def bonus_game_fat_tuna():
 ### Math Problem Functions ###
 ##############################
 
-def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
+# def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
+#     screen.fill(screen_color)
+    
+#     # Dynamically calculate positions based on screen size
+#     right_x = WIDTH * 0.55  # Right edge for alignment
+#     num1_y = HEIGHT * 0.4
+#     num2_y = HEIGHT * 0.5
+#     line_y = HEIGHT * 0.57
+#     sum_y = HEIGHT * 0.63
+    
+#     # Draw the first number (right-aligned)
+#     num1_surface = font.render(str(num1), True, text_color)
+#     num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
+#     screen.blit(num1_surface, num1_rect)
+    
+#     # Draw the plus sign (right-aligned with some offset)
+#     plus_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
+#     plus_surface = font.render("+", True, text_color)
+#     plus_rect = plus_surface.get_rect(right=plus_sign_x, centery=num2_y)
+#     screen.blit(plus_surface, plus_rect)
+    
+#     # Draw the second number placeholder or the input from the user (right-aligned)
+#     if first_input:
+#         input_text = "?"
+#     else:
+#         input_text = user_input
+        
+#     input_surface = font.render(input_text, True, text_color)
+#     input_rect = input_surface.get_rect(right=right_x, centery=num2_y)
+#     screen.blit(input_surface, input_rect)
+    
+#     # Calculate line width with a factor
+#     line_width = max(num1_surface.get_width(), input_surface.get_width(), font.size(str(num1 + num2))[0]) * line_length_factor
+#     pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+    
+#     # Draw the sum (right-aligned)
+#     sum_surface = font.render(str(num1 + num2), True, text_color)
+#     sum_rect = sum_surface.get_rect(right=right_x, centery=sum_y)
+#     screen.blit(sum_surface, sum_rect)
+
+#     pygame.display.flip()
+def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=2.5):
     screen.fill(screen_color)
     
     # Dynamically calculate positions based on screen size
     right_x = WIDTH * 0.55  # Right edge for alignment
     num1_y = HEIGHT * 0.4
     num2_y = HEIGHT * 0.5
-    line_y = HEIGHT * 0.57
+    line_y = HEIGHT * 0.60
     sum_y = HEIGHT * 0.63
     
-    # Draw the first number (right-aligned)
-    num1_surface = font.render(str(num1), True, text_color)
-    num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
-    screen.blit(num1_surface, num1_rect)
-    
+    # Draw the first number (right-aligned) using draw_text
+    num1_rect = draw_text(
+        str(num1), font, text_color, right_x, num1_y, center=True, enable_shadow=True, shadow_color=shadow_color, return_rect=True
+    )
+
     # Draw the plus sign (right-aligned with some offset)
-    plus_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
-    plus_surface = font.render("+", True, text_color)
-    plus_rect = plus_surface.get_rect(right=plus_sign_x, centery=num2_y)
-    screen.blit(plus_surface, plus_rect)
-    
+    plus_sign_x = right_x - num1_rect.width - WIDTH * 0.1
+    draw_text(
+        "+", font, text_color, plus_sign_x, num2_y, center=False, enable_shadow=True, shadow_color=shadow_color
+    )
+
     # Draw the second number placeholder or the input from the user (right-aligned)
-    if first_input:
-        input_text = "?"
-    else:
-        input_text = user_input
-        
-    input_surface = font.render(input_text, True, text_color)
-    input_rect = input_surface.get_rect(right=right_x, centery=num2_y)
-    screen.blit(input_surface, input_rect)
-    
+    input_text = "?" if first_input else user_input
+    input_rect = draw_text(
+        input_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True, shadow_color=shadow_color, return_rect=True
+    )
+
     # Calculate line width with a factor
-    line_width = max(num1_surface.get_width(), input_surface.get_width(), font.size(str(num1 + num2))[0]) * line_length_factor
+    line_width = max(num1_rect.width, input_rect.width, font.size(str(num1 + num2))[0]) * line_length_factor
     pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
-    
+
     # Draw the sum (right-aligned)
-    sum_surface = font.render(str(num1 + num2), True, text_color)
-    sum_rect = sum_surface.get_rect(right=right_x, centery=sum_y)
-    screen.blit(sum_surface, sum_rect)
+    draw_text(
+        str(num1 + num2), font, text_color, right_x, sum_y, center=True, enable_shadow=True, shadow_color=shadow_color
+    )
 
     pygame.display.flip()
 
@@ -6725,22 +6762,22 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       # "japanese_body_parts_teach",         #JP
-                       "japanese_colors_teach",              #JP
-                       # "japanese_adjectives_teach",         #JP
-                       "japanese_animals_teach",            #JP
-                       "japanese_colors_quiz",              #JP
+                       
                        
                                               
                        ### DEBUG TESTING ###
                        # "basic_shapes_quiz",
-                       
+                       # "japanese_body_parts_teach",         #JP
+                       # "japanese_colors_teach",              #JP
+                       # "japanese_adjectives_teach",         #JP
+                       # "japanese_animals_teach",            #JP
+                       # "japanese_colors_quiz",              #JP
                        
                        
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       # "rainbow_numbers",                   #Math
+                       "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",      #Math
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
