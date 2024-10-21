@@ -384,6 +384,149 @@ j_colors6 = {
   ]
 }
 
+j_colors7 = {
+  "quiz_title": "Color Sentences 2",
+  "questions": [
+    {
+      "furigana": "きいろいねこです",
+      "kanji": "黄色い猫です",
+      "translation": "It is a yellow cat.",
+      "image": "GFX/colors/yellow.png"
+    },
+    {
+      "furigana": "ちゃいろいねこです",
+      "kanji": "茶色い猫です",
+      "translation": "It is a brown cat.",
+      "image": "GFX/colors/brown.png"
+    },
+    {
+      "furigana": "むらさきのねこです",
+      "kanji": "紫の猫です",
+      "translation": "It is a purple cat.",
+      "image": "GFX/colors/purple.png"
+    },
+    {
+      "furigana": "はいいろのねこです",
+      "kanji": "灰色の猫です",
+      "translation": "It is a gray cat.",
+      "image": "GFX/colors/gray.png"
+    },
+    {
+      "furigana": "きんいろのねこです",
+      "kanji": "金色の猫です",
+      "translation": "It is a gold cat.",
+      "image": "GFX/colors/gold.png"
+    }
+  ]
+}
+
+j_colors8 = {
+  "quiz_title": "Color Sentences 3",
+  "questions": [
+    {
+      "furigana": "だいだいいろのねこです",
+      "kanji": "橙色の猫です",
+      "translation": "It is an orange cat.",
+      "image": "GFX/colors/orange.png"
+    },
+    {
+      "furigana": "ももいろのねこです",
+      "kanji": "桃色の猫です",
+      "translation": "It is a pink cat.",
+      "image": "GFX/colors/pink.png"
+    },
+    {
+      "furigana": "きんいろのねこです",
+      "kanji": "金色の猫です",
+      "translation": "It is a gold cat.",
+      "image": "GFX/colors/gold.png"
+    },
+    {
+      "furigana": "ぎんいろのねこです",
+      "kanji": "銀色の猫です",
+      "translation": "It is a silver cat.",
+      "image": "GFX/colors/silver.png"
+    },
+    {
+      "furigana": "こんいろのねこです",
+      "kanji": "紺色の猫です",
+      "translation": "It is a navy blue cat.",
+      "image": "GFX/colors/navy_blue.png"
+    }
+  ]
+}
+
+j_colors9 = {
+  "quiz_title": "Color Sentences 4",
+  "questions": [
+    {
+      "furigana": "みずいろのねこです",
+      "kanji": "水色の猫です",
+      "translation": "It is a light blue cat.",
+      "image": "GFX/colors/light_blue.png"
+    },
+    {
+      "furigana": "しこうのねこです",
+      "kanji": "紫紅の猫です",
+      "translation": "It is a crimson cat.",
+      "image": "GFX/colors/crimson.png"
+    },
+    {
+      "furigana": "きみどりのねこです",
+      "kanji": "黄緑の猫です",
+      "translation": "It is a yellow-green cat.",
+      "image": "GFX/colors/yellow_green.png"
+    },
+    {
+      "furigana": "わかくさいろのねこです",
+      "kanji": "若草色の猫です",
+      "translation": "It is a light green cat.",
+      "image": "GFX/colors/light_green.png"
+    },
+    {
+      "furigana": "あさぎいろのねこです",
+      "kanji": "浅葱色の猫です",
+      "translation": "It is a light blue-green cat.",
+      "image": "GFX/colors/light_blue_green.png"
+    }
+  ]
+}
+
+j_colors10 = {
+  "quiz_title": "Color Sentences 5",
+  "questions": [
+    {
+      "furigana": "さくらいろのねこです",
+      "kanji": "桜色の猫です",
+      "translation": "It is a cherry blossom pink cat.",
+      "image": "GFX/colors/cherry_blossom_pink.png"
+    },
+    {
+      "furigana": "れんがいろのねこです",
+      "kanji": "煉瓦色の猫です",
+      "translation": "It is a brick red cat.",
+      "image": "GFX/colors/brick_red.png"
+    },
+    {
+      "furigana": "おうどいろのねこです",
+      "kanji": "黄土色の猫です",
+      "translation": "It is an ochre cat.",
+      "image": "GFX/colors/ochre.png"
+    },
+    {
+      "furigana": "とびいろのねこです",
+      "kanji": "鳶色の猫です",
+      "translation": "It is a dark reddish-brown cat.",
+      "image": "GFX/colors/dark_reddish_brown.png"
+    },
+    {
+      "furigana": "ぶどういろのねこです",
+      "kanji": "葡萄色の猫です",
+      "translation": "It is a grape-colored cat.",
+      "image": "GFX/colors/grape.png"
+    }
+  ]
+}
 
 j_body_parts1 = {
   "quiz_title": "Body Parts 1",
@@ -8342,8 +8485,11 @@ def lesson_selector(session_id, lesson_title):
                             j_colors3, 
                             j_colors4, 
                             j_colors5,
-                            
-                            j_colors6
+                            j_colors6,
+                            j_colors7,
+                            j_colors8,
+                            j_colors9,
+                            j_colors10,
                             ]
     elif lesson_title == 'Japanese Body Parts':
         lesson_data_sets = [j_body_parts1, 
