@@ -6057,9 +6057,9 @@ def session_manager():
     lessons_to_play = ["greet_student",                     #JP
                        
                        # "japanese_colors_teach",
-                       "japanese_colors_quiz",
-                       "japanese_body_parts_teach",
-                       "japanese_body_parts_quiz",
+                       
+                       
+                       
                        
                        ### DEBUG TESTING ###
                        # "rainbow_numbers",                   #Math
@@ -6067,7 +6067,17 @@ def session_manager():
                        # "psalm_23",                          #ENG
                        # "japanese_colors4_quiz",             #JP
                        # "japanese_colors1_teach",             #JP
+                       # "japanese_colors_quiz_selector",     #JP
                        # "japanese_colors1_quiz",             #JP
+                       # "japanese_colors1_quiz",             #JP
+                       # "japanese_colors2_quiz",             #JP
+                       # "japanese_colors2_teach",            #JP
+                       # "japanese_colors3_teach",            #JP
+                       # "japanese_colors3_quiz",             #JP
+                       # "japanese_colors4_teach",            #JP
+                       # "japanese_colors4_quiz",             #JP
+                       # "japanese_colors5_teach",            #JP
+                       # "japanese_colors5_quiz",             #JP
                        ### DEBUG TESTING ###
                        
                        "streak_check",                      #ENG
@@ -6085,28 +6095,21 @@ def session_manager():
                        "japanese_colors_teach",             #JP
                        "single_digit_multiplication",       #Math
                        "hebrews_11_1",                      #ENG
-                       "japanese_colors_quiz_selector",     #JP
-                       # "japanese_colors1_quiz",             #JP
+                       "japanese_colors_quiz",
                        "double_digit_subtraction",          #Math
                        "philippians_4_6",                   #ENG
-                       # "japanese_colors2_teach",            #JP
+                       "japanese_body_parts_teach",
                        "subtraction_borrowing",             #Math
                        "ephesians_4_32",                    #ENG
-                       # "japanese_colors2_quiz",             #JP
+                       "japanese_body_parts_quiz",
                        "double_digit_addition",             #Math
                        "numbers_6_24_26",                   #ENG
-                       # "japanese_colors3_teach",            #JP
                        "single_denominator_addition",       #Math
                        "lowest_common_denominator_quiz",    #Math
-                       # "japanese_colors3_quiz",             #JP
                        "basic_shapes_quiz",                 #Math
-                       # "japanese_colors4_teach",            #JP
                        "single_by_double_multiplication",   #Math
-                       # "japanese_colors4_quiz",             #JP
                        "skip_counting_fibonacci",           #Math
-                       # "japanese_colors5_teach",            #JP
                        "skip_counting_primes",              #Math
-                       # "japanese_colors5_quiz",             #JP
                        "skip_counting_kanji",               #JP
                        "psalm_23",                          #ENG
                        
@@ -6646,7 +6649,7 @@ def greet_student():
 
 def streak_check():
     global angle_x, angle_y, angle_z, hue  # Declare global for cube rotation and color
-    global text_color, shadow_color, screen_color  # Access the theme-related globals
+    global text_color, shadow_color, screen_color, current_font_name_or_path  # Access the theme-related globals
 
     # Fill the screen with the background color from the applied theme
     screen.fill(screen_color)
@@ -6678,14 +6681,33 @@ def streak_check():
         shadow_color=shadow_color
     )
 
-    # Draw the "Continue..." button
+    # --- Dynamic font size for the "Continue..." button ---
+    # Calculate dynamic font size based on current resolution
+    continue_font_size = int(get_dynamic_font_size() * 0.8)  # Adjust size as necessary
+
+    # Load the font using the dynamic size
+    if os.path.isfile(current_font_name_or_path):
+        # Load from a file path
+        button_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+    else:
+        # Load from system fonts
+        button_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+
+    # Draw the "Continue..." button with a drop shadow at the specified position
     button_text = "Continue..."
-    button_font = font
     button_color = text_color
 
-    # Determine button size and position
-    button_surface = button_font.render(button_text, True, button_color)
-    button_rect = button_surface.get_rect(center=(WIDTH // 2, HEIGHT * 0.75))  # Button centered at 75% height
+    # Get the rect for the button for click detection
+    button_rect = draw_text(
+        button_text,
+        button_font,
+        button_color,
+        x=WIDTH * 0.55,
+        y=HEIGHT * 0.9,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True  # Return the rect for click detection
+    )
 
     waiting = True
     while waiting:
@@ -6706,7 +6728,15 @@ def streak_check():
         )
 
         # Redraw the "Continue..." button
-        screen.blit(button_surface, button_rect)
+        draw_text(
+            button_text,
+            button_font,
+            button_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
 
         # Handle events
         for event in pygame.event.get():
@@ -6735,6 +6765,8 @@ def streak_check():
         clock.tick(60)
 
     return
+
+
 
 
 ############################
