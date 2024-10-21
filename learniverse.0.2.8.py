@@ -167,8 +167,8 @@ current_student = None  # Global variable to store the currently selected studen
 # Icon will be loaded later, initialized as None for now
 icon = None
 
-# Japanese colors data
-colors1 = {
+# Japanese data
+j_colors1 = {
   "quiz_title": "Colors 1",
   "questions": [
     {
@@ -204,7 +204,7 @@ colors1 = {
   ]
 }
 
-colors2 = {
+j_colors2 = {
   "quiz_title": "Colors 2",
   "questions": [
     {
@@ -240,7 +240,7 @@ colors2 = {
   ]
 }
 
-colors3 = {
+j_colors3 = {
   "quiz_title": "Colors 3",
   "questions": [
     {
@@ -276,7 +276,7 @@ colors3 = {
   ]
 }
 
-colors4 = {
+j_colors4 = {
   "quiz_title": "Colors 4",
   "questions": [
     {
@@ -312,7 +312,7 @@ colors4 = {
   ]
 }
 
-colors5 = {
+j_colors5 = {
   "quiz_title": "Colors 5",
   "questions": [
     {
@@ -419,6 +419,152 @@ j_body_parts2 = {
     }
   ]
 }
+
+j_body_parts3 = {
+  "quiz_title": "Body Parts 3",
+  "questions": [
+    {
+      "furigana": "かた",
+      "kanji": "肩",
+      "translation": "shoulder",
+      "image": "GFX/body_parts/shoulder.png"
+    },
+    {
+      "furigana": "ひじ",
+      "kanji": "",
+      "translation": "elbow",
+      "image": "GFX/body_parts/elbow.png"
+    },
+    {
+      "furigana": "ひざ",
+      "kanji": "",
+      "translation": "knee",
+      "image": "GFX/body_parts/knee.png"
+    },
+    {
+      "furigana": "むね",
+      "kanji": "胸",
+      "translation": "chest",
+      "image": "GFX/body_parts/chest.png"
+    },
+    {
+      "furigana": "せなか",
+      "kanji": "背中",
+      "translation": "back",
+      "image": "GFX/body_parts/back.png"
+    }
+  ]
+}
+
+j_body_parts4 = {
+  "quiz_title": "Body Parts 4",
+  "questions": [
+    {
+      "furigana": "くび",
+      "kanji": "首",
+      "translation": "neck",
+      "image": "GFX/body_parts/neck.png"
+    },
+    {
+      "furigana": "おなか",
+      "kanji": "お腹",
+      "translation": "stomach",
+      "image": "GFX/body_parts/stomach.png"
+    },
+    {
+      "furigana": "こし",
+      "kanji": "腰",
+      "translation": "waist",
+      "image": "GFX/body_parts/waist.png"
+    },
+    {
+      "furigana": "うで",
+      "kanji": "腕",
+      "translation": "arm",
+      "image": "GFX/body_parts/arm.png"
+    },
+    {
+      "furigana": "あご",
+      "kanji": "顔",
+      "translation": "chin",
+      "image": "GFX/body_parts/chin.png"
+    }
+  ]
+}
+
+j_body_parts5 = {
+  "quiz_title": "Body Parts 5",
+  "questions": [
+    {
+      "furigana": "ほほ",
+      "kanji": "",
+      "translation": "cheek",
+      "image": "GFX/body_parts/cheek.png"
+    },
+    {
+      "furigana": "あごひげ",
+      "kanji": "",
+      "translation": "beard",
+      "image": "GFX/body_parts/beard.png"
+    },
+    {
+      "furigana": "まゆげ",
+      "kanji": "",
+      "translation": "eyebrow",
+      "image": "GFX/body_parts/eyebrow.png"
+    },
+    {
+      "furigana": "まつげ",
+      "kanji": "",
+      "translation": "eyelash",
+      "image": "GFX/body_parts/eyelash.png"
+    },
+    {
+      "furigana": "くちびる",
+      "kanji": "",
+      "translation": "lip",
+      "image": "GFX/body_parts/lip.png"
+    }
+  ]
+}
+
+j_adjectives1 = {
+  "quiz_title": "Simple Adjectives",
+  "questions": [
+    {
+      "furigana": "おおきい",
+      "kanji": "大きい",
+      "translation": "large",
+      "image": "GFX/adjectives/large.png"
+    },
+    {
+      "furigana": "ちいさい",
+      "kanji": "小さい",
+      "translation": "small",
+      "image": "GFX/adjectives/small.png"
+    },
+    {
+      "furigana": "ながい",
+      "kanji": "長い",
+      "translation": "long",
+      "image": "GFX/adjectives/long.png"
+    },
+    {
+      "furigana": "みじかい",
+      "kanji": "短い",
+      "translation": "short",
+      "image": "GFX/adjectives/short.png"
+    },
+    {
+      "furigana": "はやい",
+      "kanji": "速い",
+      "translation": "fast",
+      "image": "GFX/adjectives/fast.png"
+    }
+  ]
+}
+
+
 
 ##################################
 # TODO
@@ -872,7 +1018,8 @@ def insert_lessons(cursor, connection):
         ("Basic Geometric Shapes", "Basic Geometric Shapes"),
         ("Subtraction Borrowing", "Subtraction Borrowing"),
         ("Japanese Colors", "Japanese Colors"),
-        ("Japanese Body Parts", "Japanese Body Parts")
+        ("Japanese Body Parts", "Japanese Body Parts"),
+        ("Japanese Adjectives", "Japanese Adjectives")
     ]
 
     try:
@@ -6065,25 +6212,21 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       
+                                              
+                       ### DEBUG TESTING ###
+                       "japanese_adjectives_teach",             #JP
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       
-                       
-                       
-                       
-                       
-                       
-                       ### DEBUG TESTING ###
                        # "japanese_colors_teach",
                        # "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",       #Math
                        # "psalm_23",                          #ENG
                        # "japanese_colors4_quiz",             #JP
-                       # "japanese_colors1_teach",             #JP
+                       # "japanese_body_parts_quiz",          #JP
+                       # "skip_counting_kanji",               #JP
                        # "japanese_colors_quiz_selector",     #JP
-                       # "japanese_colors1_quiz",             #JP
-                       # "japanese_colors1_quiz",             #JP
                        # "japanese_colors2_quiz",             #JP
                        # "japanese_colors2_teach",            #JP
                        # "japanese_colors3_teach",            #JP
@@ -6143,6 +6286,7 @@ def session_manager():
 
     # Loop through lessons
     for lesson in lessons_to_play:
+        ### Intro ###
         if lesson == "greet_student":
             greet_student()
         elif lesson == "streak_check":
@@ -6151,12 +6295,16 @@ def session_manager():
             day_of_the_week()
         elif lesson == "month_of_the_year":
             month_of_the_year()
+            
+        ### Maths ###
         elif lesson == "skip_counting":
             skip_counting()
         elif lesson == "skip_counting_fibonacci":
             skip_counting_fibonacci()
         elif lesson == "skip_counting_primes":
             skip_counting_primes()
+            
+        ### Jr. Church ###
         elif lesson == "john_3_16":
             john_3_16()
         elif lesson == "john_13_34":
@@ -6171,10 +6319,8 @@ def session_manager():
             ephesians_4_32()
         elif lesson == "numbers_6_24_26":
             numbers_6_24_26()
-        elif lesson == "hiragana_teach":
-            hiragana_teach(session_id)
-        elif lesson == "katakana_teach":
-            katakana_teach(session_id)
+            
+        
         elif lesson == "rainbow_numbers":
             # Run the lesson, passing session_id
             lesson_result = rainbow_numbers(session_id)
@@ -6184,28 +6330,7 @@ def session_manager():
             total_questions += questions_asked
             total_correct += correct_answers
             total_times.append(avg_time)
-        elif lesson == "skip_counting_japanese":
-            skip_counting_japanese()
-        elif lesson == "skip_counting_kanji":
-            skip_counting_kanji()
-        elif lesson == "hiragana_quiz":
-            # Run the lesson, passing session_id
-            lesson_result = hiragana_quiz(session_id)
-            
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            questions_asked, correct_answers, avg_time = lesson_result
-            total_questions += questions_asked
-            total_correct += correct_answers
-            total_times.append(avg_time)
-        elif lesson == "katakana_quiz":
-            # Run the lesson, passing session_id
-            lesson_result = katakana_quiz(session_id)
-            
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            questions_asked, correct_answers, avg_time = lesson_result
-            total_questions += questions_asked
-            total_correct += correct_answers
-            total_times.append(avg_time)
+        
         elif lesson == "single_digit_addition":
             print("Running single digit addition")
             # Run the lesson, passing session_id, and capture the return values
@@ -6337,13 +6462,8 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_digit_multiplication did not return a valid result.")
-        # single_by_double_multiplication
         elif lesson == "single_by_double_multiplication":
-            print("Running single by double digit multiplication")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = single_by_double_multiplication(session_id)
-            
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6351,13 +6471,8 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_by_double_multiplication did not return a valid result.")
-        # double_digit_multiplication
         elif lesson == "double_digit_multiplication":
-            print("Running double digit multiplication")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = double_digit_multiplication(session_id)
-            
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6365,148 +6480,76 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: double_digit_multiplication did not return a valid result.")
-        # single_denominator_addition
         elif lesson == "single_denominator_addition":
-            print("Running single_denominator_addition")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = single_denominator_addition(session_id)
-            
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            if lesson_result is not None:  # Ensure the function returned something
+            if lesson_result is not None:  
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
                 total_correct += correct_answers
                 total_times.append(avg_time)
             else:
                 log_message("Error: single_denominator_addition did not return a valid result.")
-        # lowest_common_denominator_quiz
         elif lesson == "lowest_common_denominator_quiz":
-            print("Running lowest_common_denominator_quiz")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = lowest_common_denominator_quiz(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            if lesson_result is not None:  # Ensure the function returned something
+            if lesson_result is not None:  
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
                 total_correct += correct_answers
                 total_times.append(avg_time)
             else:
                 log_message("Error: lowest_common_denominator_quiz did not return a valid result.")
-
-        
         elif lesson == "basic_shapes_quiz":
-            print("Running basic_shapes_quiz")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = basic_shapes_quiz(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-            if lesson_result is not None:  # Ensure the function returned something
+            if lesson_result is not None:  
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
                 total_correct += correct_answers
                 total_times.append(avg_time)
             else:
                 log_message("Error: basic_shapes_quiz did not return a valid result.")
-        # elif lesson == "japanese_colors_teach":
-        #     japanese_colors_teach(session_id)
-        # elif lesson == "japanese_colors2_teach":
-        #     japanese_colors2_teach(session_id)
-        # elif lesson == "japanese_colors3_teach":
-        #     japanese_colors3_teach(session_id)
-        # elif lesson == "japanese_colors4_teach":
-        #     japanese_colors4_teach(session_id)
-        # elif lesson == "japanese_colors5_teach":
-        #     japanese_colors5_teach(session_id)
-            
-        # elif lesson == "japanese_colors1_quiz":
-        #     print("Running japanese_colors1_quiz")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors1_quiz(session_id)
-            
-        #     # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-        #     if lesson_result is not None:  # Ensure the function returned something
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors1_quiz did not return a valid result.")
-        # elif lesson == "japanese_colors2_quiz":
-        #     print("Running japanese_colors2_quiz")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors2_quiz(session_id)
-            
-        #     # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-        #     if lesson_result is not None:  # Ensure the function returned something
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors2_quiz did not return a valid result.")
-        # elif lesson == "japanese_colors3_quiz":
-        #     print("Running japanese_colors3_quiz")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors3_quiz(session_id)
-            
-        #     # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-        #     if lesson_result is not None:  # Ensure the function returned something
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors3_quiz did not return a valid result.")
-        # elif lesson == "japanese_colors4_quiz":
-        #     print("Running japanese_colors4_quiz")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors4_quiz(session_id)
-            
-        #     # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-        #     if lesson_result is not None:  # Ensure the function returned something
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors4_quiz did not return a valid result.")
-        # elif lesson == "japanese_colors5_quiz":
-        #     print("Running japanese_colors5_quiz")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors5_quiz(session_id)
-            
-        #     # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
-        #     if lesson_result is not None:  # Ensure the function returned something
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors5_quiz did not return a valid result.")
+       
+                
+        ################
+        ### JAPANESE ###
+        ################
         
-        # elif lesson == "japanese_colors_quiz_selector":
-        #     print("Running japanese_colors_quiz_selector")
-        #     # Run the lesson, passing session_id, and capture the return values
-        #     lesson_result = japanese_colors_quiz_selector(session_id)
-
-        #     if lesson_result is not None:
-        #         questions_asked, correct_answers, avg_time = lesson_result
-        #         total_questions += questions_asked
-        #         total_correct += correct_answers
-        #         total_times.append(avg_time)
-        #     else:
-        #         log_message("Error: japanese_colors_quiz_selector did not return a valid result.")
-        # Sequence handler to call the appropriate lessons
-
-        # Sequence handler to call the appropriate lessons and process results immediately
-
-        # Quiz for Japanese Colors
+        elif lesson == "skip_counting_japanese":
+            skip_counting_japanese()
+        elif lesson == "skip_counting_kanji":
+            skip_counting_kanji()
+        
+        ### J teach
+        elif lesson == "hiragana_teach":
+            hiragana_teach(session_id)
+        elif lesson == "katakana_teach":
+            katakana_teach(session_id)
+        elif lesson == "japanese_colors_teach":
+            print("Teaching Japanese Colors")
+            vocab_teach(session_id, 'Japanese Colors') 
+        elif lesson == "japanese_body_parts_teach":
+            print("Teaching Japanese Body Parts")
+            vocab_teach(session_id, 'Japanese Body Parts') 
+        elif lesson == "japanese_adjectives_teach":
+            vocab_teach(session_id, 'Japanese Adjectives')
+      
+        ### J Quizzes
+        elif lesson == "hiragana_quiz":
+            lesson_result = hiragana_quiz(session_id)
+            questions_asked, correct_answers, avg_time = lesson_result
+            total_questions += questions_asked
+            total_correct += correct_answers
+            total_times.append(avg_time)
+        elif lesson == "katakana_quiz":
+            lesson_result = katakana_quiz(session_id)
+            questions_asked, correct_answers, avg_time = lesson_result
+            total_questions += questions_asked
+            total_correct += correct_answers
+            total_times.append(avg_time)
         elif lesson == "japanese_colors_quiz":
             print("Running Japanese Colors Quiz")
-            lesson_result = lesson_selector(session_id, 'Japanese Colors')  # Pass the subject
-            
-            # Process results immediately after quiz
+            lesson_result = lesson_selector(session_id, 'Japanese Colors') 
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6514,18 +6557,9 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: Japanese Colors Quiz did not return a valid result.")
-        
-        # Teach for Japanese Colors
-        elif lesson == "japanese_colors_teach":
-            print("Teaching Japanese Colors")
-            vocab_teach(session_id, 'Japanese Colors')  # Pass the subject
-        
-        # Quiz for Japanese Body Parts
         elif lesson == "japanese_body_parts_quiz":
             print("Running Japanese Body Parts Quiz")
-            lesson_result = lesson_selector(session_id, 'Japanese Body Parts')  # Pass the subject
-        
-            # Process results immediately after quiz
+            lesson_result = lesson_selector(session_id, 'Japanese Body Parts')
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6534,23 +6568,9 @@ def session_manager():
             else:
                 log_message("Error: Japanese Body Parts Quiz did not return a valid result.")
         
-        # Teach for Japanese Body Parts
-        elif lesson == "japanese_body_parts_teach":
-            print("Teaching Japanese Body Parts")
-            vocab_teach(session_id, 'Japanese Body Parts')  # Pass the subject
         
-        # Quiz for Rainbow Numbers (for consistency)
-        elif lesson == "rainbow_numbers":
-            lesson_result = rainbow_numbers(session_id)
-            
-            # Process results immediately after quiz
-            if lesson_result is not None:
-                questions_asked, correct_answers, avg_time = lesson_result
-                total_questions += questions_asked
-                total_correct += correct_answers
-                total_times.append(avg_time)
-            else:
-                log_message("Error: Rainbow Numbers Quiz did not return a valid result.")
+        
+        
 
 
         
@@ -7184,9 +7204,8 @@ def skip_counting_japanese(COUNT_TO=30):
     draw_and_wait_continue_button()
 
 
-
-def skip_counting_kanji():
-    """Performs skip counting from 1 to 30 using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
+def skip_counting_kanji(COUNT_TO=30):
+    """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
 
     # Define a larger size for the kanji numerals and furigana
@@ -7213,12 +7232,11 @@ def skip_counting_kanji():
         28: ("二十八", "にじゅうはち"), 29: ("二十九", "にじゅうきゅう"), 30: ("三十", "さんじゅう")
     }
 
-
-    # Clear the screen and inform the student about the activity
+    # Clear the screen and inform the student about the activity dynamically
     screen.fill(screen_color)
-    intro_message = "Let's count using kanji!"
+    intro_message = f"Let's count using kanji up to {COUNT_TO}!"
 
-    # Display the intro message and update the screen using the default global font
+    # Display the intro message and update the screen using the default global font, with word wrapping
     draw_text(intro_message, 
               font, 
               text_color, 
@@ -7232,8 +7250,8 @@ def skip_counting_kanji():
     # Draw the "Continue..." button after the intro message
     draw_and_wait_continue_button()
 
-    # Start counting from 1 to 30
-    for i in range(1, 31):
+    # Start counting from 1 to COUNT_TO
+    for i in range(1, COUNT_TO + 1):
         # Clear the screen before displaying each kanji
         screen.fill(screen_color)
 
@@ -7255,13 +7273,14 @@ def skip_counting_kanji():
         # Pause for a second before showing the next number
         time.sleep(1)
 
-    # After completing the skip counting, show a completion message using the default font
-    completion_message = "Great job counting with kanji!"
+    # After completing the skip counting, show a dynamic completion message using the default font, with word wrapping
+    completion_message = f"Great job counting with kanji up to {COUNT_TO}!"
     screen.fill(screen_color)
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
+
 
 
 def get_hiragana_subset_by_level(student_level, hiragana_list):
@@ -7626,125 +7645,13 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'colors{student_level}')
     elif lesson_title == 'Japanese Body Parts':
         lesson_data = globals().get(f'j_body_parts{student_level}')
+    elif lesson_title == 'Japanese Adjectives':
+        lesson_data = globals().get(f'j_adjectives{student_level}')
     else:
         return None
     return lesson_data
 
-# def vocab_teach(session_id, lesson_title):
-#     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
-#     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
-#     # Get the student's current level for the lesson title (e.g., 'Japanese Colors', 'Japanese Body Parts')
-#     student_level = get_student_progress(session_id, lesson_title)
-
-#     # Select the appropriate lesson data based on the student's level
-#     if lesson_title == 'Japanese Colors':
-#         if student_level == 1:
-#             lesson_data = colors1
-#         elif student_level == 2:
-#             lesson_data = colors2
-#         elif student_level == 3:
-#             lesson_data = colors3
-#         elif student_level == 4:
-#             lesson_data = colors4
-#         elif student_level == 5:
-#             lesson_data = colors5
-#         else:
-#             log_message(f"Error: Invalid student level {student_level} for {lesson_title}.")
-#             return
-#     elif lesson_title == 'Japanese Body Parts':
-#         if student_level == 1:
-#             lesson_data = j_body_parts1
-#         elif student_level == 2:
-#             lesson_data = j_body_parts2
-#         else:
-#             log_message(f"Error: Invalid student level {student_level} for {lesson_title}.")
-#             return
-#     else:
-#         log_message(f"Error: Invalid lesson title {lesson_title}.")
-#         return
-
-#     # Font initialization for furigana, kanji, and translation
-#     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
-#     kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
-    
-#     # Use the global font for translations
-#     translation_font_size = 50
-#     if os.path.isfile(current_font_name_or_path):
-#         translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
-#     else:
-#         translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
-
-#     # Now that we have the correct lesson data, display the intro message
-#     screen.fill(screen_color)
-#     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
-#     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
-#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-
-#     # Display the "Continue..." button and wait for user input
-#     draw_and_wait_continue_button()
-
-#     # Loop through the lesson questions and display each one
-#     for item in lesson_data['questions']:
-#         # Clear the screen for each new vocabulary item
-#         screen.fill(screen_color)
-
-#         # Step 1: Display the furigana (above kanji)
-#         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
-#                   enable_shadow=True, shadow_color=shadow_color)
-
-#         # Step 2: Display the kanji (below furigana)
-#         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
-#                   enable_shadow=True, shadow_color=shadow_color)
-
-#         # Step 3: Display the English translation (below kanji)
-#         draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
-#                   enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-
-#         pygame.display.flip()
-
-#         # Speak the furigana (the reading of the kanji)
-#         speak_japanese(item['furigana'])
-#         time.sleep(1)  # Wait for the audio to finish
-
-#         # Step 4: Attempt to display the image, fallback to just text if the image is not found
-#         try:
-#             # Try to load and resize the color image to the current window size
-#             image = pygame.image.load(item['image'])
-#             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
-
-#             # Blit the image on the screen
-#             screen.blit(image, (0, 0))
-#             pygame.display.flip()
-
-#             # Speak the furigana again in the background without showing text
-#             speak_japanese(item['furigana'])
-#             time.sleep(1)
-
-#         except FileNotFoundError:
-#             log_message(f"Image not found: {item['image']}. Displaying text instead.")
-#             screen.fill(screen_color)
-
-#             # Re-display the furigana, kanji, and translation again if the image is not found
-#             draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
-#                       enable_shadow=True, shadow_color=shadow_color)
-#             draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
-#                       enable_shadow=True, shadow_color=shadow_color)
-#             draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.6, center=True, 
-#                       enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-
-#             pygame.display.flip()
-
-#             # Speak the furigana again
-#             speak_japanese(item['furigana'])
-#             time.sleep(1)  # Wait for the audio to finish
-
-#     # Show completion message and wait for "Continue..."
-#     screen.fill(screen_color)
-#     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
-#     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-#     draw_and_wait_continue_button()
 def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
@@ -7901,112 +7808,6 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
     pygame.event.clear()
 
 
-# def japanese_quiz(session_id, data):
-#     """Presents a quiz on the given dataset and returns the result."""
-#     global screen_color, text_color, shadow_color  # Access theme-related globals
-
-#     # Step 1: Intro screen to inform the student that it's time for a quiz
-#     screen.fill(screen_color)
-#     intro_message = f"It's time for a {data['quiz_title']} Quiz!"
-#     draw_text(
-#         intro_message,
-#         font,
-#         text_color,
-#         x=0,
-#         y=HEIGHT * 0.4,
-#         center=True,
-#         enable_shadow=True,
-#         shadow_color=shadow_color,
-#         max_width=WIDTH
-#     )
-    
-#     draw_and_wait_continue_button()
-
-#     # Start the lesson timer here
-#     lesson_start_time = time.time()
-
-#     # Shuffle the questions
-#     questions = data['questions']
-#     random.shuffle(questions)
-
-#     total_questions = min(5, len(questions))  # Set number of questions (at most 5, but can be less)
-#     correct_answers = 0
-#     completion_times = []
-
-#     # Quiz loop
-#     for problem_count in range(total_questions):
-#         # Pick a question
-#         question = questions[problem_count]
-#         correct_answer = question['translation']
-
-#         # Generate 3 incorrect answers (ensure we have enough to choose from)
-#         incorrect_answers = random.sample(
-#             [q['translation'] for q in questions if q['translation'] != correct_answer], min(3, len(questions) - 1))
-
-#         # Create the multiple-choice options
-#         options = [correct_answer] + incorrect_answers
-#         random.shuffle(options)
-
-#         # Display the quiz options and get option rects
-#         kanji_rect, furigana_rect, option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
-
-#         pygame.display.flip()
-
-#         # Speak the furigana aloud
-#         speak_japanese(question['furigana'])
-
-#         start_time = time.time()
-#         question_complete = False
-#         while not question_complete:
-#             for event in pygame.event.get():
-#                 if event.type == pygame.QUIT:
-#                     pygame.quit()
-#                     sys.exit()
-#                 elif event.type == pygame.MOUSEBUTTONDOWN:
-#                     mouse_pos = event.pos
-#                     for rect, option in option_rects:
-#                         if rect.collidepoint(mouse_pos):
-#                             time_taken = round(time.time() - start_time, 1)
-#                             completion_times.append(time_taken)
-
-#                             if option == correct_answer:
-#                                 correct_answers += 1
-#                                 display_result_with_image("Correct!", question['image'], use_lightning=(time_taken < 3))
-#                             else:
-#                                 display_result_with_image(f"Sorry, the correct answer is {correct_answer}")
-#                             question_complete = True
-
-#             pygame.time.Clock().tick(60)
-
-#     # Final score and performance
-#     avg_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
-
-#     # Fetch lesson ID
-#     lesson_id = fetch_lesson_id(data['quiz_title'])
-
-#     # End the lesson timer
-#     lesson_end_time = time.time()
-
-#     # Add session lesson to the database (track progress)
-#     add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
-
-#     # Display the final score and handle perfect scores
-#     screen.fill(screen_color)
-#     draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-    
-#     if correct_answers == total_questions:
-#         set_student_progress(session_id, data['quiz_title'])  # Level up on perfect score
-#         draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
-#         if avg_time < 3.0:
-#             draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
-
-#     draw_and_wait_continue_button()
-    
-#     if correct_answers == total_questions:
-#         bonus_game_fat_tuna()  # Trigger bonus game for perfect score
-
-#     # Return total questions, correct answers, and average time as a tuple
-#     return total_questions, correct_answers, avg_time
 def japanese_quiz(session_id, lesson_title, lesson_data):
     """Presents a quiz on the given dataset and returns the result."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
@@ -8054,7 +7855,7 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
         random.shuffle(options)
 
         # Display the quiz options and get option rects
-        kanji_rect, furigana_rect, option_rects = display_color_quiz(screen, question['kanji'], question['furigana'], options)
+        kanji_rect, furigana_rect, option_rects = display_quiz(screen, question['kanji'], question['furigana'], options)
 
         pygame.display.flip()
 
@@ -8115,79 +7916,6 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
     return total_questions, correct_answers, avg_time
 
 
-
-
-
-
-
-
-
-
-# def lesson_selector(session_id, lesson_title):
-#     """Presents a quiz based on the lesson_title and returns the result."""
-    
-#     # Fetch the student's current level for the specified lesson
-#     student_level = get_student_progress(session_id, lesson_title)
-
-#     # Dynamically determine the available levels for the lesson
-#     lesson_data_sets = []
-    
-#     # Populate the lesson_data_sets based on the lesson_title
-#     if lesson_title == 'Japanese Colors':
-#         lesson_data_sets = [colors1, colors2, colors3, colors4, colors5]
-#     elif lesson_title == 'Japanese Body Parts':
-#         lesson_data_sets = [j_body_parts1, j_body_parts2]
-#     else:
-#         log_message(f"Error: Invalid lesson title {lesson_title}.")
-#         return None
-
-#     # Dynamically set the max level based on the number of datasets
-#     max_level = len(lesson_data_sets)
-
-#     # Cap the student level if they've reached the highest available content
-#     if student_level > max_level:
-#         student_level = max_level
-#         log_message(f"Student has capped out on available content for {lesson_title} (Level {max_level}).")
-#         # Optionally, notify the student
-#         screen.fill(screen_color)
-#         draw_text(
-#             f"Great job! You've mastered all available levels for {lesson_title}!",
-#             font,
-#             text_color,
-#             x=0,
-#             y=HEIGHT * 0.4,
-#             center=True,
-#             enable_shadow=True,
-#             shadow_color=shadow_color,
-#             max_width=WIDTH
-#         )
-#         draw_and_wait_continue_button()
-#         return None  # Exit, since there’s no new content to show
-
-#     # Select the appropriate lesson data based on the student's current level
-#     lesson_data = lesson_data_sets[student_level - 1]  # Adjust for 0-indexing
-
-#     # Start the lesson timer
-#     lesson_start_time = time.time()
-
-#     # Run the quiz using japanese_quiz
-#     total_questions, correct_answers, avg_time = japanese_quiz(session_id, lesson_data)
-
-#     # End the lesson timer
-#     lesson_end_time = time.time()
-
-#     # Fetch the lesson_id from the database for the specified lesson title
-#     lesson_id = fetch_lesson_id(lesson_title)
-
-#     # Add session lesson to the database, tracking progress
-#     add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
-
-#     # Handle perfect score and leveling up
-#     if correct_answers == total_questions and student_level < max_level:
-#         set_student_progress(session_id, lesson_title)  # Level up on perfect score
-#         log_message(f"Student leveled up in {lesson_title}")
-
-#     return total_questions, correct_answers, avg_time
 def lesson_selector(session_id, lesson_title):
     """Presents a quiz based on the lesson_title and returns the result."""
     
@@ -8199,9 +7927,20 @@ def lesson_selector(session_id, lesson_title):
     
     # Populate the lesson_data_sets based on the lesson_title
     if lesson_title == 'Japanese Colors':
-        lesson_data_sets = [colors1, colors2, colors3, colors4, colors5]
+        lesson_data_sets = [j_colors1, 
+                            j_colors2, 
+                            j_colors3, 
+                            j_colors4, 
+                            j_colors5]
     elif lesson_title == 'Japanese Body Parts':
-        lesson_data_sets = [j_body_parts1, j_body_parts2]
+        lesson_data_sets = [j_body_parts1, 
+                            j_body_parts2, 
+                            j_body_parts3, 
+                            j_body_parts4, 
+                            j_body_parts5]
+    # j_adjectives1
+    elif lesson_title == 'Japanese Adjectives':
+        lesson_data_sets = [j_adjectives1]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
@@ -8255,16 +7994,7 @@ def lesson_selector(session_id, lesson_title):
     return total_questions, correct_answers, avg_time
 
 
-
-
-
-
-
-
-
-
-
-def display_color_quiz(screen, kanji, furigana, options):
+def display_quiz(screen, kanji, furigana, options):
     """
     Draws the kanji, furigana, and multiple-choice options on the screen.
     Returns the rects for kanji, furigana, and the option rects for handling clicks.
@@ -8319,22 +8049,6 @@ def display_color_quiz(screen, kanji, furigana, options):
     pygame.display.flip()
 
     return kanji_rect, furigana_rect, option_rects
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def options_menu():
