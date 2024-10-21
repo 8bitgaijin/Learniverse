@@ -1193,7 +1193,26 @@ def center_window(width, height):
         log_entry = create_log_message(f"Failed to center window: {e}")
         log_message(log_entry)
         
+        
+def bring_window_to_front():
+    """Bring the Pygame window to the front of all other windows."""
+    # Get the Pygame window handle
+    hwnd = pygame.display.get_wm_info()['window']
+    
+    # Use ctypes to bring the window to the front
+    ctypes.windll.user32.SetForegroundWindow(hwnd)
+    ctypes.windll.user32.SetFocus(hwnd)
 
+
+def move_mouse_to_window_center():
+    """Move the mouse cursor to the center of the Pygame window using system-level positioning."""
+    screen_center_x = pygame.display.get_surface().get_width() // 2
+    screen_center_y = pygame.display.get_surface().get_height() // 2
+
+    # Convert to screen coordinates using ctypes and set the mouse position
+    ctypes.windll.user32.SetCursorPos(screen_center_x, screen_center_y)
+    
+    
 ##############################################
 ### Pygame Initialization and Window Setup ###
 ##############################################
@@ -1257,6 +1276,12 @@ center_window(WIDTH, HEIGHT)
 
 # Initialize in windowed mode
 screen = pygame.display.set_mode((WIDTH, HEIGHT))  
+
+# Now that we hava  screen, bring it to the user's attention
+bring_window_to_front()
+
+# Grab mouse 
+move_mouse_to_window_center()
 
 # Create a clock object to manage the frame rate of the game
 clock = pygame.time.Clock()
@@ -2995,47 +3020,6 @@ def bonus_game_fat_tuna():
 ### Math Problem Functions ###
 ##############################
 
-# def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=1.9):
-#     screen.fill(screen_color)
-    
-#     # Dynamically calculate positions based on screen size
-#     right_x = WIDTH * 0.55  # Right edge for alignment
-#     num1_y = HEIGHT * 0.4
-#     num2_y = HEIGHT * 0.5
-#     line_y = HEIGHT * 0.57
-#     sum_y = HEIGHT * 0.63
-    
-#     # Draw the first number (right-aligned)
-#     num1_surface = font.render(str(num1), True, text_color)
-#     num1_rect = num1_surface.get_rect(right=right_x, centery=num1_y)
-#     screen.blit(num1_surface, num1_rect)
-    
-#     # Draw the plus sign (right-aligned with some offset)
-#     plus_sign_x = right_x - num1_surface.get_width() - WIDTH * 0.05
-#     plus_surface = font.render("+", True, text_color)
-#     plus_rect = plus_surface.get_rect(right=plus_sign_x, centery=num2_y)
-#     screen.blit(plus_surface, plus_rect)
-    
-#     # Draw the second number placeholder or the input from the user (right-aligned)
-#     if first_input:
-#         input_text = "?"
-#     else:
-#         input_text = user_input
-        
-#     input_surface = font.render(input_text, True, text_color)
-#     input_rect = input_surface.get_rect(right=right_x, centery=num2_y)
-#     screen.blit(input_surface, input_rect)
-    
-#     # Calculate line width with a factor
-#     line_width = max(num1_surface.get_width(), input_surface.get_width(), font.size(str(num1 + num2))[0]) * line_length_factor
-#     pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
-    
-#     # Draw the sum (right-aligned)
-#     sum_surface = font.render(str(num1 + num2), True, text_color)
-#     sum_rect = sum_surface.get_rect(right=right_x, centery=sum_y)
-#     screen.blit(sum_surface, sum_rect)
-
-#     pygame.display.flip()
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=2.5):
     screen.fill(screen_color)
     
