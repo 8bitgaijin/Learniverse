@@ -6761,7 +6761,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       "rainbow_numbers",                   #Math
+                       # "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",      #Math
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
