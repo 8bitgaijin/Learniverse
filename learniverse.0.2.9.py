@@ -1068,7 +1068,468 @@ j_animals9 = {
   ]
 }
 
+j_family1 = {
+  "quiz_title": "Family Relations",
+  "questions": [
+    {
+      "furigana": "はは",
+      "kanji": "母",
+      "translation": "my mother",
+      "image": "GFX/family/mother.png"
+    },
+    {
+      "furigana": "ちち",
+      "kanji": "父",
+      "translation": "my father",
+      "image": "GFX/family/father.png"
+    },
+    {
+      "furigana": "あに",
+      "kanji": "兄",
+      "translation": "my older brother",
+      "image": "GFX/family/older_brother.png"
+    },
+    {
+      "furigana": "おとうと",
+      "kanji": "弟",
+      "translation": "my younger brother",
+      "image": "GFX/family/younger_brother.png"
+    },
+    {
+      "furigana": "あね",
+      "kanji": "姉",
+      "translation": "my older sister",
+      "image": "GFX/family/older_sister.png"
+    },
+    {
+      "furigana": "いもうと",
+      "kanji": "妹",
+      "translation": "my younger sister",
+      "image": "GFX/family/younger_sister.png"
+    }
+  ]
+}
 
+j_family2 = {
+  "quiz_title": "Family Relations - Out-Group",
+  "questions": [
+    {
+      "furigana": "おかあさん",
+      "kanji": "お母さん",
+      "translation": "your mother",
+      "image": "GFX/family/mother.png"
+    },
+    {
+      "furigana": "おとうさん",
+      "kanji": "お父さん",
+      "translation": "your father",
+      "image": "GFX/family/father.png"
+    },
+    {
+      "furigana": "おにいさん",
+      "kanji": "お兄さん",
+      "translation": "your older brother",
+      "image": "GFX/family/older_brother.png"
+    },
+    {
+      "furigana": "おとうとさん",
+      "kanji": "弟さん",
+      "translation": "your younger brother",
+      "image": "GFX/family/younger_brother.png"
+    },
+    {
+      "furigana": "おねえさん",
+      "kanji": "お姉さん",
+      "translation": "your older sister",
+      "image": "GFX/family/older_sister.png"
+    },
+    {
+      "furigana": "いもうとさん",
+      "kanji": "妹さん",
+      "translation": "your younger sister",
+      "image": "GFX/family/younger_sister.png"
+    }
+  ]
+}
+
+j_family3 = {
+  "quiz_title": "Family Relations 2",
+  "questions": [
+    {
+      "furigana": "そふ",
+      "kanji": "祖父",
+      "translation": "my grandfather",
+      "image": "GFX/family/grandfather.png"
+    },
+    {
+      "furigana": "そぼ",
+      "kanji": "祖母",
+      "translation": "my grandmother",
+      "image": "GFX/family/grandmother.png"
+    },
+    {
+      "furigana": "おじ",
+      "kanji": "叔父",
+      "translation": "my uncle",
+      "image": "GFX/family/uncle.png"
+    },
+    {
+      "furigana": "おば",
+      "kanji": "叔母",
+      "translation": "my aunt",
+      "image": "GFX/family/aunt.png"
+    },
+    {
+      "furigana": "いとこ",
+      "kanji": "従兄弟",
+      "translation": "my cousin",
+      "image": "GFX/family/cousin.png"
+    }
+  ]
+}
+
+j_family4 = {
+  "quiz_title": "Family Relationships 2 - Outgroup",
+  "questions": [
+    {
+      "furigana": "おじいさん",
+      "kanji": "お祖父さん",
+      "translation": "your grandfather",
+      "image": "GFX/family/grandfather.png"
+    },
+    {
+      "furigana": "おばあさん",
+      "kanji": "お祖母さん",
+      "translation": "your grandmother",
+      "image": "GFX/family/grandmother.png"
+    },
+    {
+      "furigana": "おじさん",
+      "kanji": "叔父さん",
+      "translation": "your uncle",
+      "image": "GFX/family/uncle.png"
+    },
+    {
+      "furigana": "おばさん",
+      "kanji": "叔母さん",
+      "translation": "your aunt",
+      "image": "GFX/family/aunt.png"
+    },
+    {
+      "furigana": "いとこさん",
+      "kanji": "従兄弟さん",
+      "translation": "your cousin",
+      "image": "GFX/family/cousin.png"
+    }
+  ]
+}
+
+# Note: family relation 3 out group is the same as in group
+j_family5 = {
+  "quiz_title": "Family Relations 3",
+  "questions": [
+    {
+      "furigana": "そうそふ",
+      "kanji": "曽祖父",
+      "translation": "my great-grandfather",
+      "image": "GFX/family/great_grandfather.png"
+    },
+    {
+      "furigana": "そうそぼ",
+      "kanji": "曽祖母",
+      "translation": "my great-grandmother",
+      "image": "GFX/family/great_grandmother.png"
+    },
+    {
+      "furigana": "ぎふ",
+      "kanji": "義父",
+      "translation": "my father-in-law",
+      "image": "GFX/family/father_in_law.png"
+    },
+    {
+      "furigana": "ぎぼ",
+      "kanji": "義母",
+      "translation": "my mother-in-law",
+      "image": "GFX/family/mother_in_law.png"
+    },
+    {
+      "furigana": "ぎけい",
+      "kanji": "義兄",
+      "translation": "my older brother-in-law",
+      "image": "GFX/family/older_brother_in_law.png"
+    },
+    {
+      "furigana": "ぎてい",
+      "kanji": "義弟",
+      "translation": "my younger brother-in-law",
+      "image": "GFX/family/younger_brother_in_law.png"
+    }
+  ]
+}
+
+j_family6 = {
+  "quiz_title": "Family Relations - 4",
+  "questions": [
+    {
+      "furigana": "ぎし",
+      "kanji": "義姉",
+      "translation": "my older sister-in-law",
+      "image": "GFX/family/older_sister_in_law.png"
+    },
+    {
+      "furigana": "ぎまい",
+      "kanji": "義妹",
+      "translation": "my younger sister-in-law",
+      "image": "GFX/family/younger_sister_in_law.png"
+    },
+    {
+      "furigana": "おい",
+      "kanji": "甥",
+      "translation": "my nephew",
+      "image": "GFX/family/nephew.png"
+    },
+    {
+      "furigana": "めい",
+      "kanji": "姪",
+      "translation": "my niece",
+      "image": "GFX/family/niece.png"
+    },
+    {
+      "furigana": "おっと",
+      "kanji": "夫",
+      "translation": "my husband",
+      "image": "GFX/family/husband.png"
+    },
+    {
+      "furigana": "つま",
+      "kanji": "妻",
+      "translation": "my wife",
+      "image": "GFX/family/wife.png"
+    }
+  ]
+}
+
+j_family7 = {
+  "quiz_title": "Family Relations 4 - Out Group",
+  "questions": [
+    {
+      "furigana": "おねえさん",
+      "kanji": "お姉さん",
+      "translation": "your older sister-in-law",
+      "image": "GFX/family/older_sister_in_law.png"
+    },
+    {
+      "furigana": "いもうとさん",
+      "kanji": "妹さん",
+      "translation": "your younger sister-in-law",
+      "image": "GFX/family/younger_sister_in_law.png"
+    },
+    {
+      "furigana": "おいごさん",
+      "kanji": "甥御さん",
+      "translation": "your nephew",
+      "image": "GFX/family/nephew.png"
+    },
+    {
+      "furigana": "めいごさん",
+      "kanji": "姪御さん",
+      "translation": "your niece",
+      "image": "GFX/family/niece.png"
+    },
+    {
+      "furigana": "ごしゅじん",
+      "kanji": "ご主人",
+      "translation": "your husband",
+      "image": "GFX/family/husband.png"
+    },
+    {
+      "furigana": "おくさん",
+      "kanji": "奥さん",
+      "translation": "your wife",
+      "image": "GFX/family/wife.png"
+    }
+  ]
+}
+
+j_fruits1 = {
+  "quiz_title": "Fruits",
+  "questions": [
+    {
+      "kanji": "りんご",
+      "furigana": "りんご",
+      "translation": "apple",
+      "image": "GFX/fruits/apple.png"
+    },
+    {
+      "kanji": "みかん",
+      "furigana": "みかん",
+      "translation": "mandarin orange",
+      "image": "GFX/fruits/mandarin_orange.png"
+    },
+    {
+      "kanji": "ぶどう",
+      "furigana": "ぶどう",
+      "translation": "grape",
+      "image": "GFX/fruits/grape.png"
+    },
+    {
+      "kanji": "もも",
+      "furigana": "もも",
+      "translation": "peach",
+      "image": "GFX/fruits/peach.png"
+    },
+    {
+      "kanji": "柿",
+      "furigana": "かき",
+      "translation": "persimmon",
+      "image": "GFX/fruits/persimmon.png"
+    }
+  ]
+}
+
+j_fruits2 = {
+  "quiz_title": "Fruits 2",
+  "questions": [
+    {
+      "kanji": "梨",
+      "furigana": "なし",
+      "translation": "pear",
+      "image": "GFX/fruits/pear.png"
+    },
+    {
+      "kanji": "スイカ",
+      "furigana": "スイカ",
+      "translation": "watermelon",
+      "image": "GFX/fruits/watermelon.png"
+    },
+    {
+      "kanji": "メロン",
+      "furigana": "メロン",
+      "translation": "melon",
+      "image": "GFX/fruits/melon.png"
+    },
+    {
+      "kanji": "バナナ",
+      "furigana": "バナナ",
+      "translation": "banana",
+      "image": "GFX/fruits/banana.png"
+    },
+    {
+      "kanji": "苺",
+      "furigana": "いちご",
+      "translation": "strawberry",
+      "image": "GFX/fruits/strawberry.png"
+    }
+  ]
+}
+
+j_fruits3 = {
+  "quiz_title": "Fruits 3",
+  "questions": [
+    {
+      "kanji": "キウイ",
+      "furigana": "キウイ",
+      "translation": "kiwi",
+      "image": "GFX/fruits/kiwi.png"
+    },
+    {
+      "kanji": "パイナップル",
+      "furigana": "パイナップル",
+      "translation": "pineapple",
+      "image": "GFX/fruits/pineapple.png"
+    },
+    {
+      "kanji": "さくらんぼ",
+      "furigana": "さくらんぼ",
+      "translation": "cherry",
+      "image": "GFX/fruits/cherry.png"
+    },
+    {
+      "kanji": "柚子",
+      "furigana": "ゆず",
+      "translation": "yuzu",
+      "image": "GFX/fruits/yuzu.png"
+    },
+    {
+      "kanji": "ブルーベリー",
+      "furigana": "ブルーベリー",
+      "translation": "blueberry",
+      "image": "GFX/fruits/blueberry.png"
+    }
+  ]
+}
+
+j_fruits4 = {
+  "quiz_title": "Fruits 4",
+  "questions": [
+    {
+      "kanji": "ライチ",
+      "furigana": "ライチ",
+      "translation": "lychee",
+      "image": "GFX/fruits/lychee.png"
+    },
+    {
+      "kanji": "アンズ",
+      "furigana": "アンズ",
+      "translation": "apricot",
+      "image": "GFX/fruits/apricot.png"
+    },
+    {
+      "kanji": "梅",
+      "furigana": "うめ",
+      "translation": "plum",
+      "image": "GFX/fruits/plum.png"
+    },
+    {
+      "kanji": "グレープフルーツ",
+      "furigana": "グレープフルーツ",
+      "translation": "grapefruit",
+      "image": "GFX/fruits/grapefruit.png"
+    },
+    {
+      "kanji": "ドラゴンフルーツ",
+      "furigana": "ドラゴンフルーツ",
+      "translation": "dragon fruit",
+      "image": "GFX/fruits/dragon_fruit.png"
+    }
+  ]
+}
+
+j_fruits5 = {
+  "quiz_title": "Fruits 5",
+  "questions": [
+    {
+      "kanji": "パッションフルーツ",
+      "furigana": "パッションフルーツ",
+      "translation": "passion fruit",
+      "image": "GFX/fruits/passion_fruit.png"
+    },
+    {
+      "kanji": "いちじく",
+      "furigana": "いちじく",
+      "translation": "fig",
+      "image": "GFX/fruits/fig.png"
+    },
+    {
+      "kanji": "ザクロ",
+      "furigana": "ザクロ",
+      "translation": "pomegranate",
+      "image": "GFX/fruits/pomegranate.png"
+    },
+    {
+      "kanji": "びわ",
+      "furigana": "びわ",
+      "translation": "loquat",
+      "image": "GFX/fruits/loquat.png"
+    },
+    {
+      "kanji": "マンゴー",
+      "furigana": "マンゴー",
+      "translation": "mango",
+      "image": "GFX/fruits/mango.png"
+    }
+  ]
+}
 
 
 ##################################
@@ -1295,103 +1756,6 @@ options_background = select_random_background("assets/images/options/")
 # Initialize Text to Speech
 engine = pyttsx3.init()
 
-# TODO: Move this to SFX
- ### WIREFRAME CUBE ###
-# Define vertices and edges for the cube
-cube_vertices = [
-    [-1, -1, -1],  # 0: Back-bottom-left
-    [1, -1, -1],   # 1: Back-bottom-right
-    [1, 1, -1],    # 2: Back-top-right
-    [-1, 1, -1],   # 3: Back-top-left
-    [-1, -1, 1],   # 4: Front-bottom-left
-    [1, -1, 1],    # 5: Front-bottom-right
-    [1, 1, 1],     # 6: Front-top-right
-    [-1, 1, 1]     # 7: Front-top-left
-]
-
-cube_edges = [
-    (0, 1), (1, 2), (2, 3), (3, 0),  # Back face edges
-    (4, 5), (5, 6), (6, 7), (7, 4),  # Front face edges
-    (0, 4), (1, 5), (2, 6), (3, 7)   # Connecting edges
-]
-
-# Projection function to convert 3D points to 2D
-def project_3d_to_2d(point, center_x, center_y, fov=512, viewer_distance=10):
-    """Project a 3D point onto a 2D plane (the screen) using perspective projection."""
-    factor = fov / (viewer_distance + point[2])
-    x = point[0] * factor + center_x
-    y = -point[1] * factor + center_y  # Invert y-axis to match Pygame's coordinate system
-    return (int(x), int(y))
-
-
-# Functions to rotate 3D points around the axes
-def rotate_x(point, angle):
-    """Rotate a point around the X-axis."""
-    y = point[1] * math.cos(angle) - point[2] * math.sin(angle)
-    z = point[1] * math.sin(angle) + point[2] * math.cos(angle)
-    return [point[0], y, z]
-
-
-def rotate_y(point, angle):
-    """Rotate a point around the Y-axis."""
-    x = point[2] * math.sin(angle) + point[0] * math.cos(angle)
-    z = point[2] * math.cos(angle) - point[0] * math.sin(angle)
-    return [x, point[1], z]
-
-
-def rotate_z(point, angle):
-    """Rotate a point around the Z-axis."""
-    x = point[0] * math.cos(angle) - point[1] * math.sin(angle)
-    y = point[0] * math.sin(angle) + point[1] * math.cos(angle)
-    return [x, y, point[2]]
-
-# Rotation angle variables 
-angle_x, angle_y, angle_z = 0, 0, 0  # Initial rotation angles
-
-# Inside your main loop, add the cube rendering logic:
-def draw_wireframe_cube(screen, center_x, center_y):
-    global angle_x, angle_y, angle_z  # Use the global rotation variables
-
-    # Rotate the cube's vertices
-    rotated_vertices = []
-    for vertex in cube_vertices:
-        rotated = rotate_x(vertex, angle_x)
-        rotated = rotate_y(rotated, angle_y)
-        rotated = rotate_z(rotated, angle_z)
-        rotated_vertices.append(rotated)
-
-    # Project the 3D points to 2D
-    projected_vertices = [
-        project_3d_to_2d(vertex, center_x, center_y) for vertex in rotated_vertices
-    ]
-
-    # Convert HSV to RGB for dynamic color cycling
-    r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
-    edge_color = (int(r * 255), int(g * 255), int(b * 255))
-
-    # Draw the edges of the cube with the dynamic RGB color
-    for edge in cube_edges:
-        pygame.draw.line(screen, edge_color, projected_vertices[edge[0]], projected_vertices[edge[1]], 2)
-
-    # Update the angles for continuous rotation
-    angle_x += 0.01
-    angle_y += 0.02
-    angle_z += 0.015
-
-
-def update_cube():
-    global angle_x, angle_y, angle_z, hue  # Declare as global since they are being modified
-
-    # Update the rotation angles for continuous animation
-    angle_x += 0.01
-    angle_y += 0.02
-    angle_z += 0.015
-    hue += 0.00833
-    if hue > 1.0:
-        hue -= 1.0
-
-
-hue = 0.0  # Initial hue for color
 
 ##########################
 ### DATABASE FUNCTIONS ###
@@ -1550,7 +1914,9 @@ def insert_lessons(cursor, connection):
         ("Japanese Colors", "Japanese Colors"),
         ("Japanese Body Parts", "Japanese Body Parts"),
         ("Japanese Adjectives", "Japanese Adjectives"),
-        ("Japanese Animals", "Japanese Animals")
+        ("Japanese Animals", "Japanese Animals"),
+        ("Japanese Family", "Japanese Family"),
+        ("Japanese Fruits", "Japanese Fruits")
     ]
 
     try:
@@ -2385,6 +2751,102 @@ def generate_perlin_cloud(x_offset):
     return cloud_surface
 
     
+### WIREFRAME CUBE ###
+cube_vertices = [
+    [-1, -1, -1],  # 0: Back-bottom-left
+    [1, -1, -1],   # 1: Back-bottom-right
+    [1, 1, -1],    # 2: Back-top-right
+    [-1, 1, -1],   # 3: Back-top-left
+    [-1, -1, 1],   # 4: Front-bottom-left
+    [1, -1, 1],    # 5: Front-bottom-right
+    [1, 1, 1],     # 6: Front-top-right
+    [-1, 1, 1]     # 7: Front-top-left
+]
+
+cube_edges = [
+    (0, 1), (1, 2), (2, 3), (3, 0),  # Back face edges
+    (4, 5), (5, 6), (6, 7), (7, 4),  # Front face edges
+    (0, 4), (1, 5), (2, 6), (3, 7)   # Connecting edges
+]
+
+# Rotation angle variables 
+angle_x, angle_y, angle_z = 0, 0, 0  # Initial rotation angles
+
+hue = 0.0  # Initial hue for color
+
+# Projection function to convert 3D points to 2D
+def project_3d_to_2d(point, center_x, center_y, fov=512, viewer_distance=10):
+    """Project a 3D point onto a 2D plane (the screen) using perspective projection."""
+    factor = fov / (viewer_distance + point[2])
+    x = point[0] * factor + center_x
+    y = -point[1] * factor + center_y  # Invert y-axis to match Pygame's coordinate system
+    return (int(x), int(y))
+
+
+# Functions to rotate 3D points around the axes
+def rotate_x(point, angle):
+    """Rotate a point around the X-axis."""
+    y = point[1] * math.cos(angle) - point[2] * math.sin(angle)
+    z = point[1] * math.sin(angle) + point[2] * math.cos(angle)
+    return [point[0], y, z]
+
+
+def rotate_y(point, angle):
+    """Rotate a point around the Y-axis."""
+    x = point[2] * math.sin(angle) + point[0] * math.cos(angle)
+    z = point[2] * math.cos(angle) - point[0] * math.sin(angle)
+    return [x, point[1], z]
+
+
+def rotate_z(point, angle):
+    """Rotate a point around the Z-axis."""
+    x = point[0] * math.cos(angle) - point[1] * math.sin(angle)
+    y = point[0] * math.sin(angle) + point[1] * math.cos(angle)
+    return [x, y, point[2]]
+
+
+def draw_wireframe_cube(screen, center_x, center_y):
+    global angle_x, angle_y, angle_z  # Use the global rotation variables
+
+    # Rotate the cube's vertices
+    rotated_vertices = []
+    for vertex in cube_vertices:
+        rotated = rotate_x(vertex, angle_x)
+        rotated = rotate_y(rotated, angle_y)
+        rotated = rotate_z(rotated, angle_z)
+        rotated_vertices.append(rotated)
+
+    # Project the 3D points to 2D
+    projected_vertices = [
+        project_3d_to_2d(vertex, center_x, center_y) for vertex in rotated_vertices
+    ]
+
+    # Convert HSV to RGB for dynamic color cycling
+    r, g, b = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+    edge_color = (int(r * 255), int(g * 255), int(b * 255))
+
+    # Draw the edges of the cube with the dynamic RGB color
+    for edge in cube_edges:
+        pygame.draw.line(screen, edge_color, projected_vertices[edge[0]], projected_vertices[edge[1]], 2)
+
+    # Update the angles for continuous rotation
+    angle_x += 0.01
+    angle_y += 0.02
+    angle_z += 0.015
+
+
+def update_cube():
+    global angle_x, angle_y, angle_z, hue  # Declare as global since they are being modified
+
+    # Update the rotation angles for continuous animation
+    angle_x += 0.01
+    angle_y += 0.02
+    angle_z += 0.015
+    hue += 0.00833
+    if hue > 1.0:
+        hue -= 1.0
+
+
 ###################################    
 ### 2. Display and UI Functions ###
 ###################################    
@@ -6746,6 +7208,8 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       "japanese_fruits_teach",
+                       "japanese_fruits_quiz",
                        
                        
                                               
@@ -6800,7 +7264,9 @@ def session_manager():
                        "basic_shapes_quiz",                 #Math
                        "japanese_adjectives_quiz",          #JP
                        "single_by_double_multiplication",   #Math
+                       "japanese_family_teach",             #JP
                        "skip_counting_fibonacci",           #Math
+                       "japanese_family_quiz",              #JP
                        "skip_counting_primes",              #Math
                        "skip_counting_kanji",               #JP
                        "psalm_23",                          #ENG
@@ -6830,15 +7296,7 @@ def session_manager():
             day_of_the_week()
         elif lesson == "month_of_the_year":
             month_of_the_year()
-            
-        ### Maths ###
-        elif lesson == "skip_counting":
-            skip_counting()
-        elif lesson == "skip_counting_fibonacci":
-            skip_counting_fibonacci()
-        elif lesson == "skip_counting_primes":
-            skip_counting_primes()
-            
+        
         ### Jr. Church ###
         elif lesson == "john_3_16":
             john_3_16()
@@ -6855,23 +7313,23 @@ def session_manager():
         elif lesson == "numbers_6_24_26":
             numbers_6_24_26()
             
-        
+        ### Maths ###
+        elif lesson == "skip_counting":
+            skip_counting()
+        elif lesson == "skip_counting_fibonacci":
+            skip_counting_fibonacci()
+        elif lesson == "skip_counting_primes":
+            skip_counting_primes()
         elif lesson == "rainbow_numbers":
-            # Run the lesson, passing session_id
             lesson_result = rainbow_numbers(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             questions_asked, correct_answers, avg_time = lesson_result
             total_questions += questions_asked
             total_correct += correct_answers
             total_times.append(avg_time)
-        
         elif lesson == "single_digit_addition":
-            print("Running single digit addition")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = single_digit_addition(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6880,11 +7338,8 @@ def session_manager():
             else:
                 log_message("Error: single_digit_addition did not return a valid result.")
         elif lesson == "double_digit_addition":
-            print("Running double digit addition")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = double_digit_addition(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -6893,11 +7348,8 @@ def session_manager():
             else:
                 log_message("Error: double_digit_addition did not return a valid result.")
         elif lesson == "triple_digit_addition":
-            print("Running triple digit addition")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = triple_digit_addition(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -7070,6 +7522,10 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Adjectives')
         elif lesson == "japanese_animals_teach":
             vocab_teach(session_id, 'Japanese Animals')
+        elif lesson == "japanese_family_teach":
+            vocab_teach(session_id, 'Japanese Family')
+        elif lesson == "japanese_fruits_teach":
+            vocab_teach(session_id, 'Japanese Fruits')
       
         ### J Quizzes
         elif lesson == "hiragana_quiz":
@@ -7124,6 +7580,26 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: Japanese Animals Quiz did not return a valid result.")
+        elif lesson == "japanese_family_quiz":
+            print("Running Japanese Family Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Family')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: Japanese Family Quiz did not return a valid result.")
+        elif lesson == "japanese_fruits_quiz":
+            print("Running Japanese Fruits Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Fruits')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: Japanese Fruits Quiz did not return a valid result.")
         
         
         
@@ -8202,6 +8678,10 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_adjectives{student_level}')
     elif lesson_title == 'Japanese Animals':
         lesson_data = globals().get(f'j_animals{student_level}')
+    elif lesson_title == 'Japanese Family':
+        lesson_data = globals().get(f'j_family{student_level}')
+    elif lesson_title == 'Japanese Fruits':
+        lesson_data = globals().get(f'j_fruits{student_level}')
     else:
         return None
     return lesson_data
@@ -8281,7 +8761,6 @@ def vocab_teach(session_id, lesson_title):
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
-
 
 
 def display_result_with_image(result_text, image_file=None, use_lightning=False):
@@ -8530,6 +9009,20 @@ def lesson_selector(session_id, lesson_title):
                             j_animals7,
                             j_animals8,
                             j_animals9]
+    elif lesson_title == 'Japanese Family':
+        lesson_data_sets = [j_family1, 
+                            j_family2, 
+                            j_family3, 
+                            j_family4, 
+                            j_family5,
+                            j_family6,
+                            j_family7]
+    elif lesson_title == 'Japanese Body Parts':
+        lesson_data_sets = [j_fruits1, 
+                            j_fruits2, 
+                            j_fruits3, 
+                            j_fruits4, 
+                            j_fruits5]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
