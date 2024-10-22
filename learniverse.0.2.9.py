@@ -1531,6 +1531,114 @@ j_fruits5 = {
   ]
 }
 
+j_greetings1 = {
+  "quiz_title": "Greetings",
+  "questions": [
+    {
+      "kanji": "お早う",
+      "furigana": "おはよう",
+      "translation": "Good morning",
+      "image": ""
+    },
+    {
+      "kanji": "今日は",
+      "furigana": "こんにちは",
+      "translation": "Good day",
+      "image": ""
+    },
+    {
+      "kanji": "今晩は",
+      "furigana": "こんばんは",
+      "translation": "Good evening",
+      "image": ""
+    },
+    {
+      "kanji": "お休み",
+      "furigana": "おやすみ",
+      "translation": "Good night",
+      "image": ""
+    },
+    {
+      "kanji": "頂きます",
+      "furigana": "いただきます",
+      "translation": "I humbly receive",
+      "image": ""
+    }
+  ]
+}
+
+j_greetings2 = {
+  "quiz_title": "Greetings 2",
+  "questions": [
+    {
+      "kanji": "有難う",
+      "furigana": "ありがとう",
+      "translation": "Thank you",
+      "image": ""
+    },
+    {
+      "kanji": "さようなら",
+      "furigana": "さようなら",
+      "translation": "Goodbye",
+      "image": ""
+    },
+    {
+      "kanji": "お疲れ様",
+      "furigana": "おつかれさま",
+      "translation": "Thank you for your hard work",
+      "image": ""
+    },
+    {
+      "kanji": "行ってきます",
+      "furigana": "いってきます",
+      "translation": "I'm off (and will return)",
+      "image": ""
+    },
+    {
+      "kanji": "行ってらっしゃい",
+      "furigana": "いってらっしゃい",
+      "translation": "Please go and come back",
+      "image": ""
+    }
+  ]
+}
+
+j_greetings3 = {
+  "quiz_title": "Greetings 3",
+  "questions": [
+    {
+      "kanji": "ただいま",
+      "furigana": "ただいま",
+      "translation": "I'm home",
+      "image": ""
+    },
+    {
+      "kanji": "お帰り",
+      "furigana": "おかえり",
+      "translation": "Welcome back",
+      "image": ""
+    },
+    {
+      "kanji": "ご馳走様",
+      "furigana": "ごちそうさま",
+      "translation": "Thank you for the meal (after eating)",
+      "image": ""
+    },
+    {
+      "kanji": "よろしくお願いします",
+      "furigana": "よろしくおねがいします",
+      "translation": "Please take care of this / Nice to meet you",
+      "image": ""
+    },
+    {
+      "kanji": "お元気ですか",
+      "furigana": "おげんきですか",
+      "translation": "How are you?",
+      "image": ""
+    }
+  ]
+}
+
 
 ##################################
 # TODO
@@ -1916,7 +2024,8 @@ def insert_lessons(cursor, connection):
         ("Japanese Adjectives", "Japanese Adjectives"),
         ("Japanese Animals", "Japanese Animals"),
         ("Japanese Family", "Japanese Family"),
-        ("Japanese Fruits", "Japanese Fruits")
+        ("Japanese Fruits", "Japanese Fruits"),
+        ("Japanese Greetings", "Japanese Greetings")
     ]
 
     try:
@@ -7208,8 +7317,8 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "japanese_fruits_teach",
-                       "japanese_fruits_quiz",
+                       
+                       
                        
                        
                                               
@@ -7221,7 +7330,10 @@ def session_manager():
                        # "japanese_animals_teach",            #JP
                        # "japanese_colors_quiz",              #JP
                        
-                       
+                       # "japanese_fruits_teach",             #JP
+                       # "japanese_fruits_quiz",              #JP
+                       # "japanese_colors_teach",             #JP
+                       # "japanese_colors_quiz",             #JP
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
@@ -7269,6 +7381,10 @@ def session_manager():
                        "japanese_family_quiz",              #JP
                        "skip_counting_primes",              #Math
                        "skip_counting_kanji",               #JP
+                       "japanese_fruits_teach",             #JP
+                       "japanese_fruits_quiz",              #JP
+                       "japanese_greetings_teach",
+                       "japanese_greetings_quiz",
                        "psalm_23",                          #ENG
                        
                        
@@ -7526,6 +7642,10 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Family')
         elif lesson == "japanese_fruits_teach":
             vocab_teach(session_id, 'Japanese Fruits')
+        elif lesson == "japanese_greetings_teach":
+            vocab_teach(session_id, 'Japanese Greetings')
+      
+        
       
         ### J Quizzes
         elif lesson == "hiragana_quiz":
@@ -7600,6 +7720,16 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: Japanese Fruits Quiz did not return a valid result.")
+        elif lesson == "japanese_greetings_quiz":
+            print("Running Japanese Greetings Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Greetings')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: Japanese Greetings Quiz did not return a valid result.")
         
         
         
@@ -8682,6 +8812,8 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_family{student_level}')
     elif lesson_title == 'Japanese Fruits':
         lesson_data = globals().get(f'j_fruits{student_level}')
+    elif lesson_title == 'Japanese Greetings':
+        lesson_data = globals().get(f'j_greetings{student_level}')
     else:
         return None
     return lesson_data
@@ -9017,12 +9149,16 @@ def lesson_selector(session_id, lesson_title):
                             j_family5,
                             j_family6,
                             j_family7]
-    elif lesson_title == 'Japanese Body Parts':
+    elif lesson_title == 'Japanese Fruits':
         lesson_data_sets = [j_fruits1, 
                             j_fruits2, 
                             j_fruits3, 
                             j_fruits4, 
                             j_fruits5]
+    elif lesson_title == 'Japanese Greetings':
+        lesson_data_sets = [j_greetings1, 
+                            j_greetings2, 
+                            j_greetings3]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
