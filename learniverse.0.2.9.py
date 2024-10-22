@@ -1639,6 +1639,960 @@ j_greetings3 = {
   ]
 }
 
+j_one_piece1 = {
+  "quiz_title": "One Piece",
+  "questions": [
+    {
+      "furigana": "かいぞく",
+      "kanji": "海賊",
+      "translation": "pirate",
+      "image": "GFX/one_piece/pirate.png"
+    },
+    {
+      "furigana": "ふね",
+      "kanji": "船",
+      "translation": "ship",
+      "image": "GFX/one_piece/ship.png"
+    },
+    {
+      "furigana": "うみ",
+      "kanji": "海",
+      "translation": "ocean",
+      "image": "GFX/one_piece/ocean.png"
+    },
+    {
+      "furigana": "しま",
+      "kanji": "島",
+      "translation": "island",
+      "image": "GFX/one_piece/island.png"
+    },
+    {
+      "furigana": "ちず",
+      "kanji": "地図",
+      "translation": "map",
+      "image": "GFX/one_piece/map.png"
+    }
+  ]
+}
+
+j_one_piece2 = {
+  "quiz_title": "One Piece 2",
+  "questions": [
+    {
+      "furigana": "たから",
+      "kanji": "宝",
+      "translation": "treasure",
+      "image": "GFX/one_piece/treasure.png"
+    },
+    {
+      "furigana": "ぼうけん",
+      "kanji": "冒険",
+      "translation": "adventure",
+      "image": "GFX/one_piece/adventure.png"
+    },
+    {
+      "furigana": "けん",
+      "kanji": "剣",
+      "translation": "sword",
+      "image": "GFX/one_piece/sword.png"
+    },
+    {
+      "furigana": "おれ",
+      "kanji": "俺",
+      "translation": "I/me (casual/rude)",
+      "image": "GFX/one_piece/ore.png"
+    },
+    {
+      "furigana": "まったく",
+      "kanji": "全く",
+      "translation": "jeez",
+      "image": "GFX/one_piece/mattaku.png"
+    }
+  ]
+}
+
+j_one_piece3 = {
+  "quiz_title": "One Piece 3",
+  "questions": [
+    {
+      "furigana": "せんちょう",
+      "kanji": "船長",
+      "translation": "captain",
+      "image": "GFX/one_piece/captain.png"
+    },
+    {
+      "furigana": "のりくみいん",
+      "kanji": "乗組員",
+      "translation": "crew",
+      "image": "GFX/one_piece/crew.png"
+    },
+    {
+      "furigana": "なかま",
+      "kanji": "仲間",
+      "translation": "friend/companion",
+      "image": "GFX/one_piece/friend.png"
+    },
+    {
+      "furigana": "かいぐん",
+      "kanji": "海軍",
+      "translation": "navy",
+      "image": "GFX/one_piece/navy.png"
+    },
+    {
+      "furigana": "あくまのみ",
+      "kanji": "悪魔の実",
+      "translation": "Devil Fruit",
+      "image": "GFX/one_piece/devil_fruit.png"
+    }
+  ]
+}
+
+j_one_piece4 = {
+  "quiz_title": "One Piece 4",
+  "questions": [
+    {
+      "furigana": "せんい",
+      "kanji": "船医",
+      "translation": "ship doctor",
+      "image": "GFX/one_piece/ship_doctor.png"
+    },
+    {
+      "furigana": "けんし",
+      "kanji": "剣士",
+      "translation": "swordsman",
+      "image": "GFX/one_piece/swordsman.png"
+    },
+    {
+      "furigana": "かいぞくおう",
+      "kanji": "海賊王",
+      "translation": "Pirate King",
+      "image": "GFX/one_piece/pirate_king.png"
+    },
+    {
+      "furigana": "ぼうけんしゃ",
+      "kanji": "冒険者",
+      "translation": "adventurer",
+      "image": "GFX/one_piece/adventurer.png"
+    },
+    {
+      "furigana": "たからのちず",
+      "kanji": "宝の地図",
+      "translation": "treasure map",
+      "image": "GFX/one_piece/treasure_map.png"
+    }
+  ]
+}
+
+j_self_introduction1 = {
+  "quiz_title": "Self-Introduction Vocabulary",
+  "questions": [
+    {
+      "kanji": "私",
+      "furigana": "わたし",
+      "translation": "I (formal/polite)",
+      "image": ""
+    },
+    {
+      "kanji": "の",
+      "furigana": "の",
+      "translation": "possessive particle",
+      "image": ""
+    },
+    {
+      "kanji": "名前",
+      "furigana": "なまえ",
+      "translation": "name",
+      "image": ""
+    },
+    {
+      "kanji": "は",
+      "furigana": "は",
+      "translation": "topic marker particle",
+      "image": ""
+    },
+    {
+      "kanji": "です",
+      "furigana": "です",
+      "translation": "is/are",
+      "image": ""
+    },
+    {
+      "kanji": "から",
+      "furigana": "から",
+      "translation": "from",
+      "image": ""
+    }
+  ]
+}
+
+j_self_introduction2 = {
+  "quiz_title": "Self-Introduction Vocabulary",
+  "questions": [
+    {
+      "kanji": "来ました",
+      "furigana": "きました",
+      "translation": "came (from)",
+      "image": ""
+    },
+    {
+      "kanji": "歳",
+      "furigana": "さい",
+      "translation": "years old",
+      "image": ""
+    },
+    {
+      "kanji": "趣味",
+      "furigana": "しゅみ",
+      "translation": "hobby",
+      "image": ""
+    },
+    {
+      "kanji": "どうぞ",
+      "furigana": "どうぞ",
+      "translation": "please",
+      "image": ""
+    },
+    {
+      "kanji": "よろしく",
+      "furigana": "よろしく",
+      "translation": "well",
+      "image": ""
+    },
+    {
+      "kanji": "お願いします",
+      "furigana": "おねがいします",
+      "translation": "please (polite request)",
+      "image": ""
+    }
+  ]
+}
+
+j_self_introduction3 = {
+  "quiz_title": "Self-Introduction",
+  "questions": [
+    {
+      "kanji": "私の名前は___です",
+      "furigana": "わたしのなまえは___です",
+      "translation": "My name is ___",
+      "image": ""
+    },
+    {
+      "kanji": "___から来ました",
+      "furigana": "___からきました",
+      "translation": "I am from ___",
+      "image": ""
+    },
+    {
+      "kanji": "___歳です",
+      "furigana": "___さいです",
+      "translation": "I am ___ years old",
+      "image": ""
+    },
+    {
+      "kanji": "趣味は___です",
+      "furigana": "しゅみは___です",
+      "translation": "My hobby is ___",
+      "image": ""
+    },
+    {
+      "kanji": "どうぞよろしくお願いします",
+      "furigana": "どうぞよろしくおねがいします",
+      "translation": "Please take care of me / Nice to meet you",
+      "image": ""
+    }
+  ]
+}
+
+j_self_introduction4 = {
+  "quiz_title": "Self-Introduction 2 Vocabulary",
+  "questions": [
+    {
+      "kanji": "住んでいます",
+      "furigana": "すんでいます",
+      "translation": "live (currently living)",
+      "image": ""
+    },
+    {
+      "kanji": "に",
+      "furigana": "に",
+      "translation": "location particle (in, at)",
+      "image": ""
+    },
+    {
+      "kanji": "で",
+      "furigana": "で",
+      "translation": "location particle (at, in; used for actions)",
+      "image": ""
+    },
+    {
+      "kanji": "働いています",
+      "furigana": "はたらいています",
+      "translation": "working (currently working)",
+      "image": ""
+    },
+    {
+      "kanji": "勉強しています",
+      "furigana": "べんきょうしています",
+      "translation": "studying (currently studying)",
+      "image": ""
+    }
+  ]
+}
+
+j_self_introduction5 = {
+  "quiz_title": "Self-Introduction 2 Vocabulary",
+  "questions": [
+    {
+      "kanji": "家族",
+      "furigana": "かぞく",
+      "translation": "family",
+      "image": ""
+    },
+    {
+      "kanji": "人",
+      "furigana": "にん",
+      "translation": "people (counter for people)",
+      "image": ""
+    },
+    {
+      "kanji": "好きな",
+      "furigana": "すきな",
+      "translation": "favorite, liked",
+      "image": ""
+    },
+    {
+      "kanji": "食べ物",
+      "furigana": "たべもの",
+      "translation": "food",
+      "image": ""
+    }
+  ]
+}
+
+j_self_introduction6 = {
+  "quiz_title": "Self-Introduction 2",
+  "questions": [
+    {
+      "kanji": "___に住んでいます",
+      "furigana": "___にすんでいます",
+      "translation": "I live in ___",
+      "image": ""
+    },
+    {
+      "kanji": "___で働いています",
+      "furigana": "___ではたらいています",
+      "translation": "I work at ___",
+      "image": ""
+    },
+    {
+      "kanji": "___を勉強しています",
+      "furigana": "___をべんきょうしています",
+      "translation": "I am studying ___",
+      "image": ""
+    },
+    {
+      "kanji": "家族は___人です",
+      "furigana": "かぞくは___にんです",
+      "translation": "There are ___ people in my family",
+      "image": ""
+    },
+    {
+      "kanji": "好きな食べ物は___です",
+      "furigana": "すきなたべものは___です",
+      "translation": "My favorite food is ___",
+      "image": ""
+    }
+  ]
+}
+
+j_nouns1 = {
+  "quiz_title": "Simple Nouns",
+  "questions": [
+    {
+      "furigana": "やま",
+      "kanji": "山",
+      "translation": "mountain",
+      "image": "GFX/nouns/mountain.png"
+    },
+    {
+      "furigana": "かわ",
+      "kanji": "川",
+      "translation": "river",
+      "image": "GFX/nouns/river.png"
+    },
+    {
+      "furigana": "ひ",
+      "kanji": "火",
+      "translation": "fire",
+      "image": "GFX/nouns/fire.png"
+    },
+    {
+      "furigana": "いぬ",
+      "kanji": "犬",
+      "translation": "dog",
+      "image": "GFX/nouns/dog.png"
+    },
+    {
+      "furigana": "ひと",
+      "kanji": "人",
+      "translation": "person",
+      "image": "GFX/nouns/person.png"
+    }
+  ]
+}
+
+j_nouns2 = {
+  "quiz_title": "Simple Nouns - Part 2",
+  "questions": [
+    {
+      "furigana": "いと",
+      "kanji": "糸",
+      "translation": "thread",
+      "image": "GFX/nouns/thread.png"
+    },
+    {
+      "furigana": "いし",
+      "kanji": "石",
+      "translation": "stone",
+      "image": "GFX/nouns/stone.png"
+    },
+    {
+      "furigana": "たけ",
+      "kanji": "竹",
+      "translation": "bamboo",
+      "image": "GFX/nouns/bamboo.png"
+    },
+    {
+      "furigana": "かい",
+      "kanji": "貝",
+      "translation": "shellfish",
+      "image": "GFX/nouns/shellfish.png"
+    },
+    {
+      "furigana": "くるま",
+      "kanji": "車",
+      "translation": "vehicle",
+      "image": "GFX/nouns/vehicle.png"
+    }
+  ]
+}
+
+j_nouns3 = {
+  "quiz_title": "Simple Nouns - Part 3",
+  "questions": [
+    {
+      "furigana": "きん",
+      "kanji": "金",
+      "translation": "gold",
+      "image": "GFX/nouns/gold_money.png"
+    },
+    {
+      "furigana": "あめ",
+      "kanji": "雨",
+      "translation": "rain",
+      "image": "GFX/nouns/rain.png"
+    },
+    {
+      "furigana": "つき",
+      "kanji": "月",
+      "translation": "moon",
+      "image": "GFX/nouns/moon.png"
+    },
+    {
+      "furigana": "ひ",
+      "kanji": "日",
+      "translation": "sun",
+      "image": "GFX/nouns/sun.png"
+    },
+    {
+      "furigana": "みず",
+      "kanji": "水",
+      "translation": "water",
+      "image": "GFX/nouns/water.png"
+    },
+    {
+      "furigana": "つち",
+      "kanji": "土",
+      "translation": "earth",
+      "image": "GFX/nouns/earth.png"
+    }
+  ]
+}
+
+j_nouns4 = {
+  "quiz_title": "Simple Nouns 4",
+  "questions": [
+    {
+      "furigana": "き",
+      "kanji": "木",
+      "translation": "tree",
+      "image": "GFX/nouns/tree.png"
+    },
+    {
+      "furigana": "た",
+      "kanji": "田",
+      "translation": "rice field",
+      "image": "GFX/nouns/rice_field.png"
+    },
+    {
+      "furigana": "はな",
+      "kanji": "花",
+      "translation": "flower",
+      "image": "GFX/nouns/flower.png"
+    },
+    {
+      "furigana": "むし",
+      "kanji": "虫",
+      "translation": "insect",
+      "image": "GFX/nouns/insect.png"
+    },
+    {
+      "furigana": "こ",
+      "kanji": "子",
+      "translation": "child",
+      "image": "GFX/nouns/child.png"
+    }
+  ]
+}
+
+j_time1 = {
+  "quiz_title": "Time 1",
+  "questions": [
+    {
+      "furigana": "ことし",
+      "kanji": "今年",
+      "translation": "this year",
+      "image": ""
+    },
+    {
+      "furigana": "ねん",
+      "kanji": "年",
+      "translation": "year",
+      "image": ""
+    },
+    {
+      "furigana": "こんげつ",
+      "kanji": "今月",
+      "translation": "this month",
+      "image": ""
+    },
+    {
+      "furigana": "きょう",
+      "kanji": "今日",
+      "translation": "today",
+      "image": ""
+    },
+    {
+      "furigana": "じ",
+      "kanji": "時",
+      "translation": "hour",
+      "image": ""
+    },
+    {
+      "furigana": "ふん",
+      "kanji": "分",
+      "translation": "minute",
+      "image": ""
+    },
+    {
+      "furigana": "ごぜん",
+      "kanji": "午前",
+      "translation": "A.M.",
+      "image": ""
+    }
+  ]
+}
+
+j_time2 = {
+  "quiz_title": "Time 2",
+  "questions": [
+    {
+      "furigana": "こんしゅう",
+      "kanji": "今週",
+      "translation": "this week",
+      "image": ""
+    },
+    {
+      "furigana": "せんしゅう",
+      "kanji": "先週",
+      "translation": "last week",
+      "image": ""
+    },
+    {
+      "furigana": "らいしゅう",
+      "kanji": "来週",
+      "translation": "next week",
+      "image": ""
+    },
+    {
+      "furigana": "せんげつ",
+      "kanji": "先月",
+      "translation": "last month",
+      "image": ""
+    },
+    {
+      "furigana": "らいげつ",
+      "kanji": "来月",
+      "translation": "next month",
+      "image": ""
+    }
+  ]
+}
+
+j_time3 = {
+  "quiz_title": "Time 3",
+  "questions": [
+    {
+      "furigana": "きのう",
+      "kanji": "昨日",
+      "translation": "yesterday",
+      "image": ""
+    },
+    {
+      "furigana": "あした",
+      "kanji": "明日",
+      "translation": "tomorrow",
+      "image": ""
+    },
+    {
+      "furigana": "つき",
+      "kanji": "月",
+      "translation": "month",
+      "image": ""
+    },
+    {
+      "furigana": "ひ",
+      "kanji": "日",
+      "translation": "day",
+      "image": ""
+    },
+    {
+      "furigana": "ごご",
+      "kanji": "午後",
+      "translation": "P.M.",
+      "image": ""
+    }
+  ]
+}
+
+j_time4 = {
+  "quiz_title": "Time 4",
+  "questions": [
+    {
+      "furigana": "あさって",
+      "kanji": "明後日",
+      "translation": "the day after tomorrow",
+      "image": ""
+    },
+    {
+      "furigana": "おととい",
+      "kanji": "一昨日",
+      "translation": "the day before yesterday",
+      "image": ""
+    },
+    {
+      "furigana": "まいにち",
+      "kanji": "毎日",
+      "translation": "every day",
+      "image": ""
+    },
+    {
+      "furigana": "まいしゅう",
+      "kanji": "毎週",
+      "translation": "every week",
+      "image": ""
+    },
+    {
+      "furigana": "まいつき",
+      "kanji": "毎月",
+      "translation": "every month",
+      "image": ""
+    },
+    {
+      "furigana": "まいとし",
+      "kanji": "毎年",
+      "translation": "every year",
+      "image": ""
+    }
+  ]
+}
+
+j_time5 = {
+  "quiz_title": "Time 5",
+  "questions": [
+    {
+      "furigana": "しあさって",
+      "kanji": "明明後日",
+      "translation": "two days after tomorrow",
+      "image": ""
+    },
+    {
+      "furigana": "さきおととい",
+      "kanji": "一昨昨日",
+      "translation": "three days ago",
+      "image": ""
+    },
+    {
+      "furigana": "せんせんしゅう",
+      "kanji": "先々週",
+      "translation": "the week before last",
+      "image": ""
+    },
+    {
+      "furigana": "さらいしゅう",
+      "kanji": "再来週",
+      "translation": "the week after next",
+      "image": ""
+    }
+  ]
+}
+
+j_time6 = {
+  "quiz_title": "Time 6",
+  "questions": [
+    {
+      "furigana": "とき",
+      "kanji": "時",
+      "translation": "time, moment, occasion",
+      "image": ""
+    },
+    {
+      "furigana": "じだい",
+      "kanji": "時代",
+      "translation": "era, period",
+      "image": ""
+    },
+    {
+      "furigana": "きかん",
+      "kanji": "期間",
+      "translation": "period, term, interval",
+      "image": ""
+    },
+    {
+      "furigana": "きげん",
+      "kanji": "期限",
+      "translation": "deadline, time limit",
+      "image": ""
+    },
+    {
+      "furigana": "きゅうじつ",
+      "kanji": "休日",
+      "translation": "holiday, day off",
+      "image": ""
+    }
+  ]
+}
+
+j_time7 = {
+  "quiz_title": "Time 7",
+  "questions": [
+    {
+      "furigana": "しゅん",
+      "kanji": "瞬",
+      "translation": "moment",
+      "image": ""
+    },
+    {
+      "furigana": "しゅんかん",
+      "kanji": "瞬間",
+      "translation": "instant",
+      "image": ""
+    },
+    {
+      "furigana": "しゅんじ",
+      "kanji": "瞬時",
+      "translation": "immediate, in an instant",
+      "image": ""
+    },
+    {
+      "furigana": "しゅんかんてき",
+      "kanji": "瞬間的",
+      "translation": "momentary",
+      "image": ""
+    }
+  ]
+}
+
+j_vegtables1 = {
+  "quiz_title": "Vegetables",
+  "questions": [
+    {
+      "kanji": "大根",
+      "furigana": "だいこん",
+      "translation": "daikon radish",
+      "image": "GFX/vegetables/daikon.png"
+    },
+    {
+      "kanji": "人参",
+      "furigana": "にんじん",
+      "translation": "carrot",
+      "image": "GFX/vegetables/carrot.png"
+    },
+    {
+      "kanji": "キャベツ",
+      "furigana": "キャベツ",
+      "translation": "cabbage",
+      "image": "GFX/vegetables/cabbage.png"
+    },
+    {
+      "kanji": "ほうれん草",
+      "furigana": "ほうれんそう",
+      "translation": "spinach",
+      "image": "GFX/vegetables/spinach.png"
+    },
+    {
+      "kanji": "茄子",
+      "furigana": "なす",
+      "translation": "eggplant",
+      "image": "GFX/vegetables/eggplant.png"
+    }
+  ]
+}
+
+j_vegtables2 = {
+  "quiz_title": "Vegetables 2",
+  "questions": [
+    {
+      "kanji": "玉ねぎ",
+      "furigana": "たまねぎ",
+      "translation": "onion",
+      "image": "GFX/vegetables/onion.png"
+    },
+    {
+      "kanji": "じゃがいも",
+      "furigana": "じゃがいも",
+      "translation": "potato",
+      "image": "GFX/vegetables/potato.png"
+    },
+    {
+      "kanji": "ピーマン",
+      "furigana": "ピーマン",
+      "translation": "green pepper",
+      "image": "GFX/vegetables/green_pepper.png"
+    },
+    {
+      "kanji": "白菜",
+      "furigana": "はくさい",
+      "translation": "napa cabbage",
+      "image": "GFX/vegetables/napa_cabbage.png"
+    },
+    {
+      "kanji": "とうもろこし",
+      "furigana": "とうもろこし",
+      "translation": "corn",
+      "image": "GFX/vegetables/corn.png"
+    }
+  ]
+}
+
+j_vegtables3 = {
+  "quiz_title": "Vegetables 3",
+  "questions": [
+    {
+      "kanji": "さつまいも",
+      "furigana": "さつまいも",
+      "translation": "sweet potato",
+      "image": "GFX/vegetables/sweet_potato.png"
+    },
+    {
+      "kanji": "しょうが",
+      "furigana": "しょうが",
+      "translation": "ginger",
+      "image": "GFX/vegetables/ginger.png"
+    },
+    {
+      "kanji": "れんこん",
+      "furigana": "れんこん",
+      "translation": "lotus root",
+      "image": "GFX/vegetables/lotus_root.png"
+    },
+    {
+      "kanji": "ネギ",
+      "furigana": "ネギ",
+      "translation": "green onion",
+      "image": "GFX/vegetables/green_onion.png"
+    },
+    {
+      "kanji": "きゅうり",
+      "furigana": "きゅうり",
+      "translation": "cucumber",
+      "image": "GFX/vegetables/cucumber.png"
+    }
+  ]
+}
+
+j_vegtables4 = {
+  "quiz_title": "Vegetables 4",
+  "questions": [
+    {
+      "kanji": "ブロッコリー",
+      "furigana": "ブロッコリー",
+      "translation": "broccoli",
+      "image": "GFX/vegetables/broccoli.png"
+    },
+    {
+      "kanji": "カリフラワー",
+      "furigana": "カリフラワー",
+      "translation": "cauliflower",
+      "image": "GFX/vegetables/cauliflower.png"
+    },
+    {
+      "kanji": "アスパラガス",
+      "furigana": "アスパラガス",
+      "translation": "asparagus",
+      "image": "GFX/vegetables/asparagus.png"
+    },
+    {
+      "kanji": "かぼちゃ",
+      "furigana": "かぼちゃ",
+      "translation": "pumpkin",
+      "image": "GFX/vegetables/pumpkin.png"
+    },
+    {
+      "kanji": "ししとう",
+      "furigana": "ししとう",
+      "translation": "shishito pepper",
+      "image": "GFX/vegetables/shishito_pepper.png"
+    }
+  ]
+}
+
+j_vegtables5 = {
+  "quiz_title": "Vegetables 5",
+  "questions": [
+    {
+      "kanji": "ごぼう",
+      "furigana": "ごぼう",
+      "translation": "burdock root",
+      "image": "GFX/vegetables/burdock_root.png"
+    },
+    {
+      "kanji": "にんにく",
+      "furigana": "にんにく",
+      "translation": "garlic",
+      "image": "GFX/vegetables/garlic.png"
+    },
+    {
+      "kanji": "さやえんどう",
+      "furigana": "さやえんどう",
+      "translation": "snow pea",
+      "image": "GFX/vegetables/snow_pea.png"
+    },
+    {
+      "kanji": "たけのこ",
+      "furigana": "たけのこ",
+      "translation": "bamboo shoot",
+      "image": "GFX/vegetables/bamboo_shoot.png"
+    },
+    {
+      "kanji": "春菊",
+      "furigana": "しゅんぎく",
+      "translation": "chrysanthemum greens",
+      "image": "GFX/vegetables/chrysanthemum_greens.png"
+    }
+  ]
+}
+
 
 ##################################
 # TODO
@@ -2025,7 +2979,12 @@ def insert_lessons(cursor, connection):
         ("Japanese Animals", "Japanese Animals"),
         ("Japanese Family", "Japanese Family"),
         ("Japanese Fruits", "Japanese Fruits"),
-        ("Japanese Greetings", "Japanese Greetings")
+        ("Japanese Greetings", "Japanese Greetings"),
+        ("One Piece Vocab", "One Piece Vocab"),
+        ("Japanese Self Introduction", "Japanese Self Introduction"),
+        ("Japanese Nouns", "Japanese Nouns"),
+        ("Japanese Time", "Japanese Time"),
+        ("Japanese Vegtables", "Japanese Vegtables")
     ]
 
     try:
@@ -3564,10 +4523,24 @@ def bonus_game_fat_tuna():
     # Game Over or Win Phase
     if win:
         screen.fill(screen_color)
-        draw_text(f"You caught the Fat Tuna in {elapsed_time} seconds!", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
+        draw_text(f"You caught the Fat Tuna in {elapsed_time} seconds!", 
+                  font, 
+                  text_color, 
+                  WIDTH // 2, 
+                  HEIGHT // 3, 
+                  center=True, 
+                  shadow_color=shadow_color,
+                  max_width=WIDTH)
     elif game_over:
         screen.fill(screen_color)
-        draw_text("Game Over! You were eaten by the piranha.", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, max_width=WIDTH)
+        draw_text("Game Over! You were eaten by the piranha.", 
+                  font, 
+                  text_color, 
+                  WIDTH // 2, 
+                  HEIGHT // 3, 
+                  center=True, 
+                  shadow_color=shadow_color,
+                  max_width=WIDTH)
 
     # Draw the "Continue..." button after game completion message
     continue_rect = draw_continue_button()
@@ -7318,11 +8291,10 @@ def session_manager():
     #####################################
     lessons_to_play = ["greet_student",                     #JP
                        
-                       
-                       
-                       
                                               
                        ### DEBUG TESTING ###
+                       "psalm_23",                          #ENG
+                       "numbers_6_24_26",                   #ENG
                        # "basic_shapes_quiz",
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
@@ -7346,45 +8318,65 @@ def session_manager():
                        
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
-                       "month_of_the_year",                 #JP
                        "skip_counting",                     #Math
-                       "hiragana_teach",                    #JP
-                       "rainbow_numbers",                   #Math
-                       "skip_counting_japanese",            #JP
-                       "single_digit_addition",             #Math
                        "john_3_16",                         #ENG
-                       "hiragana_quiz",                     #JP                      
-                       "single_digit_subtraction",          #Math
+                       "month_of_the_year",                 #JP
+                       "rainbow_numbers",                   #Math
                        "john_13_34",                        #ENG
-                       "japanese_colors_teach",             #JP
-                       "single_digit_multiplication",       #Math
+                       "hiragana_teach",                    #JP
+                       "single_digit_addition",             #Math
                        "hebrews_11_1",                      #ENG
-                       "japanese_colors_quiz",              #JP
-                       "double_digit_subtraction",          #Math
+                       "skip_counting_japanese",            #JP
+                       "single_digit_subtraction",          #Math
                        "philippians_4_6",                   #ENG
-                       "japanese_body_parts_teach",         #JP
-                       "subtraction_borrowing",             #Math
+                       "hiragana_quiz",                     #JP                      
+                       "single_digit_multiplication",       #Math
                        "ephesians_4_32",                    #ENG
-                       "japanese_body_parts_quiz",          #JP
-                       "double_digit_addition",             #Math
+                       "japanese_colors_teach",             #JP
+                       "double_digit_subtraction",          #Math
                        "numbers_6_24_26",                   #ENG
-                       "japanese_animals_teach",            #JP
+                       "japanese_colors_quiz",              #JP
+                       "subtraction_borrowing",             #Math
+                       
+                       "japanese_body_parts_teach",         #JP
+                       "double_digit_addition",             #Math
+                       
+                       "japanese_body_parts_quiz",          #JP
                        "single_denominator_addition",       #Math
-                       "japanese_animals_quiz",             #JP
+                       
+                       "japanese_animals_teach",            #JP
                        "lowest_common_denominator_quiz",    #Math
-                       "japanese_adjectives_teach",         #JP
+                       
+                       "japanese_animals_quiz",             #JP
                        "basic_shapes_quiz",                 #Math
-                       "japanese_adjectives_quiz",          #JP
+                       
+                       "japanese_adjectives_teach",         #JP
                        "single_by_double_multiplication",   #Math
-                       "japanese_family_teach",             #JP
+                       
+                       "japanese_adjectives_quiz",          #JP
                        "skip_counting_fibonacci",           #Math
-                       "japanese_family_quiz",              #JP
+                       
+                       "japanese_family_teach",             #JP
                        "skip_counting_primes",              #Math
+                       
+                       "japanese_family_quiz",              #JP
+                       
                        "skip_counting_kanji",               #JP
                        "japanese_fruits_teach",             #JP
                        "japanese_fruits_quiz",              #JP
-                       "japanese_greetings_teach",
-                       "japanese_greetings_quiz",
+                       "japanese_greetings_teach",          #JP
+                       "japanese_greetings_quiz",           #JP
+                       "one_piece_teach",                   #JP
+                       "one_piece_quiz",                    #JP
+                       "japanese_self_introduction_teach",  #JP
+                       "japanese_self_introduction_quiz",   #JP
+                       "japanese_nouns_teach",              #JP
+                       "japanese_nouns_quiz",               #JP
+                       "japanese_time_teach",              #JP
+                       "japanese_time_quiz",               #JP
+                       "japanese_vegtables_teach",              #JP
+                       "japanese_vegtables_quiz",               #JP
+                       
                        "psalm_23",                          #ENG
                        
                        
@@ -7644,6 +8636,16 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Fruits')
         elif lesson == "japanese_greetings_teach":
             vocab_teach(session_id, 'Japanese Greetings')
+        elif lesson == "one_piece_teach":
+            vocab_teach(session_id, 'One Piece Vocab')
+        elif lesson == "japanese_self_introduction_teach":
+            vocab_teach(session_id, 'Japanese Self Introduction')
+        elif lesson == "japanese_nouns_teach":
+            vocab_teach(session_id, 'Japanese Nouns')
+        elif lesson == "japanese_time_teach":
+            vocab_teach(session_id, 'Japanese Time')
+        elif lesson == "japanese_vegtables_teach":
+            vocab_teach(session_id, 'Japanese Vegtables')
       
         
       
@@ -7730,6 +8732,56 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error: Japanese Greetings Quiz did not return a valid result.")
+        elif lesson == "one_piece_quiz":
+            print("Running One Piece Quiz")
+            lesson_result = lesson_selector(session_id, 'One Piece Vocab')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error: One Piece Quiz did not return a valid result.")
+        elif lesson == "japanese_self_introduction_quiz":
+            print("Running Japanese Self Introduction Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Self Introduction')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Self Introduction Quiz did not return a valid result.")
+        elif lesson == "japanese_nouns_quiz":
+            print("Running Japanese Nouns Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Nouns')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Nouns Quiz did not return a valid result.")
+        elif lesson == "japanese_time_quiz":
+            print("Running Japanese Time Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Time')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Time Quiz did not return a valid result.")
+        elif lesson == "japanese_vegtables_quiz":
+            print("Running Japanese Vegtables Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Vegtables')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Vegtables Quiz did not return a valid result.")
         
         
         
@@ -8082,8 +9134,11 @@ def psalm_23():
     verse_title = "Psalm 23"
     split_text = [
         "The Lord is my shepherd; I shall not want.",
-        "He maketh me to lie down in green pastures: he leadeth me beside the still waters. He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake. Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
-        "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over. Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the Lord for ever."
+        "He maketh me to lie down in green pastures: he leadeth me beside the still waters.",
+        "He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.",
+        "Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.",
+        "Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.",
+        "Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the Lord for ever."
     ]
     display_bible_verse(greeting_message, verse_title, "", split_text)
 
@@ -8116,14 +9171,14 @@ def numbers_6_24_26():
     """Greets the student and introduces the Bible verse Numbers 6:24-26 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
     verse_title = "Numbers 6:24-26"
-    verse_text = (
+    split_text = (
         "The Lord bless you and keep you;\n"
         "The Lord make His face shine upon you,\n"
         "And be gracious to you;\n"
         "The Lord lift up His countenance upon you,\n"
         "And give you peace."
     )
-    display_bible_verse(greeting_message, verse_title, verse_text)
+    display_bible_verse(greeting_message, verse_title, "", split_text)
 
 
 ##########################
@@ -8814,6 +9869,16 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_fruits{student_level}')
     elif lesson_title == 'Japanese Greetings':
         lesson_data = globals().get(f'j_greetings{student_level}')
+    elif lesson_title == 'One Piece Vocab':
+        lesson_data = globals().get(f'j_one_piece{student_level}')
+    elif lesson_title == 'Japanese Self Introduction':
+        lesson_data = globals().get(f'j_self_introduction{student_level}')
+    elif lesson_title == 'Japanese Nouns':
+        lesson_data = globals().get(f'j_nouns{student_level}')
+    elif lesson_title == 'Japanese Time':
+        lesson_data = globals().get(f'j_time{student_level}')
+    elif lesson_title == 'Japanese Vegtables':
+        lesson_data = globals().get(f'j_vegtables{student_level}')
     else:
         return None
     return lesson_data
@@ -8858,7 +9923,7 @@ def vocab_teach(session_id, lesson_title):
         if kanji_length <= 3:
             kanji_font_size = 300
         else:
-            kanji_font_size = 150
+            kanji_font_size = 125
 
         # Initialize kanji font dynamically based on the determined size
         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
@@ -9159,6 +10224,37 @@ def lesson_selector(session_id, lesson_title):
         lesson_data_sets = [j_greetings1, 
                             j_greetings2, 
                             j_greetings3]
+    elif lesson_title == 'One Piece Vocab':
+        lesson_data_sets = [j_one_piece1, 
+                            j_one_piece2, 
+                            j_one_piece3,
+                            j_one_piece4]
+    elif lesson_title == 'Japanese Self Introduction':
+        lesson_data_sets = [j_self_introduction1, 
+                            j_self_introduction2, 
+                            j_self_introduction3, 
+                            j_self_introduction4, 
+                            j_self_introduction5,
+                            j_self_introduction6]
+    elif lesson_title == 'Japanese Nouns':
+        lesson_data_sets = [j_nouns1, 
+                            j_nouns2, 
+                            j_nouns3,
+                            j_nouns4]
+    elif lesson_title == 'Japanese Time':
+        lesson_data_sets = [j_time1, 
+                            j_time2, 
+                            j_time3, 
+                            j_time4, 
+                            j_time5,
+                            j_time6,
+                            j_time7]
+    elif lesson_title == 'Japanese Vegtables':
+        lesson_data_sets = [j_vegtables1, 
+                            j_vegtables2, 
+                            j_vegtables3, 
+                            j_vegtables4, 
+                            j_vegtables5]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
