@@ -8293,7 +8293,7 @@ def session_manager():
                        
                                               
                        ### DEBUG TESTING ###
-                       "psalm_23",                          #ENG
+                       # "psalm_23",                          #ENG
                        "numbers_6_24_26",                   #ENG
                        # "basic_shapes_quiz",
                        # "japanese_body_parts_teach",         #JP
@@ -9171,13 +9171,13 @@ def numbers_6_24_26():
     """Greets the student and introduces the Bible verse Numbers 6:24-26 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
     verse_title = "Numbers 6:24-26"
-    split_text = (
-        "The Lord bless you and keep you;\n"
-        "The Lord make His face shine upon you,\n"
-        "And be gracious to you;\n"
-        "The Lord lift up His countenance upon you,\n"
+    split_text = [
+        "The Lord bless you and keep you; "
+        "The Lord make His face shine upon you, "
+        "And be gracious to you;",
+        "The Lord lift up His countenance upon you, "
         "And give you peace."
-    )
+    ]
     display_bible_verse(greeting_message, verse_title, "", split_text)
 
 
