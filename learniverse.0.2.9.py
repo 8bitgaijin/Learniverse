@@ -2630,7 +2630,6 @@ j_verbs1 = {
   ]
 }
 
-
 j_song_sanpo1 = {
   "quiz_title": "Japanese Song Lyrics: Sanpo (Part 1a)",
   "questions": [
@@ -2704,7 +2703,6 @@ j_song_sanpo2 = {
   ],
   "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
 }
-
 
 j_song_sanpo3 = {
   "quiz_title": "Japanese Song Lyrics: Sanpo (Part 2a)",
@@ -2780,7 +2778,6 @@ j_song_sanpo4 = {
   "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
 }
 
-
 j_song_sanpo5 = {
   "quiz_title": "Japanese Song Lyrics: Sanpo (Part 3a)",
   "questions": [
@@ -2843,8 +2840,6 @@ j_song_sanpo6 = {
   "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
 }
 
-
-
 j_song_zou_san1 = {
   "quiz_title": "Zou-san Vocabulary (Part 1)",
   "questions": [
@@ -2906,7 +2901,6 @@ j_song_zou_san2 = {
   ],
   "URL": "https://www.youtube.com/watch?v=WguFpvqRSRY"  # Add URL here
 }
-
 
 
 ##################################
@@ -8603,7 +8597,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "hiragana_teach",                    #JP
+                       # "hiragana_teach",                    #JP
                        "hiragana_quiz",                     #JP    
                        "katakana_teach",                    #JP
                        "katakana_quiz",                     #JP    
@@ -9860,20 +9854,51 @@ def skip_counting_kanji(COUNT_TO=30):
     draw_and_wait_continue_button()
 
 
-# def get_hiragana_subset_by_level(student_level, hiragana_list):
-#     """Returns the subset of Hiragana characters to teach or quiz based on the student's level."""
-#     max_characters = min(student_level * 5, len(hiragana_list))
-#     return hiragana_list[:max_characters]
 def get_character_subset_by_level(student_level, character_list):
     """Returns the subset of characters (Hiragana, Katakana, etc.) to teach or quiz based on the student's level."""
     max_characters = min(student_level * 5, len(character_list))
     return character_list[:max_characters]
 
 
+def display_intro_message(lesson_type, student_level):
+    """Displays the intro message for the lesson."""
+    screen.fill(screen_color)
+    intro_message = f"Let's learn {lesson_type}! You are currently on level {student_level}."
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True,
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+    draw_and_wait_continue_button()
+
+
+def display_completion_message(lesson_type, student_level, url):
+    """Displays the completion message with a dynamic level and opens a URL if provided."""
+    screen.fill(screen_color)
+    completion_message = f"Great job studying {lesson_type} at level {student_level}!"
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True,
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
+    
+    # Open URL if provided
+    if url:
+        log_message(f"Opening URL: {url}")
+        webbrowser.open(url)
+    
+    draw_and_wait_continue_button()
+
+
+def teach_characters(character_subset, large_font):
+    """Displays each character in the subset and reads them aloud."""
+    for char in character_subset:
+        screen.fill(screen_color)
+        draw_text(char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True,
+                  enable_shadow=True, shadow_color=shadow_color, font_override=large_font)
+        pygame.display.flip()
+        speak_japanese(char)
+        time.sleep(1)
+
+
 def hiragana_teach(session_id):
     """Displays Hiragana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
-    
+
     # Retrieve the student's current level for the Hiragana lesson
     student_level = get_student_progress(session_id, 'Hiragana')
 
@@ -9892,42 +9917,54 @@ def hiragana_teach(session_id):
         "ん"
     ]
 
-    # Use the generalized function to get the subset of Hiragana based on level
+    # Get the subset of Hiragana based on the student's level
     hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
 
-    # Define a larger font for the hiragana characters
+    # Define a larger font for the characters
     large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
 
-    # Clear the screen and inform the student about the lesson
-    screen.fill(screen_color)
-    intro_message = f"Let's learn Hiragana! You are currently on level {student_level}."
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+    # Display the intro message and teach the characters
+    display_intro_message('Hiragana', student_level)
+    teach_characters(hiragana_subset, large_japanese_font)
 
-    # Display "Continue..." button and wait for user input
-    draw_and_wait_continue_button()
+    # Show completion message and open the URL
+    display_completion_message('Hiragana', student_level, "https://www.youtube.com/watch?v=bEPagHe6iUI")
 
-    # Loop through the subset of Hiragana and show each character
-    for hiragana_char in hiragana_subset:
-        screen.fill(screen_color)
-        draw_text(hiragana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
-        pygame.display.flip()
-        speak_japanese(hiragana_char)
-        time.sleep(1)
 
-    # Show completion message and wait for "Continue..."
-    screen.fill(screen_color)
-    completion_message = f"Great job studying Hiragana at level {student_level}!"
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
-    
-    # Open the URL before showing the "Continue" button
-    url = "https://www.youtube.com/watch?v=bEPagHe6iUI"
-    log_message(f"Opening URL: {url}")
-    webbrowser.open(url)  # Open the URL in the default web browser
-    
-    draw_and_wait_continue_button()
+def katakana_teach(session_id):
+    """Displays Katakana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
+    global screen_color, text_color, shadow_color  # Access theme-related globals
+
+    # Retrieve the student's current level for the Katakana lesson
+    student_level = get_student_progress(session_id, 'Katakana')
+
+    # List of the 46 basic katakana characters
+    katakana_list = [
+        "ア", "イ", "ウ", "エ", "オ", 
+        "カ", "キ", "ク", "ケ", "コ", 
+        "サ", "シ", "ス", "セ", "ソ", 
+        "タ", "チ", "ツ", "テ", "ト", 
+        "ナ", "ニ", "ヌ", "ネ", "ノ", 
+        "ハ", "ヒ", "フ", "ヘ", "ホ", 
+        "マ", "ミ", "ム", "メ", "モ", 
+        "ヤ", "ユ", "ヨ", 
+        "ラ", "リ", "ル", "レ", "ロ", 
+        "ワ", "ヲ", 
+        "ン"
+    ]
+
+    # Get the subset of Katakana based on the student's level
+    katakana_subset = get_character_subset_by_level(student_level, katakana_list)
+
+    # Define a larger font for the characters
+    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+
+    # Display the intro message and teach the characters
+    display_intro_message('Katakana', student_level)
+    teach_characters(katakana_subset, large_japanese_font)
+
+    # Show completion message and open the URL
+    display_completion_message('Katakana', student_level, "https://www.youtube.com/watch?v=xNxsGCiX3qA")
 
 
 def display_hiragana_quiz(screen, hiragana_char, options):
@@ -9969,62 +10006,28 @@ def display_hiragana_quiz(screen, hiragana_char, options):
     return option_rects
 
 
-def hiragana_quiz(session_id):
-    """Presents a quiz on Hiragana characters based on the student's level and updates their progress."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
-
-    # Retrieve the student's current level for the Hiragana lesson
-    student_level = get_student_progress(session_id, 'Hiragana')
-
-    # Fetch the Hiragana lesson ID
-    hiragana_lesson_id = fetch_lesson_id('Hiragana')
-    if hiragana_lesson_id is None:
-        return -1  # Exit if lesson_id not found
-
-    # Display the introductory message with the student's current level
+def quiz_intro_message(session_id, lesson_title, student_level):
+    """Displays the introductory quiz message."""
     screen.fill(screen_color)
-    draw_text(f"Hiragana quiz! You are currently on level {student_level}.", font, text_color,
-              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
-
+    intro_message = f"{lesson_title} quiz! You are currently on level {student_level}."
+    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
     draw_and_wait_continue_button()
 
-    # Start the lesson timer
-    lesson_start_time = time.time()
-
-    # List of Hiragana characters
-    hiragana_list = [
-        ('あ', 'a'), ('い', 'i'), ('う', 'u'), ('え', 'e'), ('お', 'o'), ('か', 'ka'), 
-        ('き', 'ki'), ('く', 'ku'), ('け', 'ke'), ('こ', 'ko'), ('さ', 'sa'), ('し', 'shi'), 
-        ('す', 'su'), ('せ', 'se'), ('そ', 'so'), ('た', 'ta'), ('ち', 'chi'), ('つ', 'tsu'), 
-        ('て', 'te'), ('と', 'to'), ('な', 'na'), ('に', 'ni'), ('ぬ', 'nu'), ('ね', 'ne'), 
-        ('の', 'no'), ('は', 'ha'), ('ひ', 'hi'), ('ふ', 'fu'), ('へ', 'he'), ('ほ', 'ho'),
-        ('ま', 'ma'), ('み', 'mi'), ('む', 'mu'), ('め', 'me'), ('も', 'mo'), ('や', 'ya'),
-        ('ゆ', 'yu'), ('よ', 'yo'), ('ら', 'ra'), ('り', 'ri'), ('る', 'ru'), ('れ', 're'),
-        ('ろ', 'ro'), ('わ', 'wa'), ('を', 'wo'), ('ん', 'n')
-    ]
-
-    # Adjust the number of Hiragana characters based on the student's level
-    hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
-    random.shuffle(hiragana_subset)
-
-    total_questions = 5  # Set the number of questions
+def quiz_loop(lesson_title, character_subset, total_questions):
+    """Handles the quiz loop, question selection, and answers."""
     correct_answers = 0
     completion_times = []
 
-    # Quiz loop
     for problem_count in range(total_questions):
-        hiragana_char, correct_english = hiragana_subset[problem_count % len(hiragana_subset)]
-
-        # Create multiple-choice options
-        incorrect_answers = random.sample(
-            [h[1] for h in hiragana_subset if h[1] != correct_english], 3)
+        character, correct_english = character_subset[problem_count % len(character_subset)]
+        incorrect_answers = random.sample([ch[1] for ch in character_subset if ch[1] != correct_english], 3)
         options = [correct_english] + incorrect_answers
         random.shuffle(options)
-
+        
         # Display the quiz options and get option rects
-        option_rects = display_hiragana_quiz(screen, hiragana_char, options)
+        option_rects = display_hiragana_quiz(screen, character, options)
 
-        # Wait for student to click on an option
+        # Wait for student to select an option
         start_time = time.time()
         question_complete = False
         while not question_complete:
@@ -10038,100 +10041,95 @@ def hiragana_quiz(session_id):
                         if rect.collidepoint(mouse_pos):
                             time_taken = round(time.time() - start_time, 1)
                             completion_times.append(time_taken)
-
                             if option == correct_english:
                                 correct_answers += 1
                                 display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
                             else:
                                 display_result(f"Sorry, the correct answer is {correct_english}")
                             question_complete = True
-
             pygame.time.Clock().tick(60)
+    
+    return correct_answers, completion_times
 
-    # Final score and performance
-    lesson_end_time = time.time()
+def final_score_display(session_id, lesson_id, correct_answers, total_questions, completion_times, lesson_start_time, lesson_end_time, lesson_title):
+    """Displays the final score and updates the student's progress."""
     average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
-    add_session_lesson(session_id, hiragana_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+    add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
 
-    # Display the final score and handle perfect scores
+    # Display final score
     screen.fill(screen_color)
     draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-    
+
     if correct_answers == total_questions:
-        set_student_progress(session_id, 'Hiragana')  # Level up on perfect score
+        set_student_progress(session_id, lesson_title)  # Level up on perfect score
         draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
         if average_time < 3.0:
             draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
 
     draw_and_wait_continue_button()
-    
+
     if correct_answers == total_questions:
         bonus_game_fat_tuna()
-    
-    # Return the results of the quiz
-    return total_questions, correct_answers, average_time
 
 
-
-def katakana_teach(session_id):
-    """Displays Katakana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
+def hiragana_quiz(session_id):
+    """Presents a quiz on Hiragana characters based on the student's level and updates their progress."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
-    
-    # Retrieve the student's current level for the Katakana lesson
-    student_level = get_student_progress(session_id, 'Katakana')
 
-    # List of the 46 basic katakana characters
-    katakana_list = [
-        "ア", "イ", "ウ", "エ", "オ", 
-        "カ", "キ", "ク", "ケ", "コ", 
-        "サ", "シ", "ス", "セ", "ソ", 
-        "タ", "チ", "ツ", "テ", "ト", 
-        "ナ", "ニ", "ヌ", "ネ", "ノ", 
-        "ハ", "ヒ", "フ", "ヘ", "ホ", 
-        "マ", "ミ", "ム", "メ", "モ", 
-        "ヤ", "ユ", "ヨ", 
-        "ラ", "リ", "ル", "レ", "ロ", 
-        "ワ", "ヲ", 
-        "ン"
+    # Retrieve the student's current level for the Hiragana lesson
+    student_level = get_student_progress(session_id, 'Hiragana')
+
+    # Fetch the Hiragana lesson ID
+    hiragana_lesson_id = fetch_lesson_id('Hiragana')
+    if hiragana_lesson_id is None:
+        return -1  # Exit if lesson_id not found
+
+    # Define total questions at the start
+    total_questions = 5
+
+    # Display the introductory message with the student's current level
+    screen.fill(screen_color)
+    draw_text(f"Hiragana quiz! You are currently on level {student_level}.", font, text_color,
+              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+    draw_and_wait_continue_button()
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    # List of Hiragana characters
+    hiragana_list = [
+        ('あ', 'a'), ('い', 'i'), ('う', 'u'), ('え', 'e'), ('お', 'o'),  # a, i, u, e, o
+        ('か', 'ka'), ('き', 'ki'), ('く', 'ku'), ('け', 'ke'), ('こ', 'ko'),  # ka, ki, ku, ke, ko
+        ('さ', 'sa'), ('し', 'shi'), ('す', 'su'), ('せ', 'se'), ('そ', 'so'),  # sa, shi, su, se, so
+        ('た', 'ta'), ('ち', 'chi'), ('つ', 'tsu'), ('て', 'te'), ('と', 'to'),  # ta, chi, tsu, te, to
+        ('な', 'na'), ('に', 'ni'), ('ぬ', 'nu'), ('ね', 'ne'), ('の', 'no'),  # na, ni, nu, ne, no
+        ('は', 'ha'), ('ひ', 'hi'), ('ふ', 'fu'), ('へ', 'he'), ('ほ', 'ho'),  # ha, hi, fu, he, ho
+        ('ま', 'ma'), ('み', 'mi'), ('む', 'mu'), ('め', 'me'), ('も', 'mo'),  # ma, mi, mu, me, mo
+        ('や', 'ya'), ('ゆ', 'yu'), ('よ', 'yo'),  # ya, yu, yo
+        ('ら', 'ra'), ('り', 'ri'), ('る', 'ru'), ('れ', 're'), ('ろ', 'ro'),  # ra, ri, ru, re, ro
+        ('わ', 'wa'), ('を', 'wo'), ('ん', 'n')  # wa, wo, n
     ]
 
-    # Use the generalized function to get the subset of Katakana based on level
-    katakana_subset = get_character_subset_by_level(student_level, katakana_list)
+    # Adjust the number of Hiragana characters based on the student's level
+    hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
+    random.shuffle(hiragana_subset)
 
-    # Define a larger font for the katakana characters
-    large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
+    correct_answers = 0
+    completion_times = []
 
-    # Clear the screen and inform the student about the lesson
-    screen.fill(screen_color)
-    intro_message = f"Let's learn Katakana! You are currently on level {student_level}."
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+    # Quiz loop
+    correct_answers, completion_times = quiz_loop("Hiragana", hiragana_subset, total_questions)
 
-    # Display "Continue..." button and wait for user input
-    draw_and_wait_continue_button()
+    # Lesson end time
+    lesson_end_time = time.time()
 
-    # Loop through the subset of Katakana and show each character
-    for katakana_char in katakana_subset:
-        screen.fill(screen_color)
-        draw_text(katakana_char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color, font_override=large_japanese_font)
-        pygame.display.flip()
-        speak_japanese(katakana_char)
-        time.sleep(1)
+    # Final score and performance display
+    final_score_display(session_id, hiragana_lesson_id, correct_answers, total_questions, completion_times, 
+                        lesson_start_time, lesson_end_time, lesson_title="Hiragana")
 
-    # Show completion message and dynamically include the level
-    screen.fill(screen_color)
-    completion_message = f"Great job studying Katakana at level {student_level}!"
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
-
-    # Open the URL before showing the "Continue..." button
-    url = "https://www.youtube.com/watch?v=xNxsGCiX3qA"
-    log_message(f"Opening URL: {url}")
-    webbrowser.open(url)  # Open the URL in the default web browser
-
-    # Display the "Continue..." button and wait for user input
-    draw_and_wait_continue_button()
+    # Return the results of the quiz
+    return total_questions, correct_answers, sum(completion_times) / len(completion_times) if completion_times else 0
 
 
 def katakana_quiz(session_id):
@@ -10145,6 +10143,9 @@ def katakana_quiz(session_id):
     katakana_lesson_id = fetch_lesson_id('Katakana')
     if katakana_lesson_id is None:
         return -1  # Exit if lesson_id not found
+
+    # Define total questions at the start
+    total_questions = 5
 
     # Display the introductory message with the student's current level
     screen.fill(screen_color)
@@ -10170,72 +10171,25 @@ def katakana_quiz(session_id):
         ('ワ', 'wa'), ('ヲ', 'wo'), ('ン', 'n')  # wa, wo, n
     ]
 
-
     # Adjust the number of Katakana characters based on the student's level
     katakana_subset = get_character_subset_by_level(student_level, katakana_list)
     random.shuffle(katakana_subset)
 
-    total_questions = 5
     correct_answers = 0
     completion_times = []
 
-    # Quiz loop (same as in hiragana_quiz)
-    for problem_count in range(total_questions):
-        katakana_char, correct_english = katakana_subset[problem_count % len(katakana_subset)]
+    # Quiz loop
+    correct_answers, completion_times = quiz_loop("Katakana", katakana_subset, total_questions)
 
-        # Create multiple-choice options
-        incorrect_answers = random.sample([k[1] for k in katakana_subset if k[1] != correct_english], 3)
-        options = [correct_english] + incorrect_answers
-        random.shuffle(options)
-
-        # Display the quiz options and get option rects
-        option_rects = display_hiragana_quiz(screen, katakana_char, options)
-
-        # Wait for student to click on an option
-        start_time = time.time()
-        question_complete = False
-        while not question_complete:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = event.pos
-                    for rect, option in option_rects:
-                        if rect.collidepoint(mouse_pos):
-                            time_taken = round(time.time() - start_time, 1)
-                            completion_times.append(time_taken)
-
-                            if option == correct_english:
-                                correct_answers += 1
-                                display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
-                            else:
-                                display_result(f"Sorry, the correct answer is {correct_english}")
-                            question_complete = True
-
-            pygame.time.Clock().tick(60)
-
-    # Final score and performance
+    # Lesson end time
     lesson_end_time = time.time()
-    average_time = round(sum(completion_times) / len(completion_times), 1) if completion_times else 0
-    add_session_lesson(session_id, katakana_lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
 
-    # Display the final score and handle perfect scores
-    screen.fill(screen_color)
-    draw_text(f"Final Score: {correct_answers}/{total_questions}", font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-    
-    if correct_answers == total_questions:
-        set_student_progress(session_id, 'Katakana')  # Level up on perfect score
-        draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
-        if average_time < 3.0:
-            draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+    # Final score and performance display
+    final_score_display(session_id, katakana_lesson_id, correct_answers, total_questions, completion_times, 
+                        lesson_start_time, lesson_end_time, lesson_title="Katakana")
 
-    draw_and_wait_continue_button()
-    
-    if correct_answers == total_questions:
-        bonus_game_fat_tuna()
-    
-    return total_questions, correct_answers, average_time
+    # Return the results of the quiz
+    return total_questions, correct_answers, sum(completion_times) / len(completion_times) if completion_times else 0
 
 
 def fetch_lesson_data(lesson_title, student_level):
