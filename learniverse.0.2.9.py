@@ -18,6 +18,7 @@ import random
 import sqlite3
 import sys
 import time
+import webbrowser
 
 
 ###################################
@@ -2630,95 +2631,282 @@ j_verbs1 = {
 }
 
 
-j_song_sanpo = {
-  "quiz_title": "Japanese Song Lyrics: Sanpo",
+j_song_sanpo1 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 1a)",
   "questions": [
     {
-      "furigana": "あるこう　あるこう　わたしはげんき",
-      "kanji": "歩こう 歩こう 私は元気",
-      "translation": "Let's walk, let's walk, I'm feeling good",
+      "furigana": "あるこう　あるこう",
+      "kanji": "歩こう 歩こう",
+      "translation": "Let's walk, let's walk",
       "image": ""
     },
     {
-      "furigana": "あるくの　だいすき　どんどんいこう",
-      "kanji": "歩くの 大好き どんどん行こう",
-      "translation": "I love walking, let's keep going forward",
+      "furigana": "わたしはげんき",
+      "kanji": "私は元気",
+      "translation": "I'm feeling good",
       "image": ""
     },
     {
-      "furigana": "さかみち　トンネル　くさっぱら",
-      "kanji": "坂道 トンネル 草っぱら",
-      "translation": "Uphill road, tunnel, grassy field",
+      "furigana": "あるくの　だいすき",
+      "kanji": "歩くの 大好き",
+      "translation": "I love walking",
       "image": ""
     },
     {
-      "furigana": "いっぽんばしに　でこぼこじゃりみち",
-      "kanji": "一本橋に でこぼこ砂利道",
-      "translation": "Single log bridge, bumpy gravel path",
+      "furigana": "どんどんいこう",
+      "kanji": "どんどん行こう",
+      "translation": "Let's keep going forward",
       "image": ""
     },
     {
-      "furigana": "くものすくぐって　くだりみち",
-      "kanji": "蜘蛛の巣くぐって 下り道",
-      "translation": "Passing through spider webs, downhill road",
-      "image": ""
-    },
-    {
-      "furigana": "くりかえし",
-      "kanji": "繰り返し",
-      "translation": "Repeat",
-      "image": ""
-    },
-    {
-      "furigana": "みつばち　ぶんぶん　はなばたけ",
-      "kanji": "蜜蜂 ブンブン 花畑",
-      "translation": "Buzzing bees, flower field",
-      "image": ""
-    },
-    {
-      "furigana": "ひなたにとかげ　へびはひるね",
-      "kanji": "日向にトカゲ 蛇は昼寝",
-      "translation": "Lizards in the sunlight, snake is napping",
-      "image": ""
-    },
-    {
-      "furigana": "ばったがとんで　まがりみち",
-      "kanji": "バッタが飛んで 曲がり道",
-      "translation": "Grasshoppers flying, winding road",
-      "image": ""
-    },
-    {
-      "furigana": "くりかえし",
-      "kanji": "繰り返し",
-      "translation": "Repeat",
-      "image": ""
-    },
-    {
-      "furigana": "きつねも　たぬきも　でておいで",
-      "kanji": "狐も 狸も 出ておいで",
-      "translation": "Foxes and tanuki, come on out",
-      "image": ""
-    },
-    {
-      "furigana": "たんけんしよう　はやしのおくまで",
-      "kanji": "探検しよう 林の奥まで",
-      "translation": "Let's explore deep into the forest",
-      "image": ""
-    },
-    {
-      "furigana": "ともだちたくさん　うれしいな!",
-      "kanji": "友達たくさん 嬉しいな!",
-      "translation": "Lots of friends, I'm so happy!",
-      "image": ""
-    },
-    {
-      "furigana": "ともだちたくさん　うれしいな!",
-      "kanji": "友達たくさん 嬉しいな!",
-      "translation": "Lots of friends, I'm so happy!",
+      "furigana": "さかみち　トンネル",
+      "kanji": "坂道 トンネル",
+      "translation": "Uphill road, tunnel",
       "image": ""
     }
-  ]
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
 }
+
+j_song_sanpo2 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 1b)",
+  "questions": [
+    {
+      "furigana": "くさっぱら",
+      "kanji": "草っぱら",
+      "translation": "Grassy field",
+      "image": ""
+    },
+    {
+      "furigana": "いっぽんばしに",
+      "kanji": "一本橋に",
+      "translation": "Single log bridge",
+      "image": ""
+    },
+    {
+      "furigana": "でこぼこじゃりみち",
+      "kanji": "でこぼこ砂利道",
+      "translation": "Bumpy gravel path",
+      "image": ""
+    },
+    {
+      "furigana": "くものすくぐって",
+      "kanji": "蜘蛛の巣くぐって",
+      "translation": "Passing through spider webs",
+      "image": ""
+    },
+    {
+      "furigana": "くだりみち",
+      "kanji": "下り道",
+      "translation": "Downhill road",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
+}
+
+
+j_song_sanpo3 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 2a)",
+  "questions": [
+    {
+      "furigana": "くりかえし",
+      "kanji": "繰り返し",
+      "translation": "Repeat",
+      "image": ""
+    },
+    {
+      "furigana": "みつばち　ぶんぶん",
+      "kanji": "蜜蜂 ブンブン",
+      "translation": "Buzzing bees",
+      "image": ""
+    },
+    {
+      "furigana": "はなばたけ",
+      "kanji": "花畑",
+      "translation": "Flower field",
+      "image": ""
+    },
+    {
+      "furigana": "ひなたにとかげ",
+      "kanji": "日向にトカゲ",
+      "translation": "Lizards in the sunlight",
+      "image": ""
+    },
+    {
+      "furigana": "へびはひるね",
+      "kanji": "蛇は昼寝",
+      "translation": "Snake is napping",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
+}
+
+j_song_sanpo4 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 2b)",
+  "questions": [
+    {
+      "furigana": "ばったがとんで",
+      "kanji": "バッタが飛んで",
+      "translation": "Grasshoppers flying",
+      "image": ""
+    },
+    {
+      "furigana": "まがりみち",
+      "kanji": "曲がり道",
+      "translation": "Winding road",
+      "image": ""
+    },
+    {
+      "furigana": "くりかえし",
+      "kanji": "繰り返し",
+      "translation": "Repeat",
+      "image": ""
+    },
+    {
+      "furigana": "きつねも　たぬきも",
+      "kanji": "狐も 狸も",
+      "translation": "Foxes and tanuki",
+      "image": ""
+    },
+    {
+      "furigana": "でておいで",
+      "kanji": "出ておいで",
+      "translation": "Come on out",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
+}
+
+
+j_song_sanpo5 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 3a)",
+  "questions": [
+    {
+      "furigana": "きつねも　たぬきも",
+      "kanji": "狐も 狸も",
+      "translation": "Foxes and tanuki",
+      "image": ""
+    },
+    {
+      "furigana": "でておいで",
+      "kanji": "出ておいで",
+      "translation": "Come on out",
+      "image": ""
+    },
+    {
+      "furigana": "たんけんしよう",
+      "kanji": "探検しよう",
+      "translation": "Let's explore",
+      "image": ""
+    },
+    {
+      "furigana": "はやしのおくまで",
+      "kanji": "林の奥まで",
+      "translation": "Deep into the forest",
+      "image": ""
+    },
+    {
+      "furigana": "ともだちたくさん",
+      "kanji": "友達たくさん",
+      "translation": "Lots of friends",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
+}
+
+j_song_sanpo6 = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo (Part 3b)",
+  "questions": [
+    {
+      "furigana": "うれしいな!",
+      "kanji": "嬉しいな!",
+      "translation": "I'm so happy!",
+      "image": ""
+    },
+    {
+      "furigana": "ともだちたくさん",
+      "kanji": "友達たくさん",
+      "translation": "Lots of friends",
+      "image": ""
+    },
+    {
+      "furigana": "うれしいな!",
+      "kanji": "嬉しいな!",
+      "translation": "I'm so happy!",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=DoDJX9pPFLY"
+}
+
+
+
+j_song_zou_san1 = {
+  "quiz_title": "Zou-san Vocabulary (Part 1)",
+  "questions": [
+    {
+      "furigana": "ぞうさん",
+      "kanji": "象さん",
+      "translation": "elephant",
+      "image": ""
+    },
+    {
+      "furigana": "おはな",
+      "kanji": "お鼻",
+      "translation": "nose, trunk",
+      "image": ""
+    },
+    {
+      "furigana": "かあさん",
+      "kanji": "母さん",
+      "translation": "mother",
+      "image": ""
+    },
+    {
+      "furigana": "ながい",
+      "kanji": "長い",
+      "translation": "long",
+      "image": ""
+    },
+    {
+      "furigana": "だれ",
+      "kanji": "誰",
+      "translation": "Who?",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=WguFpvqRSRY"  # Add URL here
+}
+
+j_song_zou_san2 = {
+  "quiz_title": "Zou-san Vocabulary (Part 2)",
+  "questions": [
+    {
+      "furigana": "すき",
+      "kanji": "好き",
+      "translation": "like, love",
+      "image": ""
+    },
+    {
+      "furigana": "あのね",
+      "kanji": "あのね",
+      "translation": "well, you see...",
+      "image": ""
+    },
+    {
+      "furigana": "そうよ",
+      "kanji": "そうよ",
+      "translation": "That's right!",
+      "image": ""
+    }
+  ],
+  "URL": "https://www.youtube.com/watch?v=WguFpvqRSRY"  # Add URL here
+}
+
 
 
 ##################################
@@ -3112,7 +3300,9 @@ def insert_lessons(cursor, connection):
         ("Japanese Nouns", "Japanese Nouns"),
         ("Japanese Time", "Japanese Time"),
         ("Japanese Vegtables", "Japanese Vegtables"),
-        ("Japanese Verbs", "Japanese Verbs")
+        ("Japanese Verbs", "Japanese Verbs"),
+        ("Japanese Song Sanpo", "Japanese Song Sanpo"),
+        ("Japanese Song Zou-san", "Japanese Song Zou-san")
     ]
 
     try:
@@ -8413,12 +8603,13 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "japanese_animals_quiz",             #JP
-                       "japanese_animals_teach",            #JP
+                       "japanese_song_zou_san_teach",       #JP
                        
                        
-                                              
+                                          
                        ### DEBUG TESTING ###
+                       # "japanese_animals_quiz",             #JP
+                       # "japanese_animals_teach",            #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        # "basic_shapes_quiz",
@@ -8498,12 +8689,16 @@ def session_manager():
                        "japanese_self_introduction_quiz",   #JP
                        "japanese_nouns_teach",              #JP
                        "japanese_nouns_quiz",               #JP
-                       "japanese_time_teach",              #JP
-                       "japanese_time_quiz",               #JP
-                       "japanese_vegtables_teach",              #JP
-                       "japanese_vegtables_quiz",               #JP
-                       "japanese_verbs_teach",
-                       "japanese_verbs_quiz",
+                       "japanese_time_teach",               #JP
+                       "japanese_time_quiz",                #JP
+                       "japanese_vegtables_teach",          #JP
+                       "japanese_vegtables_quiz",           #JP
+                       "japanese_verbs_teach",              #JP
+                       "japanese_verbs_quiz",               #JP
+                       "japanese_song_zou_san_teach",       #JP
+                       "japanese_song_zou_san_quiz",        #JP
+                       "japanese_song_sanpo_teach",         #JP
+                       "japanese_song_sanpo_quiz",          #JP
                        
                        "psalm_23",                          #ENG
                        
@@ -8776,6 +8971,10 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Vegtables')
         elif lesson == "japanese_verbs_teach":
             vocab_teach(session_id, 'Japanese Verbs')
+        elif lesson == "japanese_song_sanpo_teach":
+            vocab_teach(session_id, 'Japanese Song Sanpo')
+        elif lesson == "japanese_song_zou_san_teach":
+            vocab_teach(session_id, 'Japanese Song Zou-san')
       
         
       
@@ -8922,6 +9121,26 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error:Japanese Verbs Quiz did not return a valid result.")
+        elif lesson == "japanese_song_sanpo_quiz":
+            print("Running Japanese Song Sanpo Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Song Sanpo')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Song Sanpo Quiz did not return a valid result.")
+        elif lesson == "japanese_song_zou_san_quiz":
+            print("Running Japanese Song Zou-san Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Song Zou-san')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Song Zou-san Quiz did not return a valid result.")
         
         
         
@@ -10021,10 +10240,134 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_vegtables{student_level}')
     elif lesson_title == 'Japanese Verbs':
         lesson_data = globals().get(f'j_verbs{student_level}')
+    elif lesson_title == 'Japanese Song Sanpo':
+        lesson_data = globals().get(f'j_song_sanpo{student_level}')
+    elif lesson_title == 'Japanese Song Zou-san':
+        lesson_data = globals().get(f'j_song_zou_san{student_level}')
     else:
         return None
     return lesson_data
 
+
+# def vocab_teach(session_id, lesson_title):
+#     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
+#     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
+
+#     # Get the student's current level for the lesson title (e.g., 'Japanese Colors', 'Japanese Body Parts')
+#     student_level = get_student_progress(session_id, lesson_title)
+
+#     # Dynamically fetch the dataset based on the student's level
+#     lesson_data = fetch_lesson_data(lesson_title, student_level)
+
+#     if lesson_data is None:
+#         log_message(f"Error: No lesson data found for {lesson_title} at level {student_level}")
+#         return
+
+#     # Font initialization for furigana and translation
+#     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 50)
+    
+#     translation_font_size = 50
+#     if os.path.isfile(current_font_name_or_path):
+#         translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
+#     else:
+#         translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
+
+#     # Intro message
+#     screen.fill(screen_color)
+#     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
+#     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
+#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+#     draw_and_wait_continue_button()
+
+#     # Loop through each vocabulary item
+#     for item in lesson_data['questions']:
+#         screen.fill(screen_color)
+
+#         # Adjust the kanji font size dynamically based on kanji length
+#         kanji_length = len(item['kanji'])
+#         if kanji_length <= 3:
+#             kanji_font_size = 215
+#         else:
+#             kanji_font_size = 75
+
+#         # Initialize kanji font dynamically based on the determined size
+#         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
+
+#         # Display furigana, kanji, and translation
+#         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
+#                   center=True, 
+#                   max_width=WIDTH,
+#                   enable_shadow=True, shadow_color=shadow_color)
+#         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
+#                   center=True, 
+#                   enable_shadow=True, shadow_color=shadow_color)
+#         draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
+#                   enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+
+#         pygame.display.flip()
+#         speak_japanese(item['furigana'])
+#         time.sleep(1)
+
+#         # Try to show the image, assume JPG first and fallback to PNG
+#         image_loaded = False
+#         try:
+#             # Try loading the image as a JPG first
+#             jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
+#             image = pygame.image.load(jpg_image_path)
+#             image_loaded = True
+#         except FileNotFoundError:
+#             try:
+#                 # If JPG not found, fallback to PNG
+#                 image = pygame.image.load(item['image'])
+#                 image_loaded = True
+#             except FileNotFoundError:
+#                 log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
+
+#         if image_loaded:
+#             # Resize and display the image if it was loaded successfully
+#             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
+#             screen.blit(image, (0, 0))
+#             pygame.display.flip()
+#             speak_japanese(item['furigana'])
+#             time.sleep(1)
+#         else:
+#             # If no image is found, just display the text
+#             pygame.display.flip()
+
+#     # Completion message
+#     screen.fill(screen_color)
+#     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
+#     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+#     # Check if there's a URL in the lesson data and open it in the browser
+#     if 'URL' in lesson_data and lesson_data['URL']:
+#         log_message(f"Opening URL: {lesson_data['URL']}")
+#         webbrowser.open(lesson_data['URL'])
+#     draw_and_wait_continue_button()
+def draw_repeat_button(y_position):
+    """
+    Draws the 'Repeat Lesson' button and checks if it was clicked.
+    Args:
+        y_position (float): The y-coordinate for the button's placement.
+    Returns:
+        bool: True if the button was clicked, False otherwise.
+    """
+    repeat_font_size = 40
+    repeat_font = pygame.font.SysFont(current_font_name_or_path, repeat_font_size)
+    repeat_text = "Repeat Lesson"
+
+    # Draw the button text and get its rect for click detection
+    repeat_button_rect = draw_text(repeat_text, repeat_font, text_color, x=0, y=y_position, 
+                                   center=True, enable_shadow=True, shadow_color=shadow_color, 
+                                   max_width=WIDTH, return_rect=True)
+
+    # Check if the button is clicked
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if repeat_button_rect.collidepoint(event.pos):
+                return True  # Button was clicked
+
+    return False  # Button was not clicked
 
 def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
@@ -10041,7 +10384,7 @@ def vocab_teach(session_id, lesson_title):
         return
 
     # Font initialization for furigana and translation
-    furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 100)
+    furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 50)
     
     translation_font_size = 50
     if os.path.isfile(current_font_name_or_path):
@@ -10062,21 +10405,18 @@ def vocab_teach(session_id, lesson_title):
 
         # Adjust the kanji font size dynamically based on kanji length
         kanji_length = len(item['kanji'])
-        if kanji_length <= 3:
-            kanji_font_size = 215
-        else:
-            kanji_font_size = 125
+        kanji_font_size = 215 if kanji_length <= 3 else 75
 
         # Initialize kanji font dynamically based on the determined size
         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
 
         # Display furigana, kanji, and translation
-        draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color)
-        draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color)
-        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+        draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
+                  center=True, max_width=WIDTH, enable_shadow=True, shadow_color=shadow_color)
+        draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
+                  center=True, enable_shadow=True, shadow_color=shadow_color)
+        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, 
+                  center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
         pygame.display.flip()
         speak_japanese(item['furigana'])
@@ -10085,27 +10425,23 @@ def vocab_teach(session_id, lesson_title):
         # Try to show the image, assume JPG first and fallback to PNG
         image_loaded = False
         try:
-            # Try loading the image as a JPG first
             jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
             image = pygame.image.load(jpg_image_path)
             image_loaded = True
         except FileNotFoundError:
             try:
-                # If JPG not found, fallback to PNG
                 image = pygame.image.load(item['image'])
                 image_loaded = True
             except FileNotFoundError:
                 log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
 
         if image_loaded:
-            # Resize and display the image if it was loaded successfully
             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
             screen.blit(image, (0, 0))
             pygame.display.flip()
             speak_japanese(item['furigana'])
             time.sleep(1)
         else:
-            # If no image is found, just display the text
             pygame.display.flip()
 
     # Completion message
@@ -10113,7 +10449,22 @@ def vocab_teach(session_id, lesson_title):
     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-    draw_and_wait_continue_button()
+
+    # Check if there's a URL in the lesson data and open it in the browser
+    if 'URL' in lesson_data and lesson_data['URL']:
+        log_message(f"Opening URL: {lesson_data['URL']}")
+        webbrowser.open(lesson_data['URL'])
+        
+    # Draw the "Repeat Lesson" button and check if it was clicked
+    if draw_repeat_button(HEIGHT * 0.6):
+        vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
+
+    # draw_continue_button()
+
+    
+
+    
+
 
 
 
@@ -10344,8 +10695,6 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
     return total_questions, correct_answers, avg_time
 
 
-
-
 def lesson_selector(session_id, lesson_title):
     """Presents a quiz based on the lesson_title and returns the result."""
     
@@ -10437,6 +10786,13 @@ def lesson_selector(session_id, lesson_title):
                             j_vegtables5]
     elif lesson_title == 'Japanese Verbs':
         lesson_data_sets = [j_verbs1]
+    elif lesson_title == 'Japanese Song Sanpo':
+        lesson_data_sets = [j_song_sanpo1, 
+                            j_song_sanpo2, 
+                            j_song_sanpo3]
+    elif lesson_title == 'Japanese Song Zou-san':
+        lesson_data_sets = [j_song_zou_san1, 
+                            j_song_zou_san2]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
