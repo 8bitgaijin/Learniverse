@@ -4005,7 +4005,7 @@ def draw_continue_button():
     y_position = HEIGHT * 0.90  # 90% down the screen
 
     # Use draw_text to render the continue button with a drop shadow and get its rect
-    continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+    continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
 
     return continue_rect
 
@@ -4529,7 +4529,7 @@ def bonus_game_fat_tuna():
                   WIDTH // 2, 
                   HEIGHT // 3, 
                   center=True, 
-                  shadow_color=shadow_color,
+                  enable_shadow=True,
                   max_width=WIDTH)
     elif game_over:
         screen.fill(screen_color)
@@ -4539,7 +4539,7 @@ def bonus_game_fat_tuna():
                   WIDTH // 2, 
                   HEIGHT // 3, 
                   center=True, 
-                  shadow_color=shadow_color,
+                  enable_shadow=True,
                   max_width=WIDTH)
 
     # Draw the "Continue..." button after game completion message
@@ -4576,19 +4576,19 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
     
     # Draw the first number (right-aligned) using draw_text
     num1_rect = draw_text(
-        str(num1), font, text_color, right_x, num1_y, center=True, enable_shadow=True, shadow_color=shadow_color, return_rect=True
+        str(num1), font, text_color, right_x, num1_y, center=True, enable_shadow=True, return_rect=True
     )
 
     # Draw the plus sign (right-aligned with some offset)
     plus_sign_x = right_x - num1_rect.width - WIDTH * 0.1
     draw_text(
-        "+", font, text_color, plus_sign_x, num2_y, center=False, enable_shadow=True, shadow_color=shadow_color
+        "+", font, text_color, plus_sign_x, num2_y, center=False, enable_shadow=True, 
     )
 
     # Draw the second number placeholder or the input from the user (right-aligned)
     input_text = "?" if first_input else user_input
     input_rect = draw_text(
-        input_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True, shadow_color=shadow_color, return_rect=True
+        input_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True, return_rect=True
     )
 
     # Calculate line width with a factor
@@ -4597,7 +4597,7 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
 
     # Draw the sum (right-aligned)
     draw_text(
-        str(num1 + num2), font, text_color, right_x, sum_y, center=True, enable_shadow=True, shadow_color=shadow_color
+        str(num1 + num2), font, text_color, right_x, sum_y, center=True, enable_shadow=True, 
     )
 
     pygame.display.flip()
@@ -4724,8 +4724,7 @@ def rainbow_numbers(session_id):
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
         center=True,
-        enable_shadow=True,
-        shadow_color=shadow_color  # Use the shadow color from the theme
+        enable_shadow=True
     )
 
     # Draw the "Continue..." button before starting the lesson
@@ -4957,8 +4956,7 @@ def single_digit_addition(session_id):
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,
         center=True,
-        enable_shadow=True,
-        shadow_color=shadow_color
+        enable_shadow=True
     )
 
     draw_and_wait_continue_button()
@@ -5098,8 +5096,7 @@ def double_digit_addition(session_id):
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,
         center=True,
-        enable_shadow=True,
-        shadow_color=shadow_color
+        enable_shadow=True
     )
 
     draw_and_wait_continue_button()
@@ -8013,7 +8010,6 @@ def skip_counting():
               y=HEIGHT * 0.4, 
               center=True, 
               enable_shadow=True, 
-              shadow_color=shadow_color,
               max_width=WIDTH)
     
     # Draw the "Continue..." button after intro message
@@ -8028,7 +8024,7 @@ def skip_counting():
         number_str = str(i)
 
         # Display the number in the center of the screen using the larger font size
-        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+        draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True)
 
         # Update the screen after drawing the number
         pygame.display.flip()
@@ -8050,7 +8046,6 @@ def skip_counting():
         y=HEIGHT * 0.4, 
         center=True, 
         enable_shadow=True, 
-        shadow_color=shadow_color,
         max_width=WIDTH
     )
 
@@ -8141,9 +8136,9 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
                 # Check if "X" was clicked
                 # check_exit_click(mouse_pos, exit_rect)
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-            #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
             #     elif event.key == pygame.K_r:
             #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
             #     elif event.key == pygame.K_s:
@@ -8294,8 +8289,8 @@ def session_manager():
                                               
                        ### DEBUG TESTING ###
                        # "psalm_23",                          #ENG
-                       "numbers_6_24_26",                   #ENG
-                       # "basic_shapes_quiz",
+                       # "numbers_6_24_26",                   #ENG
+                       "basic_shapes_quiz",
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
@@ -8309,7 +8304,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       # "rainbow_numbers",                   #Math
+                       "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",      #Math
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
@@ -10276,7 +10271,6 @@ def lesson_selector(session_id, lesson_title):
             y=HEIGHT * 0.4,
             center=True,
             enable_shadow=True,
-            shadow_color=shadow_color,
             max_width=WIDTH
         )
         draw_and_wait_continue_button()
