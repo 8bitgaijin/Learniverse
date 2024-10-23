@@ -8603,7 +8603,11 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "japanese_song_zou_san_teach",       #JP
+                       "hiragana_teach",                    #JP
+                       "hiragana_quiz",                     #JP    
+                       "katakana_teach",                    #JP
+                       "katakana_quiz",                     #JP    
+                       # "japanese_song_zou_san_teach",       #JP
                        
                        
                                           
@@ -9856,10 +9860,14 @@ def skip_counting_kanji(COUNT_TO=30):
     draw_and_wait_continue_button()
 
 
-def get_hiragana_subset_by_level(student_level, hiragana_list):
-    """Returns the subset of Hiragana characters to teach or quiz based on the student's level."""
-    max_characters = min(student_level * 5, len(hiragana_list))
-    return hiragana_list[:max_characters]
+# def get_hiragana_subset_by_level(student_level, hiragana_list):
+#     """Returns the subset of Hiragana characters to teach or quiz based on the student's level."""
+#     max_characters = min(student_level * 5, len(hiragana_list))
+#     return hiragana_list[:max_characters]
+def get_character_subset_by_level(student_level, character_list):
+    """Returns the subset of characters (Hiragana, Katakana, etc.) to teach or quiz based on the student's level."""
+    max_characters = min(student_level * 5, len(character_list))
+    return character_list[:max_characters]
 
 
 def hiragana_teach(session_id):
@@ -9884,8 +9892,8 @@ def hiragana_teach(session_id):
         "ん"
     ]
 
-    # Get the subset of Hiragana to teach based on the student's current level
-    hiragana_subset = get_hiragana_subset_by_level(student_level, hiragana_list)
+    # Use the generalized function to get the subset of Hiragana based on level
+    hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
 
     # Define a larger font for the hiragana characters
     large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
@@ -9910,8 +9918,15 @@ def hiragana_teach(session_id):
 
     # Show completion message and wait for "Continue..."
     screen.fill(screen_color)
-    draw_text("Great job!", font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color)
+    completion_message = f"Great job studying Hiragana at level {student_level}!"
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
+    
+    # Open the URL before showing the "Continue" button
+    url = "https://www.youtube.com/watch?v=bEPagHe6iUI"
+    log_message(f"Opening URL: {url}")
+    webbrowser.open(url)  # Open the URL in the default web browser
+    
     draw_and_wait_continue_button()
 
 
@@ -9989,7 +10004,7 @@ def hiragana_quiz(session_id):
     ]
 
     # Adjust the number of Hiragana characters based on the student's level
-    hiragana_subset = get_hiragana_subset_by_level(student_level, hiragana_list)
+    hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
     random.shuffle(hiragana_subset)
 
     total_questions = 5  # Set the number of questions
@@ -10057,6 +10072,7 @@ def hiragana_quiz(session_id):
     return total_questions, correct_answers, average_time
 
 
+
 def katakana_teach(session_id):
     """Displays Katakana characters one by one based on the student's current level and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
@@ -10075,11 +10091,12 @@ def katakana_teach(session_id):
         "マ", "ミ", "ム", "メ", "モ", 
         "ヤ", "ユ", "ヨ", 
         "ラ", "リ", "ル", "レ", "ロ", 
-        "ワ", "ヲ", "ン"
+        "ワ", "ヲ", 
+        "ン"
     ]
 
-    # Get the subset of Katakana to teach based on the student's current level
-    katakana_subset = get_hiragana_subset_by_level(student_level, katakana_list)
+    # Use the generalized function to get the subset of Katakana based on level
+    katakana_subset = get_character_subset_by_level(student_level, katakana_list)
 
     # Define a larger font for the katakana characters
     large_japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 300)
@@ -10090,6 +10107,7 @@ def katakana_teach(session_id):
     draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
+    # Display "Continue..." button and wait for user input
     draw_and_wait_continue_button()
 
     # Loop through the subset of Katakana and show each character
@@ -10101,10 +10119,18 @@ def katakana_teach(session_id):
         speak_japanese(katakana_char)
         time.sleep(1)
 
-    # Show completion message and wait for "Continue..."
+    # Show completion message and dynamically include the level
     screen.fill(screen_color)
-    draw_text("Great job!", font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color)
+    completion_message = f"Great job studying Katakana at level {student_level}!"
+    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
+
+    # Open the URL before showing the "Continue..." button
+    url = "https://www.youtube.com/watch?v=xNxsGCiX3qA"
+    log_message(f"Opening URL: {url}")
+    webbrowser.open(url)  # Open the URL in the default web browser
+
+    # Display the "Continue..." button and wait for user input
     draw_and_wait_continue_button()
 
 
@@ -10146,7 +10172,7 @@ def katakana_quiz(session_id):
 
 
     # Adjust the number of Katakana characters based on the student's level
-    katakana_subset = get_hiragana_subset_by_level(student_level, katakana_list)
+    katakana_subset = get_character_subset_by_level(student_level, katakana_list)
     random.shuffle(katakana_subset)
 
     total_questions = 5
@@ -10249,101 +10275,6 @@ def fetch_lesson_data(lesson_title, student_level):
     return lesson_data
 
 
-# def vocab_teach(session_id, lesson_title):
-#     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
-#     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
-
-#     # Get the student's current level for the lesson title (e.g., 'Japanese Colors', 'Japanese Body Parts')
-#     student_level = get_student_progress(session_id, lesson_title)
-
-#     # Dynamically fetch the dataset based on the student's level
-#     lesson_data = fetch_lesson_data(lesson_title, student_level)
-
-#     if lesson_data is None:
-#         log_message(f"Error: No lesson data found for {lesson_title} at level {student_level}")
-#         return
-
-#     # Font initialization for furigana and translation
-#     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 50)
-    
-#     translation_font_size = 50
-#     if os.path.isfile(current_font_name_or_path):
-#         translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
-#     else:
-#         translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
-
-#     # Intro message
-#     screen.fill(screen_color)
-#     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
-#     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
-#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-#     draw_and_wait_continue_button()
-
-#     # Loop through each vocabulary item
-#     for item in lesson_data['questions']:
-#         screen.fill(screen_color)
-
-#         # Adjust the kanji font size dynamically based on kanji length
-#         kanji_length = len(item['kanji'])
-#         if kanji_length <= 3:
-#             kanji_font_size = 215
-#         else:
-#             kanji_font_size = 75
-
-#         # Initialize kanji font dynamically based on the determined size
-#         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
-
-#         # Display furigana, kanji, and translation
-#         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
-#                   center=True, 
-#                   max_width=WIDTH,
-#                   enable_shadow=True, shadow_color=shadow_color)
-#         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
-#                   center=True, 
-#                   enable_shadow=True, shadow_color=shadow_color)
-#         draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
-#                   enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-
-#         pygame.display.flip()
-#         speak_japanese(item['furigana'])
-#         time.sleep(1)
-
-#         # Try to show the image, assume JPG first and fallback to PNG
-#         image_loaded = False
-#         try:
-#             # Try loading the image as a JPG first
-#             jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
-#             image = pygame.image.load(jpg_image_path)
-#             image_loaded = True
-#         except FileNotFoundError:
-#             try:
-#                 # If JPG not found, fallback to PNG
-#                 image = pygame.image.load(item['image'])
-#                 image_loaded = True
-#             except FileNotFoundError:
-#                 log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
-
-#         if image_loaded:
-#             # Resize and display the image if it was loaded successfully
-#             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
-#             screen.blit(image, (0, 0))
-#             pygame.display.flip()
-#             speak_japanese(item['furigana'])
-#             time.sleep(1)
-#         else:
-#             # If no image is found, just display the text
-#             pygame.display.flip()
-
-#     # Completion message
-#     screen.fill(screen_color)
-#     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
-#     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-#               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-#     # Check if there's a URL in the lesson data and open it in the browser
-#     if 'URL' in lesson_data and lesson_data['URL']:
-#         log_message(f"Opening URL: {lesson_data['URL']}")
-#         webbrowser.open(lesson_data['URL'])
-#     draw_and_wait_continue_button()
 def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
