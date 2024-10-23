@@ -10344,31 +10344,6 @@ def fetch_lesson_data(lesson_title, student_level):
 #         log_message(f"Opening URL: {lesson_data['URL']}")
 #         webbrowser.open(lesson_data['URL'])
 #     draw_and_wait_continue_button()
-def draw_repeat_button(y_position):
-    """
-    Draws the 'Repeat Lesson' button and checks if it was clicked.
-    Args:
-        y_position (float): The y-coordinate for the button's placement.
-    Returns:
-        bool: True if the button was clicked, False otherwise.
-    """
-    repeat_font_size = 40
-    repeat_font = pygame.font.SysFont(current_font_name_or_path, repeat_font_size)
-    repeat_text = "Repeat Lesson"
-
-    # Draw the button text and get its rect for click detection
-    repeat_button_rect = draw_text(repeat_text, repeat_font, text_color, x=0, y=y_position, 
-                                   center=True, enable_shadow=True, shadow_color=shadow_color, 
-                                   max_width=WIDTH, return_rect=True)
-
-    # Check if the button is clicked
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if repeat_button_rect.collidepoint(event.pos):
-                return True  # Button was clicked
-
-    return False  # Button was not clicked
-
 def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
@@ -10405,18 +10380,24 @@ def vocab_teach(session_id, lesson_title):
 
         # Adjust the kanji font size dynamically based on kanji length
         kanji_length = len(item['kanji'])
-        kanji_font_size = 215 if kanji_length <= 3 else 75
+        if kanji_length <= 3:
+            kanji_font_size = 215
+        else:
+            kanji_font_size = 75
 
         # Initialize kanji font dynamically based on the determined size
         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
 
         # Display furigana, kanji, and translation
         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
-                  center=True, max_width=WIDTH, enable_shadow=True, shadow_color=shadow_color)
+                  center=True, 
+                  max_width=WIDTH,
+                  enable_shadow=True, shadow_color=shadow_color)
         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
-                  center=True, enable_shadow=True, shadow_color=shadow_color)
-        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, 
-                  center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+                  center=True, 
+                  enable_shadow=True, shadow_color=shadow_color)
+        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
+                  enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
 
         pygame.display.flip()
         speak_japanese(item['furigana'])
@@ -10425,23 +10406,27 @@ def vocab_teach(session_id, lesson_title):
         # Try to show the image, assume JPG first and fallback to PNG
         image_loaded = False
         try:
+            # Try loading the image as a JPG first
             jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
             image = pygame.image.load(jpg_image_path)
             image_loaded = True
         except FileNotFoundError:
             try:
+                # If JPG not found, fallback to PNG
                 image = pygame.image.load(item['image'])
                 image_loaded = True
             except FileNotFoundError:
                 log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
 
         if image_loaded:
+            # Resize and display the image if it was loaded successfully
             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
             screen.blit(image, (0, 0))
             pygame.display.flip()
             speak_japanese(item['furigana'])
             time.sleep(1)
         else:
+            # If no image is found, just display the text
             pygame.display.flip()
 
     # Completion message
@@ -10454,12 +10439,34 @@ def vocab_teach(session_id, lesson_title):
     if 'URL' in lesson_data and lesson_data['URL']:
         log_message(f"Opening URL: {lesson_data['URL']}")
         webbrowser.open(lesson_data['URL'])
-        
-    # Draw the "Repeat Lesson" button and check if it was clicked
-    if draw_repeat_button(HEIGHT * 0.6):
-        vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
 
-    # draw_continue_button()
+    # Draw the "Repeat?" button (bottom left) and "Continue..." button (bottom right)
+    repeat_text = "Repeat?"
+    continue_text = "Continue..."
+
+    # Draw both text buttons and get their rects
+    repeat_button_rect = draw_text(repeat_text, translation_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.85,
+                                   enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+    continue_button_rect = draw_text(continue_text, translation_font, text_color, x=WIDTH * 0.75, y=HEIGHT * 0.85,
+                                     enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+
+    pygame.display.flip()
+
+    # Wait for input
+    button_clicked = False
+    while not button_clicked:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = event.pos
+                if repeat_button_rect.collidepoint(mouse_pos):
+                    vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
+                    button_clicked = True
+                elif continue_button_rect.collidepoint(mouse_pos):
+                    button_clicked = True  # Exit the loop and continue
+
 
     
 
