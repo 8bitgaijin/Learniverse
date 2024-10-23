@@ -2593,6 +2593,133 @@ j_vegtables5 = {
   ]
 }
 
+j_verbs1 = {
+  "quiz_title": "Simple Verbs",
+  "questions": [
+    {
+      "furigana": "たべる",
+      "kanji": "食べる",
+      "translation": "eat",
+      "image": "GFX/verbs/eat.png"
+    },
+    {
+      "furigana": "のむ",
+      "kanji": "飲む",
+      "translation": "drink",
+      "image": "GFX/verbs/drink.png"
+    },
+    {
+      "furigana": "みる",
+      "kanji": "見る",
+      "translation": "look",
+      "image": "GFX/verbs/look.png"
+    },
+    {
+      "furigana": "きく",
+      "kanji": "聞く",
+      "translation": "hear",
+      "image": "GFX/verbs/hear.png"
+    },
+    {
+      "furigana": "いう",
+      "kanji": "言う",
+      "translation": "say",
+      "image": "GFX/verbs/say.png"
+    }
+  ]
+}
+
+
+j_song_sanpo = {
+  "quiz_title": "Japanese Song Lyrics: Sanpo",
+  "questions": [
+    {
+      "furigana": "あるこう　あるこう　わたしはげんき",
+      "kanji": "歩こう 歩こう 私は元気",
+      "translation": "Let's walk, let's walk, I'm feeling good",
+      "image": ""
+    },
+    {
+      "furigana": "あるくの　だいすき　どんどんいこう",
+      "kanji": "歩くの 大好き どんどん行こう",
+      "translation": "I love walking, let's keep going forward",
+      "image": ""
+    },
+    {
+      "furigana": "さかみち　トンネル　くさっぱら",
+      "kanji": "坂道 トンネル 草っぱら",
+      "translation": "Uphill road, tunnel, grassy field",
+      "image": ""
+    },
+    {
+      "furigana": "いっぽんばしに　でこぼこじゃりみち",
+      "kanji": "一本橋に でこぼこ砂利道",
+      "translation": "Single log bridge, bumpy gravel path",
+      "image": ""
+    },
+    {
+      "furigana": "くものすくぐって　くだりみち",
+      "kanji": "蜘蛛の巣くぐって 下り道",
+      "translation": "Passing through spider webs, downhill road",
+      "image": ""
+    },
+    {
+      "furigana": "くりかえし",
+      "kanji": "繰り返し",
+      "translation": "Repeat",
+      "image": ""
+    },
+    {
+      "furigana": "みつばち　ぶんぶん　はなばたけ",
+      "kanji": "蜜蜂 ブンブン 花畑",
+      "translation": "Buzzing bees, flower field",
+      "image": ""
+    },
+    {
+      "furigana": "ひなたにとかげ　へびはひるね",
+      "kanji": "日向にトカゲ 蛇は昼寝",
+      "translation": "Lizards in the sunlight, snake is napping",
+      "image": ""
+    },
+    {
+      "furigana": "ばったがとんで　まがりみち",
+      "kanji": "バッタが飛んで 曲がり道",
+      "translation": "Grasshoppers flying, winding road",
+      "image": ""
+    },
+    {
+      "furigana": "くりかえし",
+      "kanji": "繰り返し",
+      "translation": "Repeat",
+      "image": ""
+    },
+    {
+      "furigana": "きつねも　たぬきも　でておいで",
+      "kanji": "狐も 狸も 出ておいで",
+      "translation": "Foxes and tanuki, come on out",
+      "image": ""
+    },
+    {
+      "furigana": "たんけんしよう　はやしのおくまで",
+      "kanji": "探検しよう 林の奥まで",
+      "translation": "Let's explore deep into the forest",
+      "image": ""
+    },
+    {
+      "furigana": "ともだちたくさん　うれしいな!",
+      "kanji": "友達たくさん 嬉しいな!",
+      "translation": "Lots of friends, I'm so happy!",
+      "image": ""
+    },
+    {
+      "furigana": "ともだちたくさん　うれしいな!",
+      "kanji": "友達たくさん 嬉しいな!",
+      "translation": "Lots of friends, I'm so happy!",
+      "image": ""
+    }
+  ]
+}
+
 
 ##################################
 # TODO
@@ -2984,7 +3111,8 @@ def insert_lessons(cursor, connection):
         ("Japanese Self Introduction", "Japanese Self Introduction"),
         ("Japanese Nouns", "Japanese Nouns"),
         ("Japanese Time", "Japanese Time"),
-        ("Japanese Vegtables", "Japanese Vegtables")
+        ("Japanese Vegtables", "Japanese Vegtables"),
+        ("Japanese Verbs", "Japanese Verbs")
     ]
 
     try:
@@ -8136,9 +8264,9 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
                 # Check if "X" was clicked
                 # check_exit_click(mouse_pos, exit_rect)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
             #     elif event.key == pygame.K_r:
             #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
             #     elif event.key == pygame.K_s:
@@ -8285,12 +8413,15 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       "japanese_animals_quiz",             #JP
+                       "japanese_animals_teach",            #JP
+                       
                        
                                               
                        ### DEBUG TESTING ###
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
-                       "basic_shapes_quiz",
+                       # "basic_shapes_quiz",
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
@@ -8304,7 +8435,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       "rainbow_numbers",                   #Math
+                       # "rainbow_numbers",                   #Math
                        # "lowest_common_denominator_quiz",      #Math
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
@@ -8371,6 +8502,8 @@ def session_manager():
                        "japanese_time_quiz",               #JP
                        "japanese_vegtables_teach",              #JP
                        "japanese_vegtables_quiz",               #JP
+                       "japanese_verbs_teach",
+                       "japanese_verbs_quiz",
                        
                        "psalm_23",                          #ENG
                        
@@ -8641,6 +8774,8 @@ def session_manager():
             vocab_teach(session_id, 'Japanese Time')
         elif lesson == "japanese_vegtables_teach":
             vocab_teach(session_id, 'Japanese Vegtables')
+        elif lesson == "japanese_verbs_teach":
+            vocab_teach(session_id, 'Japanese Verbs')
       
         
       
@@ -8777,6 +8912,16 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error:Japanese Vegtables Quiz did not return a valid result.")
+        elif lesson == "japanese_verbs_quiz":
+            print("Running Japanese Verbs Quiz")
+            lesson_result = lesson_selector(session_id, 'Japanese Verbs')
+            if lesson_result is not None:
+                questions_asked, correct_answers, avg_time = lesson_result
+                total_questions += questions_asked
+                total_correct += correct_answers
+                total_times.append(avg_time)
+            else:
+                log_message("Error:Japanese Verbs Quiz did not return a valid result.")
         
         
         
@@ -9874,6 +10019,8 @@ def fetch_lesson_data(lesson_title, student_level):
         lesson_data = globals().get(f'j_time{student_level}')
     elif lesson_title == 'Japanese Vegtables':
         lesson_data = globals().get(f'j_vegtables{student_level}')
+    elif lesson_title == 'Japanese Verbs':
+        lesson_data = globals().get(f'j_verbs{student_level}')
     else:
         return None
     return lesson_data
@@ -9916,7 +10063,7 @@ def vocab_teach(session_id, lesson_title):
         # Adjust the kanji font size dynamically based on kanji length
         kanji_length = len(item['kanji'])
         if kanji_length <= 3:
-            kanji_font_size = 300
+            kanji_font_size = 215
         else:
             kanji_font_size = 125
 
@@ -9935,16 +10082,30 @@ def vocab_teach(session_id, lesson_title):
         speak_japanese(item['furigana'])
         time.sleep(1)
 
-        # Try to show the image
+        # Try to show the image, assume JPG first and fallback to PNG
+        image_loaded = False
         try:
-            image = pygame.image.load(item['image'])
+            # Try loading the image as a JPG first
+            jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
+            image = pygame.image.load(jpg_image_path)
+            image_loaded = True
+        except FileNotFoundError:
+            try:
+                # If JPG not found, fallback to PNG
+                image = pygame.image.load(item['image'])
+                image_loaded = True
+            except FileNotFoundError:
+                log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
+
+        if image_loaded:
+            # Resize and display the image if it was loaded successfully
             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
             screen.blit(image, (0, 0))
             pygame.display.flip()
             speak_japanese(item['furigana'])
             time.sleep(1)
-        except FileNotFoundError:
-            log_message(f"Image not found: {item['image']}. Displaying text only.")
+        else:
+            # If no image is found, just display the text
             pygame.display.flip()
 
     # Completion message
@@ -9953,6 +10114,7 @@ def vocab_teach(session_id, lesson_title):
     draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
               enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
     draw_and_wait_continue_button()
+
 
 
 def display_result_with_image(result_text, image_file=None, use_lightning=False):
@@ -10123,7 +10285,28 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
 
                             if option == correct_answer:
                                 correct_answers += 1
-                                display_result_with_image("Correct!", question['image'], use_lightning=(time_taken < 3))
+                                
+                                # Assume JPG and fall back to PNG
+                                image_loaded = False
+                                image_file = question['image']
+                                try:
+                                    # Try loading the image as JPG
+                                    jpg_image_path = image_file.replace(".png", ".jpg") if image_file.endswith(".png") else image_file + ".jpg"
+                                    image = pygame.image.load(jpg_image_path)
+                                    image_file = jpg_image_path  # Update to use the JPG file path
+                                    image_loaded = True
+                                except FileNotFoundError:
+                                    try:
+                                        # Fallback to PNG if JPG is not found
+                                        image = pygame.image.load(image_file)
+                                        image_loaded = True
+                                    except FileNotFoundError:
+                                        log_message(f"Image not found: {jpg_image_path} or {image_file}. Displaying text only.")
+
+                                if image_loaded:
+                                    display_result_with_image("Correct!", image_file, use_lightning=(time_taken < 3))
+                                else:
+                                    display_result_with_image("Correct!")
                             else:
                                 display_result_with_image(f"Sorry, the correct answer is {correct_answer}")
                             question_complete = True
@@ -10159,6 +10342,8 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
 
     # Return total questions, correct answers, and average time as a tuple
     return total_questions, correct_answers, avg_time
+
+
 
 
 def lesson_selector(session_id, lesson_title):
@@ -10250,6 +10435,8 @@ def lesson_selector(session_id, lesson_title):
                             j_vegtables3, 
                             j_vegtables4, 
                             j_vegtables5]
+    elif lesson_title == 'Japanese Verbs':
+        lesson_data_sets = [j_verbs1]
     else:
         log_message(f"Error: Invalid lesson title {lesson_title}.")
         return None
@@ -10295,7 +10482,7 @@ def lesson_selector(session_id, lesson_title):
     add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
 
     # Handle perfect score and leveling up
-    if correct_answers == total_questions and student_level < max_level:
+    if correct_answers == total_questions and student_level < max_level + 1:
         set_student_progress(session_id, lesson_title)  # Level up on perfect score
         log_message(f"Student leveled up in {lesson_title}")
 
