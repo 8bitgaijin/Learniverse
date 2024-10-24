@@ -4302,7 +4302,7 @@ def draw_continue_button():
     global current_font_name_or_path  # Ensure we're using the global variable for font
 
     # Update the dynamic font size for the continue button based on the current resolution
-    continue_font_size = int(get_dynamic_font_size() * 0.8)  # Adjust the size as necessary
+    continue_font_size = int(get_dynamic_font_size() * 0.8)  
 
     # Recreate the font with the new size using the current font name or path
     if os.path.isfile(current_font_name_or_path):
@@ -10333,10 +10333,19 @@ def vocab_teach(session_id, lesson_title):
     repeat_text = "Repeat?"
     continue_text = "Continue..."
 
+    # 10/24/2024
+    continue_font_size = int(get_dynamic_font_size() * 0.8)  
+    # Load the font using the dynamic size
+    if os.path.isfile(current_font_name_or_path):
+        # Load from a file path
+        continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+    else:
+        # Load from system fonts
+        continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
     # Draw both text buttons and get their rects
-    repeat_button_rect = draw_text(repeat_text, translation_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.85,
+    repeat_button_rect = draw_text(repeat_text, continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9,
                                    enable_shadow=True, shadow_color=shadow_color, return_rect=True)
-    continue_button_rect = draw_text(continue_text, translation_font, text_color, x=WIDTH * 0.75, y=HEIGHT * 0.85,
+    continue_button_rect = draw_text(continue_text, continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9,
                                      enable_shadow=True, shadow_color=shadow_color, return_rect=True)
 
     pygame.display.flip()
@@ -10443,6 +10452,7 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
                       HEIGHT // 2, 
                       center=True, 
                       enable_shadow=True,
+                      shadow_color=shadow_color,
                       max_width=WIDTH)
             pygame.display.flip()
 
