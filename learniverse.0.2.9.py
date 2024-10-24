@@ -4005,6 +4005,7 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
     while keeping the background image and 'CORRECT!' text intact, using the student's personalized settings.
     """
+    
     # Prepare colors for the lightning
     start_color = (173, 216, 230)  # Light blue
     end_color = (255, 255, 255)    # White
@@ -4035,7 +4036,6 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             y=screen.get_height() * 0.2,  # Y position places the text above the image
             center=True,
             enable_shadow=True,  # Optionally enable shadow
-            shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
         )
 
         # Step 3.1: Play the thunder sound effect for each lightning flash burst
@@ -4079,7 +4079,6 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             y=screen.get_height() * 0.2,  # Y position places the text above the image
             center=True,
             enable_shadow=True,  # Optionally enable shadow
-            shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
         )
 
         # Step 7: Refresh the screen to apply the cleared frame
@@ -4098,7 +4097,6 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
         y=screen.get_height() * 0.2,  # Y position places the text above the image
         center=True,
         enable_shadow=True,  # Optionally enable shadow
-        shadow_color=(0, 0, 0),  # Shadow color, adjust if needed
     )
     pygame.display.flip()  # Final refresh with background and text intact
 
@@ -4921,6 +4919,8 @@ def display_result(result_text, image_folder=None, use_lightning=False):
     If an image is provided and 'use_lightning' is True, show lightning instead of particles.
     If 'use_lightning' is False, show a particle effect.
     """
+    # global shadow_color
+    
     # Clear the event queue to avoid any unwanted inputs
     pygame.event.clear()
 
@@ -5550,7 +5550,6 @@ def triple_digit_addition(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -5691,7 +5690,6 @@ def quad_digit_addition(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -5832,7 +5830,6 @@ def single_digit_subtraction(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -5973,7 +5970,7 @@ def double_digit_subtraction(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6114,7 +6111,7 @@ def triple_digit_subtraction(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6255,7 +6252,7 @@ def quad_digit_subtraction(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6396,7 +6393,7 @@ def subtraction_borrowing(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6554,7 +6551,7 @@ def single_digit_multiplication(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6695,7 +6692,7 @@ def single_by_double_multiplication(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -6840,7 +6837,7 @@ def double_digit_multiplication(session_id):
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     draw_and_wait_continue_button()
@@ -7053,7 +7050,7 @@ def single_denominator_addition_intro():
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
     )
 
     # Draw the "What is Same Denominator?" clickable text
@@ -7065,7 +7062,7 @@ def single_denominator_addition_intro():
         y=HEIGHT * 0.8,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7078,7 +7075,7 @@ def single_denominator_addition_intro():
         y=HEIGHT * 0.9,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7376,7 +7373,7 @@ def lowest_common_denominator_quiz_intro():
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     # Draw the "Lowest Common Denominator?" clickable text
@@ -7388,7 +7385,7 @@ def lowest_common_denominator_quiz_intro():
         y=HEIGHT * 0.8,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7401,7 +7398,7 @@ def lowest_common_denominator_quiz_intro():
         y=HEIGHT * 0.9,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7685,7 +7682,7 @@ def basic_shapes_quiz_intro():
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        # shadow_color=shadow_color
     )
 
     # Draw the "What are basic shapes?" clickable text
@@ -7697,7 +7694,7 @@ def basic_shapes_quiz_intro():
         y=HEIGHT * 0.8,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7710,7 +7707,7 @@ def basic_shapes_quiz_intro():
         y=HEIGHT * 0.9,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         return_rect=True  # Return the rect so we can check if it's clicked
     )
 
@@ -7973,8 +7970,12 @@ def show_fibonacci_explanation(COUNT_TO):
     while sentence_index < len(fibonacci_explanation):
         # Clear the screen and show the current explanation sentence
         screen.fill(screen_color)
-        draw_text(fibonacci_explanation[sentence_index], font, text_color, x=0, y=HEIGHT * 0.4, 
-                  center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+        draw_text(fibonacci_explanation[sentence_index], font, text_color, x=0, 
+                  y=HEIGHT * 0.4, 
+                  center=True, 
+                  enable_shadow=True, 
+                  # shadow_color=shadow_color, 
+                  max_width=WIDTH)
         pygame.display.flip()
 
         # Wait for a mouse click to move to the next sentence
@@ -8603,7 +8604,7 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       "single_digit_addition",             #Math
+                       # "single_digit_addition",             #Math
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
@@ -10014,7 +10015,13 @@ def quiz_intro_message(session_id, lesson_title, student_level):
     """Displays the introductory quiz message."""
     screen.fill(screen_color)
     intro_message = f"{lesson_title} quiz! You are currently on level {student_level}."
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+    draw_text(intro_message, font, text_color, x=0, 
+              y=HEIGHT * 0.4, 
+              max_width=WIDTH * 0.95, 
+              center=True, 
+              enable_shadow=True, 
+              # shadow_color=shadow_color
+              )
     draw_and_wait_continue_button()
 
 def quiz_loop(lesson_title, character_subset, total_questions):
@@ -10078,7 +10085,7 @@ def final_score_display(session_id, lesson_id, correct_answers, total_questions,
 
 def hiragana_quiz(session_id):
     """Presents a quiz on Hiragana characters based on the student's level and updates their progress."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
+    global screen_color, text_color#, shadow_color  # Access theme-related globals
 
     # Retrieve the student's current level for the Hiragana lesson
     student_level = get_student_progress(session_id, 'Hiragana')
@@ -10094,7 +10101,10 @@ def hiragana_quiz(session_id):
     # Display the introductory message with the student's current level
     screen.fill(screen_color)
     draw_text(f"Hiragana quiz! You are currently on level {student_level}.", font, text_color,
-              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, 
+              enable_shadow=True, 
+              # shadow_color=shadow_color
+              )
 
     draw_and_wait_continue_button()
 
@@ -10138,7 +10148,7 @@ def hiragana_quiz(session_id):
 
 def katakana_quiz(session_id):
     """Presents a quiz on Katakana characters based on the student's level and updates their progress."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
+    global screen_color, text_color #, shadow_color  # Access theme-related globals
 
     # Retrieve the student's current level for the Katakana lesson
     student_level = get_student_progress(session_id, 'Katakana')
@@ -10154,7 +10164,13 @@ def katakana_quiz(session_id):
     # Display the introductory message with the student's current level
     screen.fill(screen_color)
     draw_text(f"Katakana quiz! You are currently on level {student_level}.", font, text_color,
-              x=0, y=HEIGHT * 0.4, max_width=WIDTH * 0.95, center=True, enable_shadow=True, shadow_color=shadow_color)
+              x=0, 
+              y=HEIGHT * 0.4, 
+              max_width=WIDTH * 0.95, 
+              center=True, 
+              enable_shadow=True, 
+              # shadow_color=shadow_color
+              )
 
     draw_and_wait_continue_button()
 
@@ -10260,7 +10276,9 @@ def vocab_teach(session_id, lesson_title):
     screen.fill(screen_color)
     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+              enable_shadow=True, 
+              # shadow_color=shadow_color, 
+              max_width=WIDTH)
     draw_and_wait_continue_button()
 
     # Loop through each vocabulary item
@@ -10281,12 +10299,20 @@ def vocab_teach(session_id, lesson_title):
         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
                   center=True, 
                   max_width=WIDTH,
-                  enable_shadow=True, shadow_color=shadow_color)
+                  enable_shadow=True, 
+                  # shadow_color=shadow_color
+                  )
         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
                   center=True, 
-                  enable_shadow=True, shadow_color=shadow_color)
-        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
-                  enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+                  enable_shadow=True, 
+                  # shadow_color=shadow_color
+                  )
+        draw_text(item['translation'], translation_font, text_color, x=0, 
+                  y=HEIGHT * 0.75, 
+                  center=True, 
+                  enable_shadow=True, 
+                  # shadow_color=shadow_color, 
+                  max_width=WIDTH)
 
         pygame.display.flip()
         speak_japanese(item['furigana'])
@@ -10321,8 +10347,15 @@ def vocab_teach(session_id, lesson_title):
     # Completion message
     screen.fill(screen_color)
     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
-    draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+    draw_text(completion_message, 
+              translation_font, 
+              text_color, 
+              x=0, 
+              y=HEIGHT * 0.4, 
+              center=True, 
+              enable_shadow=True, 
+              # shadow_color=shadow_color, 
+              max_width=WIDTH)
 
     # Check if there's a URL in the lesson data and open it in the browser
     if 'URL' in lesson_data and lesson_data['URL']:
@@ -10344,9 +10377,13 @@ def vocab_teach(session_id, lesson_title):
         continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
     # Draw both text buttons and get their rects
     repeat_button_rect = draw_text(repeat_text, continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9,
-                                   enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+                                   enable_shadow=True, 
+                                   # shadow_color=shadow_color, 
+                                   return_rect=True)
     continue_button_rect = draw_text(continue_text, continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9,
-                                     enable_shadow=True, shadow_color=shadow_color, return_rect=True)
+                                     enable_shadow=True, 
+                                     # shadow_color=shadow_color, 
+                                     return_rect=True)
 
     pygame.display.flip()
 
@@ -10452,7 +10489,7 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
                       HEIGHT // 2, 
                       center=True, 
                       enable_shadow=True,
-                      shadow_color=shadow_color,
+                      # shadow_color=shadow_color,
                       max_width=WIDTH)
             pygame.display.flip()
 
@@ -10464,9 +10501,10 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
     pygame.event.clear()
 
 
+
 def japanese_quiz(session_id, lesson_title, lesson_data):
     """Presents a quiz on the given dataset and returns the result."""
-    global screen_color, text_color, shadow_color  # Access theme-related globals
+    global screen_color, text_color#, shadow_color  # Access theme-related globals
 
     # Display intro screen for the quiz
     screen.fill(screen_color)
@@ -10479,7 +10517,7 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
         y=HEIGHT * 0.4,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color,
+        # shadow_color=shadow_color,
         max_width=WIDTH
     )
     
