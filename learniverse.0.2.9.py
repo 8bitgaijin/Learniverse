@@ -4869,7 +4869,273 @@ def bonus_game_fat_tuna():
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
 
+def bonus_game_no_fish():
+    # Check if the assets/images directory exists
+    if not os.path.exists('assets/images'):
+        log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
+        log_message(log_entry)
+        return "main_menu"
+    
+    # Calculate scaling factors based on the current resolution
+    scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
+    scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
+    scale_factor = min(scale_factor_x, scale_factor_y)
 
+    FALL_SPEED = 13 * scale_factor  # Base speed for falling platforms, scaled
+    RESPAWN_RATE = 10  # Probability out of 100 for a new platform to spawn each frame
+    PLATFORM_SPAWN_INTERVAL = 300  # Minimum time (milliseconds) between platform spawns
+    PIRANHA_SPAWN_INTERVAL = 2000  # Time interval (milliseconds) between spawning additional piranhas
+    BOMB_SPAWN_INTERVAL = 1500  # Time interval (milliseconds) between bomb spawns
+    BOMB_FALL_SPEED = 25 * scale_factor  # Speed for the falling bombs
+    
+    running = True
+    game_over = False
+    death_cause = None  # Variable to store the cause of death
+    start_time = time.time()
+    last_spawn_time = 0
+    last_piranha_spawn_time = 0
+    last_bomb_spawn_time = 0  # Track last bomb spawn time
+
+    # Load images
+    platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
+    bonus_mode_background = select_random_background("assets/images/bonus_mode")
+    gameplay_background = select_random_background("assets/images/bonus_bkgs")
+
+    # Load and scale the piranha image
+    piranha_img = pygame.image.load('assets/images/sprites/piranha.png')
+    piranha_img = pygame.transform.scale(
+        piranha_img, 
+        (int(piranha_img.get_width() * scale_factor), int(piranha_img.get_height() * scale_factor))
+    )
+    piranhas = [Piranha(piranha_img, 0, HEIGHT, 5 * scale_factor)]
+
+    # Initialize platforms with the image
+    platforms = [
+        Platform(platform_img, int(100 * scale_factor), int(600 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
+        Platform(platform_img, int(400 * scale_factor), int(400 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
+        Platform(platform_img, int(700 * scale_factor), int(200 * scale_factor), int(200 * scale_factor), int(50 * scale_factor))
+    ]
+    
+    # Load and scale the bomb image
+    bomb_img = pygame.image.load('assets/images/sprites/bomb.png')
+    bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * scale_factor), int(bomb_img.get_height() * scale_factor)))
+    bombs = []  # List to hold bombs
+
+    # Scale the text positions and movements
+    text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
+    text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
+    text_dx *= scale_factor
+    text_dy *= scale_factor
+
+    # Initialize the cat
+    player_img = pygame.image.load('assets/images/sprites/cat01.png')
+    player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor), int(player_img.get_height() * scale_factor)))
+    cat = Cat(player_img, WIDTH // 2, HEIGHT - player_img.get_rect().height, 25 * scale_factor, scale_factor)
+
+    # Create a clock object to control the frame rate
+    clock = pygame.time.Clock()
+
+    # Load and play bonus game music
+    bonus_music_directory = 'assets/music/bonus'
+    random_mp3 = get_random_mp3(bonus_music_directory)
+    
+    if random_mp3:
+        music_loaded = load_mp3(random_mp3)
+        if music_loaded:
+            play_mp3()
+
+    # Bonus Mode Display Phase (show controls and animated text)
+    controls_displayed = False
+    start_time = time.time()
+
+    while not controls_displayed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Draw the bonus mode background (or fallback to navy blue)
+        if bonus_mode_background:
+            draw_background(bonus_mode_background)
+        else:
+            screen.fill(screen_color)
+
+        # Render the controls
+        draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
+        draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
+        draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
+        draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
+
+        # Render the bouncing "Bonus Stage!" text
+        text_surface = font.render("Bonus Stage!", True, text_color)
+        text_width, text_height = text_surface.get_size()
+
+        # Update text position
+        text_x += text_dx
+        text_y += text_dy
+
+        # Check for collisions with the screen edges
+        if text_x <= 0 or text_x >= WIDTH - text_width:
+            text_dx = -text_dx
+        if text_y <= 0 or text_y >= HEIGHT - text_height:
+            text_dy = -text_dy
+
+        # Draw the bouncing text at the new position
+        screen.blit(text_surface, (text_x, text_y))
+
+        # Draw the "Continue..." button below the controls
+        continue_rect = draw_continue_button()
+        pygame.display.flip()
+
+        # Check for "Continue..." button click without stopping the animation
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    controls_displayed = True  # Exit the loop and continue to gameplay
+
+        clock.tick(60)  # Keep the animation going at 60 FPS
+
+    # Gameplay Phase
+    try:
+        start_time = time.time()
+        while running:
+            elapsed_time = int(time.time() - start_time)
+            current_time = pygame.time.get_ticks()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.mixer.music.stop()
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                        running = False
+                        pygame.mixer.music.stop()
+                        return
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_w:
+                        cat.jump()
+
+            cat.update(platforms)
+
+            # Check for game over condition (bomb or piranha collision)
+            for bomb in bombs:
+                if cat.rect.colliderect(bomb.rect):
+                    death_cause = "bomb"
+                    game_over = True
+                    running = False
+
+            for piranha in piranhas:
+                if cat.rect.colliderect(piranha.rect):
+                    death_cause = "piranha"
+                    game_over = True
+                    running = False
+
+            # Update piranhas positions
+            for piranha in piranhas:
+                piranha.update()
+
+            # Update platform positions and remove them if they scroll off the bottom of the screen
+            for platform in platforms[:]:
+                platform.update(FALL_SPEED)
+                if platform.rect.y > HEIGHT:
+                    platforms.remove(platform)
+
+            # Spawn new platforms at the top of the screen
+            if current_time - last_spawn_time > PLATFORM_SPAWN_INTERVAL and random.randint(1, 100) <= RESPAWN_RATE:
+                new_platform = Platform(
+                    platform_img, 
+                    random.randint(0, int(WIDTH - 200 * scale_factor)), 
+                    -int(50 * scale_factor), 
+                    int(200 * scale_factor), 
+                    int(50 * scale_factor)
+                )
+                platforms.append(new_platform)
+                last_spawn_time = current_time
+
+            # Spawn new piranhas at the bottom of the screen
+            if current_time - last_piranha_spawn_time > PIRANHA_SPAWN_INTERVAL:
+                new_piranha = Piranha(piranha_img, 0, HEIGHT, 5 * scale_factor)
+                piranhas.append(new_piranha)
+                last_piranha_spawn_time = current_time
+
+            # Spawn new bombs at the top of the screen
+            if current_time - last_bomb_spawn_time > BOMB_SPAWN_INTERVAL:
+                new_bomb = Bomb(bomb_img, random.randint(0, WIDTH - bomb_img.get_width()), 0, BOMB_FALL_SPEED)
+                bombs.append(new_bomb)
+                last_bomb_spawn_time = current_time
+
+            # Update bombs positions
+            for bomb in bombs:
+                bomb.update()
+
+            # Draw the gameplay background (or fallback to navy blue)
+            if gameplay_background:
+                draw_background(gameplay_background)
+            else:
+                screen.fill(screen_color)
+
+            # Draw the platforms first
+            for platform in platforms:
+                platform.draw(screen)
+
+            # Draw the piranhas
+            for piranha in piranhas:
+                piranha.draw(screen)
+
+            # Draw the bombs
+            for bomb in bombs:
+                bomb.draw(screen)
+
+            # Draw the cat on top of everything else
+            cat.draw(screen)
+
+            # Draw the timer on top of all elements
+            draw_text(f"{elapsed_time}", font, text_color, WIDTH // 4, HEIGHT // 60)
+
+            pygame.display.flip()
+            clock.tick(24)  # Control the frame rate
+
+    finally:
+        # Ensure music stops and resources are freed if an exception occurs
+        stop_mp3()
+
+    # Game Over Phase
+    if game_over:
+        screen.fill(screen_color)
+        if death_cause == "bomb":
+            death_message = "Game Over! You were hit by a bomb."
+        elif death_cause == "piranha":
+            death_message = "Game Over! You were eaten by a piranha."
+        else:
+            death_message = "Game Over!"
+
+        draw_text(death_message, font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True, max_width=WIDTH)
+
+    # Draw the "Continue..." button after game completion message
+    continue_rect = draw_continue_button()
+
+    pygame.display.flip()
+
+    # Wait for the player to click "Continue..." after the game ends
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()  
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Continue after the "Continue..." button is clicked
+
+
+
+
+
+                    
+                    
 ##############################
 ### Math Problem Functions ###
 ##############################
@@ -8450,8 +8716,9 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
                 # Check if "X" was clicked
                 # check_exit_click(mouse_pos, exit_rect)
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+                    bonus_game_fat_tuna()
             #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
             #     elif event.key == pygame.K_r:
             #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
@@ -11222,7 +11489,7 @@ class Cat:
             if platforms:
                 for platform in platforms:
                     if self.rect.colliderect(platform.rect) and self.vertical_speed > 0 and self.rect.bottom <= platform.rect.top + self.vertical_speed:
-                        self.rect.bottom = platform.rect.top
+                        self.rect.bottom = platform.rect.top + 14
                         self.vertical_speed = 0
                         self.is_jumping = False
                         self.can_double_jump = True  # Reset double jump when landing on a platform
@@ -11435,7 +11702,56 @@ class Platform:
         """
         screen.blit(self.image, self.rect.topleft)
 
+class Bomb:
+    def __init__(self, image, x, y, speed):
+        """
+        Initialize the Bomb object.
 
+        Parameters:
+            image (Surface): The image representing the bomb.
+            x (int): The initial x-coordinate of the bomb.
+            y (int): The initial y-coordinate of the bomb.
+            speed (int): The speed at which the bomb falls.
+        """
+        self.image = image
+        self.original_image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = speed
+        self.angle = 0
+        self.particles = []
+
+    def update(self):
+        """
+        Update the bomb's position, rotation, and particles.
+
+        The bomb falls from the top of the screen, rotating as it descends. It also emits particles.
+        """
+        self.rect.y += self.speed
+        self.angle = (self.angle + 15) % 360
+        self.particles = [
+            particle for particle in self.particles if particle.lifetime > 0
+        ]
+        for particle in self.particles:
+            particle.update()
+
+    def draw(self, screen):
+        """
+        Draw the bomb and its particles on the screen.
+
+        Parameters:
+            screen (Surface): The Pygame surface to draw the bomb and particles on.
+        """
+        rotated_image = pygame.transform.rotate(self.original_image, self.angle)
+        new_rect = rotated_image.get_rect(center=self.rect.center)
+        screen.blit(rotated_image, new_rect.topleft)
+        if random.randint(0, 1) == 0:
+            self.particles.append(Particle(self.rect.centerx, self.rect.top, (255, 0, 0)))
+        for particle in self.particles:
+            particle.draw(screen)
+            
+            
 #################
 # Main function #
 #################
