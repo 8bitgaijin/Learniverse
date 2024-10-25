@@ -201,7 +201,7 @@ j_colors1 = {
       "kanji": "緑",
       "translation": "green",
       "image": "GFX/colors/green.png"
-    }
+    },
   ]
 }
 
@@ -4603,6 +4603,12 @@ def speak_japanese(text):
 ### Bonus Game Functions ###
 ############################
 
+def bonus_game_selector():
+    bonus_games = [bonus_game_fat_tuna, bonus_game_no_fish, bonus_game_falling_fish]#, bonus_game_dolphin_dive, bonus_game_star_splash]
+    selected_game = random.choice(bonus_games)
+    selected_game()
+
+
 def bonus_game_fat_tuna():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -5131,6 +5137,271 @@ def bonus_game_no_fish():
                     waiting = False  # Continue after the "Continue..." button is clicked
 
 
+def bonus_game_falling_fish():
+    # Check if the assets/images directory exists
+    if not os.path.exists('assets/images'):
+        log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
+        log_message(log_entry)
+        return "main_menu"
+    
+    # Calculate scaling factors based on the current resolution
+    scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
+    scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
+    scale_factor = min(scale_factor_x, scale_factor_y)
+
+    FALL_SPEED = 13 * scale_factor  # Base speed for falling platforms, scaled
+    RESPAWN_RATE = 10  # Probability out of 100 for a new platform to spawn each frame
+    PLATFORM_SPAWN_INTERVAL = 300  # Minimum time (milliseconds) between platform spawns
+    BOMB_SPAWN_INTERVAL = 1500  # Time interval (milliseconds) between bomb spawns
+    FISH_SPAWN_INTERVAL = 2000  # Time interval (milliseconds) between fish spawns
+    BOMB_FALL_SPEED = 25 * scale_factor  # Speed for the falling bombs
+    FISH_FALL_SPEED = 8 * scale_factor  # Speed for the falling fish
+    
+    running = True
+    game_over = False
+    death_cause = None  # Variable to store the cause of death
+    score = 0  # Initialize the score
+    start_time = time.time()
+    last_spawn_time = 0
+    last_bomb_spawn_time = 0  # Track last bomb spawn time
+    last_fish_spawn_time = 0  # Track last fish spawn time
+
+    # Load images
+    platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
+    bonus_mode_background = select_random_background("assets/images/bonus_mode")
+    gameplay_background = select_random_background("assets/images/bonus_bkgs")
+
+    # Initialize platforms with the image
+    platforms = [
+        Platform(platform_img, int(100 * scale_factor), int(600 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
+        Platform(platform_img, int(400 * scale_factor), int(400 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
+        Platform(platform_img, int(700 * scale_factor), int(200 * scale_factor), int(200 * scale_factor), int(50 * scale_factor))
+    ]
+    
+    # Load and scale the bomb image
+    bomb_img = pygame.image.load('assets/images/sprites/bomb.png')
+    bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * scale_factor), int(bomb_img.get_height() * scale_factor)))
+    bombs = []  # List to hold bombs
+
+    # Load fish images from directory and filter for .jpg and .png files
+    fish_dir = 'assets/images/sprites/fish'
+    fish_images = [
+        os.path.join(fish_dir, file) for file in os.listdir(fish_dir)
+        if file.lower().endswith(('.jpg', '.png'))
+    ]
+    fishes = []
+
+    # Scale the text positions and movements
+    text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
+    text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
+    text_dx *= scale_factor
+    text_dy *= scale_factor
+
+    # Initialize the cat
+    player_img = pygame.image.load('assets/images/sprites/cat01.png')
+    player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor), int(player_img.get_height() * scale_factor)))
+    cat = Cat(player_img, WIDTH // 2, HEIGHT - player_img.get_rect().height, 25 * scale_factor, scale_factor)
+
+    # Create a clock object to control the frame rate
+    clock = pygame.time.Clock()
+
+    # Load and play bonus game music
+    bonus_music_directory = 'assets/music/bonus'
+    random_mp3 = get_random_mp3(bonus_music_directory)
+    
+    if random_mp3:
+        music_loaded = load_mp3(random_mp3)
+        if music_loaded:
+            play_mp3()
+
+    # Bonus Mode Display Phase (show controls and animated text)
+    controls_displayed = False
+    start_time = time.time()
+
+    while not controls_displayed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Draw the bonus mode background (or fallback to navy blue)
+        if bonus_mode_background:
+            draw_background(bonus_mode_background)
+        else:
+            screen.fill(screen_color)
+
+        # Render the controls
+        draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
+        draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
+        draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
+        draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
+
+        # Render the bouncing "Bonus Stage!" text
+        text_surface = font.render("Bonus Stage!", True, text_color)
+        text_width, text_height = text_surface.get_size()
+
+        # Update text position
+        text_x += text_dx
+        text_y += text_dy
+
+        # Check for collisions with the screen edges
+        if text_x <= 0 or text_x >= WIDTH - text_width:
+            text_dx = -text_dx
+        if text_y <= 0 or text_y >= HEIGHT - text_height:
+            text_dy = -text_dy
+
+        # Draw the bouncing text at the new position
+        screen.blit(text_surface, (text_x, text_y))
+
+        # Draw the "Continue..." button below the controls
+        continue_rect = draw_continue_button()
+        pygame.display.flip()
+
+        # Check for "Continue..." button click without stopping the animation
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    controls_displayed = True  # Exit the loop and continue to gameplay
+
+        clock.tick(60)  # Keep the animation going at 60 FPS
+
+    # Gameplay Phase
+    try:
+        start_time = time.time()
+        while running:
+            elapsed_time = int(time.time() - start_time)
+            current_time = pygame.time.get_ticks()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    pygame.mixer.music.stop()
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
+                        running = False
+                        pygame.mixer.music.stop()
+                        return
+                    elif event.key == pygame.K_SPACE or event.key == pygame.K_w:
+                        cat.jump()
+
+            cat.update(platforms)
+
+            # Check for game over condition (bomb collision)
+            for bomb in bombs:
+                if cat.rect.colliderect(bomb.rect):
+                    death_cause = "bomb"
+                    game_over = True
+                    running = False
+
+            # Check for fish collision
+            for fish in fishes[:]:
+                if cat.rect.colliderect(fish.rect):
+                    score += 1
+                    fishes.remove(fish)  # Remove fish upon collision
+
+            # Update platform positions and remove them if they scroll off the bottom of the screen
+            for platform in platforms[:]:
+                platform.update(FALL_SPEED)
+                if platform.rect.y > HEIGHT:
+                    platforms.remove(platform)
+
+            # Spawn new platforms at the top of the screen and increase score
+            if current_time - last_spawn_time > PLATFORM_SPAWN_INTERVAL and random.randint(1, 100) <= RESPAWN_RATE:
+                new_platform = Platform(
+                    platform_img, 
+                    random.randint(0, int(WIDTH - 200 * scale_factor)), 
+                    -int(50 * scale_factor), 
+                    int(200 * scale_factor), 
+                    int(50 * scale_factor)
+                )
+                platforms.append(new_platform)
+                last_spawn_time = current_time
+
+            # Spawn new bombs
+            if current_time - last_bomb_spawn_time > BOMB_SPAWN_INTERVAL:
+                new_bomb = Bomb(bomb_img, random.randint(0, WIDTH - bomb_img.get_width()), 0, BOMB_FALL_SPEED)
+                bombs.append(new_bomb)
+                last_bomb_spawn_time = current_time
+
+            # Spawn new fish
+            if current_time - last_fish_spawn_time > FISH_SPAWN_INTERVAL and fish_images:
+                fish_img_path = random.choice(fish_images)
+                fish_img = pygame.image.load(fish_img_path)
+                fish_img = pygame.transform.scale(fish_img, (int(fish_img.get_width() * scale_factor), int(fish_img.get_height() * scale_factor)))
+                new_fish = Fish(fish_img, random.randint(0, WIDTH - fish_img.get_width()), 0, FISH_FALL_SPEED)
+                fishes.append(new_fish)
+                last_fish_spawn_time = current_time
+
+            # Update bombs and fish positions
+            for bomb in bombs:
+                bomb.update()
+            for fish in fishes:
+                fish.update()
+
+            # Draw the gameplay background (or fallback to navy blue)
+            if gameplay_background:
+                draw_background(gameplay_background)
+            else:
+                screen.fill(screen_color)
+
+            # Draw the platforms first
+            for platform in platforms:
+                platform.draw(screen)
+
+            # Draw the bombs
+            for bomb in bombs:
+                bomb.draw(screen)
+
+            # Draw the fishes
+            for fish in fishes:
+                fish.draw(screen)
+
+            # Draw the cat on top of everything else
+            cat.draw(screen)
+
+            # Draw the score on top of all elements
+            draw_text(f"Score: {score}", font, text_color, WIDTH // 4, HEIGHT // 60, enable_shadow=True)
+
+            pygame.display.flip()
+            clock.tick(24)  # Control the frame rate
+
+    finally:
+        # Ensure music stops and resources are freed if an exception occurs
+        stop_mp3()
+
+    # Game Over Phase
+    if game_over:
+        screen.fill(screen_color)
+        if death_cause == "bomb":
+            death_message = "Game Over! You were hit by a bomb."
+        else:
+            death_message = "Game Over!"
+
+        draw_text(death_message, font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True, max_width=WIDTH)
+
+    # Draw the "Continue..." button after game completion message
+    continue_rect = draw_continue_button()
+
+    pygame.display.flip()
+
+    # Wait for the player to click "Continue..." after the game ends
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()  
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    waiting = False  # Continue after the "Continue..." button is clicked
+
+
+
+
 
 
 
@@ -5416,7 +5687,7 @@ def rainbow_numbers(session_id):
     draw_and_wait_continue_button()
 
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     # Return the lesson results
     return total_questions, correct_answers, average_time
@@ -5638,7 +5909,7 @@ def single_digit_addition(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -5778,7 +6049,7 @@ def double_digit_addition(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -5918,7 +6189,7 @@ def triple_digit_addition(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6058,7 +6329,7 @@ def quad_digit_addition(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6198,7 +6469,7 @@ def single_digit_subtraction(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6339,7 +6610,7 @@ def double_digit_subtraction(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6480,7 +6751,7 @@ def triple_digit_subtraction(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6621,7 +6892,7 @@ def quad_digit_subtraction(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6763,7 +7034,7 @@ def subtraction_borrowing(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -6920,7 +7191,7 @@ def single_digit_multiplication(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -7065,7 +7336,7 @@ def single_by_double_multiplication(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -7206,7 +7477,7 @@ def double_digit_multiplication(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -7523,7 +7794,7 @@ def single_denominator_addition(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -7817,7 +8088,7 @@ def lowest_common_denominator_quiz(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -8208,7 +8479,7 @@ def basic_shapes_quiz(session_id):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
     return total_questions, correct_answers, average_time
 
@@ -8718,7 +8989,7 @@ def main_menu():
                 # check_exit_click(mouse_pos, exit_rect)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_fat_tuna()
+                    bonus_game_falling_fish()
             #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
             #     elif event.key == pygame.K_r:
             #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
@@ -8892,7 +9163,7 @@ def session_manager():
                        # "japanese_fruits_teach",             #JP
                        # "japanese_fruits_quiz",              #JP
                        # "japanese_colors_teach",             #JP
-                       # "japanese_colors_quiz",             #JP
+                       "japanese_colors_quiz",             #JP
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
@@ -10347,7 +10618,7 @@ def final_score_display(session_id, lesson_id, correct_answers, total_questions,
     draw_and_wait_continue_button()
 
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()
+        bonus_game_selector()
 
 
 def hiragana_quiz(session_id):
@@ -10900,7 +11171,7 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
     draw_and_wait_continue_button()
     
     if correct_answers == total_questions:
-        bonus_game_fat_tuna()  # Trigger bonus game for perfect score
+        bonus_game_selector()
 
     # Return total questions, correct answers, and average time as a tuple
     return total_questions, correct_answers, avg_time
@@ -11751,6 +12022,63 @@ class Bomb:
         for particle in self.particles:
             particle.draw(screen)
             
+
+class Fish:
+    """
+    A class to represent a fish object in the game.
+
+    Attributes:
+        image (pygame.Surface): The image representing the fish.
+        rect (pygame.Rect): The rectangle area of the fish, used for positioning and collisions.
+        speed (int): The vertical speed of the fish, controlling how fast it falls.
+        particles (list): A list of particles for visual effects as the fish falls.
+    """
+
+    def __init__(self, image, x, y, speed):
+        """
+        Initialize the fish object with an image, position, and speed.
+
+        Args:
+            image (pygame.Surface): The image to represent the fish.
+            x (int): The initial x-coordinate of the fish.
+            y (int): The initial y-coordinate of the fish.
+            speed (int): The speed at which the fish will fall.
+        """
+        self.image = image  # Store the image of the fish.
+        self.rect = self.image.get_rect()  # Get the rectangle of the image.
+        self.rect.x = x  # Set the initial x-coordinate.
+        self.rect.y = y  # Set the initial y-coordinate.
+        self.speed = speed  # Set the falling speed.
+        self.particles = []  # Initialize an empty list for particles.
+
+    def update(self):
+        """
+        Update the fish's position and manage its particles.
+
+        The fish falls by increasing its y-coordinate by its speed. Particles are updated and removed
+        if their lifetime is over.
+        """
+        self.rect.y += self.speed  # Move the fish down by its speed.
+        # Remove particles whose lifetime has expired and update remaining particles.
+        self.particles = [particle for particle in self.particles if particle.lifetime > 0]
+        for particle in self.particles:
+            particle.update()  # Update each particle's position and state.
+
+    def draw(self, screen):
+        """
+        Draw the fish and its associated particles on the screen.
+
+        Args:
+            screen (pygame.Surface): The surface to draw the fish and particles on.
+        """
+        screen.blit(self.image, self.rect.topleft)  # Draw the fish at its current position.
+        # Occasionally generate a new particle behind the fish.
+        if random.randint(0, 10) < 8:
+            self.particles.append(Particle(self.rect.centerx, self.rect.bottom, (50, 50, 255)))
+        # Draw all particles on the screen.
+        for particle in self.particles:
+            particle.draw(screen)
+
             
 #################
 # Main function #
