@@ -4604,12 +4604,55 @@ def speak_japanese(text):
 ############################
 
 def bonus_game_selector():
-    bonus_games = [bonus_game_fat_tuna, bonus_game_no_fish, bonus_game_falling_fish]#, bonus_game_dolphin_dive, bonus_game_star_splash]
+    """
+    Selects and launches a random bonus game.
+
+    This function randomly chooses one of the available bonus games and initiates it.
+    Each bonus game offers unique gameplay and objectives, providing variety for the player.
+    Additional bonus games may be added to the selection list in the future.
+
+    Returns:
+        None
+    """
+    bonus_games = [bonus_game_fat_tuna, 
+                   bonus_game_no_fish, 
+                   bonus_game_falling_fish]
+                    #, bonus_game_dolphin_dive, bonus_game_star_splash]
     selected_game = random.choice(bonus_games)
     selected_game()
 
 
 def bonus_game_fat_tuna():
+    """
+    Runs the "Fat Tuna" bonus game.
+
+    This function initializes the game environment, including background images,
+    platforms, the player's cat character, piranhas, and the fat tuna target.
+    The objective is to reach the fat tuna without colliding with any piranhas.
+    The player can control the cat's movements to jump across platforms and avoid 
+    obstacles.
+
+    If the cat collides with the fat tuna, the game ends with a win message.
+    If a piranha collides with the cat, the game ends with a game over message.
+
+    Game Elements:
+        - Scaling factors are used to adjust the size of sprites and movement speeds 
+          based on the current resolution.
+        - Platforms spawn and move downwards periodically.
+        - The fat tuna moves horizontally and reverses direction when reaching 
+          screen edges.
+        - Piranhas spawn periodically and fall, presenting an obstacle to the player.
+
+    Gameplay Phases:
+        1. Control Display: Shows the control instructions and a bouncing "Bonus Stage!" 
+           message until the player clicks "Continue...".
+        2. Gameplay: Player controls the cat character to jump between platforms, avoid 
+           piranhas, and reach the fat tuna. 
+        3. End Phase: Displays a win or game over message based on the outcome.
+
+    Returns:
+        None
+    """
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
@@ -4875,7 +4918,34 @@ def bonus_game_fat_tuna():
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
 
+
 def bonus_game_no_fish():
+    """
+    Runs the "No Fish" bonus game.
+
+    This game requires the player to control a cat character, avoiding obstacles and 
+    surviving as long as possible by jumping across falling platforms and dodging 
+    hazards like bombs and piranhas. The objective is to accumulate survival time 
+    or a high score while avoiding collisions that would end the game.
+
+    Game Elements:
+        - Scaling factors adjust sprite sizes and movement speeds based on the 
+          current screen resolution.
+        - Platforms spawn periodically and scroll downwards.
+        - Bombs and piranhas spawn at intervals and pose hazards for the player.
+
+    Gameplay Phases:
+        1. Control Display Phase: Shows control instructions and an animated 
+           "Bonus Stage!" message until the player clicks "Continue...".
+        2. Gameplay Phase: The player controls the cat, jumping between platforms 
+           and avoiding bombs and piranhas. The game ends if the cat collides with 
+           a bomb or piranha.
+        3. Game Over Phase: Displays a game-over message indicating the cause of 
+           death, either "hit by a bomb" or "eaten by a piranha."
+
+    Returns:
+        None
+    """
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
@@ -5138,6 +5208,33 @@ def bonus_game_no_fish():
 
 
 def bonus_game_falling_fish():
+    """
+    Runs the "Falling Fish" bonus game.
+
+    This function launches a game where the player controls a cat character to jump 
+    between platforms, collect falling fish for points, and avoid falling bombs that 
+    cause a game-over. Fish appear at intervals, falling from the top, while platforms 
+    continuously scroll down. The player gains a point each time the cat collides 
+    with a fish and loses if the cat collides with a bomb.
+
+    Game Elements:
+        - Scaling factors dynamically adjust sprite sizes and speeds based on screen 
+          resolution.
+        - Platforms spawn at intervals and scroll downwards, providing safe areas 
+          for the cat to jump onto.
+        - Bombs spawn at intervals, falling as obstacles for the player to avoid.
+        - Fish spawn randomly from the top of the screen, giving points when collected.
+
+    Gameplay Phases:
+        1. Control Display Phase: Shows control instructions and an animated "Bonus Stage!" 
+           message until the player clicks "Continue...".
+        2. Gameplay Phase: The player controls the cat character to collect fish and avoid bombs.
+        3. Game Over Phase: Displays a "Game Over" message indicating if the player was hit 
+           by a bomb.
+
+    Returns:
+        None
+    """
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
@@ -5152,10 +5249,10 @@ def bonus_game_falling_fish():
     FALL_SPEED = 13 * scale_factor  # Base speed for falling platforms, scaled
     RESPAWN_RATE = 10  # Probability out of 100 for a new platform to spawn each frame
     PLATFORM_SPAWN_INTERVAL = 300  # Minimum time (milliseconds) between platform spawns
-    BOMB_SPAWN_INTERVAL = 1500  # Time interval (milliseconds) between bomb spawns
-    FISH_SPAWN_INTERVAL = 2000  # Time interval (milliseconds) between fish spawns
-    BOMB_FALL_SPEED = 25 * scale_factor  # Speed for the falling bombs
-    FISH_FALL_SPEED = 8 * scale_factor  # Speed for the falling fish
+    BOMB_SPAWN_INTERVAL = 600  # Time interval (milliseconds) between bomb spawns
+    FISH_SPAWN_INTERVAL = 1000  # Time interval (milliseconds) between fish spawns
+    BOMB_FALL_SPEED = 35 * scale_factor  # Speed for the falling bombs
+    FISH_FALL_SPEED = 24 * scale_factor  # Speed for the falling fish
     
     running = True
     game_over = False
