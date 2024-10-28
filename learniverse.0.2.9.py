@@ -30,7 +30,7 @@ pygame.display.set_caption("Learniverse")
 
 # Constants for display and opacity
 DISPLAY_TIME = 2000  # Time for text at full opacity (in milliseconds)
-FADE_SPEED = 1  # Controls the fade-in and fade-out speed
+FADE_SPEED = 5  # Controls the fade-in and fade-out speed
 
 # Color Definitions
 BLACK = (0, 0, 0)
@@ -5497,6 +5497,218 @@ def bonus_game_falling_fish():
                     waiting = False  # Continue after the "Continue..." button is clicked
 
 
+def bonus_game_cat_pong():
+    """
+    Runs the "Cat Pong" bonus game.
+
+    This function launches a game where the player controls a cat character on 
+    one side of the screen to bat a bomb back and forth with a computer-controlled 
+    cat on the opposite side. The goal is to prevent the bomb from hitting the 
+    player’s side while trying to make it past the computer-controlled cat.
+
+    Game Elements:
+        - Player Cat: Controlled by the player, moving up and down on the left side.
+        - Computer Cat: Controlled by the AI, moving up and down on the right side 
+          to intercept the bomb.
+        - Bomb: Moves between the cats, with speed and direction changing upon contact 
+          with the cats or screen edges.
+
+    Gameplay Phases:
+        1. Control Display Phase: Shows control instructions and an animated 
+           "Bonus Stage!" message until the player clicks "Continue...".
+        2. Gameplay Phase: The player controls the cat to prevent the bomb from 
+           crossing the left boundary while the AI cat defends the right boundary.
+        3. Game Over Phase: Displays a "Victory!" message if the bomb crosses 
+           the AI’s side, or a "Game Over!" message if it crosses the player’s side.
+
+    Returns:
+        None
+    """
+    # Check if the assets/images directory exists
+    if not os.path.exists('assets/images'):
+        log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
+        log_message(log_entry)
+        return "main_menu"
+
+    # Calculate scaling factors based on the current resolution
+    scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
+    scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
+    scale_factor = min(scale_factor_x, scale_factor_y)
+
+    BOMB_SPEED_X = 8 * scale_factor  # Initial horizontal speed of the bomb
+    BOMB_SPEED_Y = 7 * scale_factor  # Initial vertical speed of the bomb
+    PLAYER_SPEED = 6 * scale_factor  # Slightly slower than the bomb’s initial speed
+    AI_SPEED = 6 * scale_factor  # AI speed matches player speed
+    
+    running = True
+    game_over = False
+    win = False  # Track if the player won or lost
+    start_time = time.time()
+
+    # Load images
+    background = select_random_background("assets/images/bonus_bkgs")
+
+    # Load and double-scale the bomb image
+    bomb_img = pygame.image.load('assets/images/sprites/bomb.png')
+    bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * 2 * scale_factor), int(bomb_img.get_height() * 2 * scale_factor)))
+    bomb_rect = bomb_img.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    bomb_dx, bomb_dy = BOMB_SPEED_X, BOMB_SPEED_Y
+
+    # Load and double-scale player cat
+    player_cat_img = pygame.image.load('assets/images/sprites/cat01.png')
+    player_cat_img = pygame.transform.scale(player_cat_img, (int(player_cat_img.get_width() * 2 * scale_factor), int(player_cat_img.get_height() * 2 * scale_factor)))
+    player_cat_rect = player_cat_img.get_rect(midleft=(int(50 * scale_factor), HEIGHT // 2))
+
+    # Load and double-scale AI cat
+    ai_cat_img = pygame.image.load('assets/images/sprites/cat02.png')  # A second cat sprite
+    ai_cat_img = pygame.transform.scale(ai_cat_img, (int(ai_cat_img.get_width() * 2 * scale_factor), int(ai_cat_img.get_height() * 2 * scale_factor)))
+    ai_cat_rect = ai_cat_img.get_rect(midright=(WIDTH - int(50 * scale_factor), HEIGHT // 2))
+
+
+    # Create a clock object to control the frame rate
+    clock = pygame.time.Clock()
+
+    # Load and play bonus game music
+    bonus_music_directory = 'assets/music/bonus'
+    random_mp3 = get_random_mp3(bonus_music_directory)
+    
+    if random_mp3:
+        music_loaded = load_mp3(random_mp3)
+        if music_loaded:
+            play_mp3()
+
+    # Control Display Phase
+    controls_displayed = False
+
+    while not controls_displayed:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        # Draw the background
+        if background:
+            draw_background(background)
+        else:
+            screen.fill(screen_color)
+
+        # Render the controls
+        draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
+        draw_text("W = Move Up", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
+        draw_text("S = Move Down", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
+
+        # Render the bouncing "Bonus Stage!" text
+        text_surface = font.render("Bonus Stage!", True, text_color)
+        screen.blit(text_surface, (WIDTH // 2 - text_surface.get_width() // 2, HEIGHT // 2))
+
+        # Draw the "Continue..." button below the controls
+        continue_rect = draw_continue_button()
+        pygame.display.flip()
+
+        # Check for "Continue..." button click
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if check_continue_click(mouse_pos, continue_rect):
+                    controls_displayed = True
+
+        clock.tick(60)
+
+    # Gameplay Phase
+    try:
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            # Move the player cat based on input
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w] and player_cat_rect.top > 0:
+                player_cat_rect.y -= PLAYER_SPEED
+            if keys[pygame.K_s] and player_cat_rect.bottom < HEIGHT:
+                player_cat_rect.y += PLAYER_SPEED
+
+            # AI cat movement logic
+            if bomb_rect.centery < ai_cat_rect.centery and ai_cat_rect.top > 0:
+                ai_cat_rect.y -= AI_SPEED
+            elif bomb_rect.centery > ai_cat_rect.centery and ai_cat_rect.bottom < HEIGHT:
+                ai_cat_rect.y += AI_SPEED
+
+            # Update bomb position
+            bomb_rect.x += bomb_dx
+            bomb_rect.y += bomb_dy
+
+            # Check for collisions with top/bottom screen boundaries
+            if bomb_rect.top <= 0 or bomb_rect.bottom >= HEIGHT:
+                bomb_dy = -bomb_dy
+
+            # Check for collisions with player cat
+            if bomb_rect.colliderect(player_cat_rect) and bomb_dx < 0:
+                bomb_dx = -bomb_dx  # Reverse direction horizontally
+
+            # Check for collisions with AI cat
+            if bomb_rect.colliderect(ai_cat_rect) and bomb_dx > 0:
+                bomb_dx = -bomb_dx  # Reverse direction horizontally
+
+            # Check for win/loss state
+            if bomb_rect.left <= 0:  # Player loses if bomb crosses the left edge
+                game_over = True
+                win = False
+            elif bomb_rect.right >= WIDTH:  # Player wins if bomb crosses the right edge
+                game_over = True
+                win = True
+
+            # Exit the loop if game_over has been triggered
+            if game_over:
+                running = False
+
+            # Draw gameplay background
+            if background:
+                draw_background(background)
+            else:
+                screen.fill(screen_color)
+
+            # Draw the cats and the bomb
+            screen.blit(player_cat_img, player_cat_rect.topleft)
+            screen.blit(ai_cat_img, ai_cat_rect.topleft)
+            screen.blit(bomb_img, bomb_rect.topleft)
+
+            pygame.display.flip()
+            clock.tick(60)
+
+    finally:
+        stop_mp3()
+
+    # Game Over Phase
+    if game_over:
+        screen.fill(screen_color)
+        if win:
+            message = "Victory! The bomb passed the AI cat."
+        else:
+            message = "Game Over! The bomb passed your side."
+
+        draw_text(message, font, text_color, WIDTH // 2, HEIGHT // 3, 
+                  center=True, 
+                  max_width=WIDTH,
+                  enable_shadow=True)
+        continue_rect = draw_continue_button()
+        pygame.display.flip()
+
+        # Wait for the player to click "Continue..."
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()  
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if check_continue_click(mouse_pos, continue_rect):
+                        waiting = False  # Continue after the "Continue..." button is clicked
+
+
+
 
 
 
@@ -9086,7 +9298,8 @@ def main_menu():
                 # check_exit_click(mouse_pos, exit_rect)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_falling_fish()
+                    bonus_game_cat_pong()
+                    # bonus_game_falling_fish()
             #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
             #     elif event.key == pygame.K_r:
             #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
@@ -9246,7 +9459,7 @@ def session_manager():
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
-                       # "japanese_animals_quiz",             #JP
+                       "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
@@ -9260,7 +9473,7 @@ def session_manager():
                        # "japanese_fruits_teach",             #JP
                        # "japanese_fruits_quiz",              #JP
                        # "japanese_colors_teach",             #JP
-                       "japanese_colors_quiz",             #JP
+                       # "japanese_colors_quiz",             #JP
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
@@ -12069,6 +12282,7 @@ class Platform:
             screen (Surface): The Pygame surface to draw the platform on.
         """
         screen.blit(self.image, self.rect.topleft)
+
 
 class Bomb:
     def __init__(self, image, x, y, speed):
