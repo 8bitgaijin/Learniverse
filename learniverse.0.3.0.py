@@ -8270,7 +8270,6 @@ def single_by_double_multiplication(session_id):
     return total_questions, correct_answers, average_time
 
 
-
 def double_digit_multiplication(session_id):
     """Presents a double-digit multiplication quiz and updates the session results."""
     global current_student  # Access the global current student
@@ -8500,11 +8499,26 @@ def display_same_denominator_explanation():
     single_denominator_addition_intro()
 
 
-def single_denominator_addition_intro():
+def single_denominator_addition_intro(session_id):
     """
     Display the initial introduction for the Single Denominator Addition quiz with
-    two clickable buttons: "What is Same Denominator?" and "Continue".
+    three clickable buttons: "What is Same Denominator?", "Continue", and "Skip" if applicable.
     """
+    global current_student  # Access the global current student
+
+    # Check if the student got a perfect score on this lesson yesterday
+    perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Single Denominator Fraction Addition')
+    
+    # Log the result of the perfect score check
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    log_entry = create_log_message(
+        f"Student: {current_student}, Lesson: 'Single Denominator Fraction Addition', "
+        f"Date: {yesterday}, 100%: {'Yes' if perfect_score_yesterday else 'No'}"
+    )
+    log_message(log_entry)
+
+    # Display the introductory message
     screen.fill(screen_color)
 
     # Draw the main instructional text
@@ -8516,40 +8530,31 @@ def single_denominator_addition_intro():
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,
         center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color,
+        enable_shadow=True
     )
 
-    # Draw the "What is Same Denominator?" clickable text
+    # Draw the "What is Same Denominator?" clickable text in the center
     explanation_button_rect = draw_text(
         "Same Denominator?",
         font,
         text_color,
         x=0,
-        y=HEIGHT * 0.8,
+        y=HEIGHT * 0.7,
         center=True,
         enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
+        return_rect=True  # Return the rect to check if it's clicked
     )
 
-    # Draw the "Continue" button
-    continue_button_rect = draw_text(
-        "Continue",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.9,
-        center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
-    )
-
+    # Draw the "Continue" and, if applicable, "Skip" buttons using the standard functions
+    continue_rect = draw_continue_button()
+    skip_rect = None
+    if perfect_score_yesterday:
+        skip_rect = draw_skip_button()
     pygame.display.flip()
 
-    # Wait for a click on either the explanation button or the Continue button
+    # Event loop to wait for clicks on buttons
     waiting = True
+    skip_clicked = False
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -8558,17 +8563,74 @@ def single_denominator_addition_intro():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if explanation_button_rect.collidepoint(mouse_pos):
-                    # Show the explanation if "What is Same Denominator?" is clicked
+                    # Show the explanation if "Same Denominator?" is clicked
                     display_same_denominator_explanation()
                     waiting = False
-                elif continue_button_rect.collidepoint(mouse_pos):
-                    # Move to the next part of the quiz if "Continue" is clicked
+                elif continue_rect.collidepoint(mouse_pos):
+                    # Proceed with the lesson if "Continue" is clicked
                     waiting = False
+                elif skip_rect and skip_rect.collidepoint(mouse_pos):
+                    # Skip the lesson if "Skip" is clicked
+                    print("skip clicked")
+                    skip_clicked = True
+                    waiting = False
+
+    # Handle the skip functionality
+    if skip_clicked:
+        try:
+            connection = sqlite3.connect('learniverse.db')
+            cursor = connection.cursor()
+            
+            # Format the current time to match the desired format without microseconds
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Retrieve lesson ID for recording skip with NULL metrics
+            cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Denominator Fraction Addition',))
+            result = cursor.fetchone()
+            if result:
+                lesson_id = result[0]
+                # Insert the session lesson with NULL values for performance metrics
+                cursor.execute('''
+                    INSERT INTO session_lessons (
+                        session_id, lesson_id, start_time, end_time,
+                        total_time, questions_asked, questions_correct, avg_time_per_question, percent_correct
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    session_id, lesson_id, current_time, current_time,
+                    None, None, None, None, None  # NULL values for performance metrics
+                ))
+                
+                connection.commit()
+                log_entry = create_log_message("Session recorded as skipped with NULL values.")
+                log_message(log_entry)
+
+        except sqlite3.Error as e:
+            log_entry = create_log_message(f"Error recording skipped session: {e}")
+            log_message(log_entry)
+            connection.rollback()
+        
+        finally:
+            cursor.close()
+            connection.close()
+
+        # Return control to handle the skip in session manager or calling function
+        return "skip"
+
+    # Return control to proceed with the lesson if not skipped
+    return "continue"
 
 
 def single_denominator_addition(session_id):
     """Presents an addition quiz of fractions with the same denominator and updates the session results."""
     global current_student  # Access the global current student
+    
+    # Display the introduction with session_id passed as an argument
+    intro_result = single_denominator_addition_intro(session_id)
+    
+    # Handle the outcome based on intro result
+    if intro_result == "skip":
+        # If skipped, exit early with default values or any specific logic for a skipped lesson
+        return 0, 0, None
 
     # Retrieve the lesson_id for Fraction Addition
     connection = sqlite3.connect('learniverse.db')
@@ -8589,7 +8651,7 @@ def single_denominator_addition(session_id):
     connection.close()
 
     # Start by displaying the introduction and clickable LCD explanation
-    single_denominator_addition_intro()
+    # single_denominator_addition_intro()
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -8820,14 +8882,29 @@ def display_lcd_explanation():
                     waiting = False  # Move to the next line
 
     # After the explanation, return to the original introduction screen
-    lowest_common_denominator_quiz_intro()
+    # lowest_common_denominator_quiz_intro()
 
 
-def lowest_common_denominator_quiz_intro():
+def lowest_common_denominator_quiz_intro(session_id):
     """
     Display the initial introduction for the Lowest Common Denominator quiz with
-    two clickable buttons: "Lowest Common Denominator?" and "Continue".
+    three clickable buttons: "Lowest Common Denominator?", "Continue", and "Skip" if applicable.
     """
+    global current_student  # Access the global current student
+
+    # Check if the student got a perfect score on this lesson recently
+    perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Lowest Common Denominator')
+    
+    # Log the result of the perfect score check
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    log_entry = create_log_message(
+        f"Student: {current_student}, Lesson: 'Lowest Common Denominator', "
+        f"Date: {yesterday}, 100%: {'Yes' if perfect_score_yesterday else 'No'}"
+    )
+    log_message(log_entry)
+
+    # Display the introductory message
     screen.fill(screen_color)
 
     # Draw the main instructional text
@@ -8839,40 +8916,31 @@ def lowest_common_denominator_quiz_intro():
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,
         center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color
+        enable_shadow=True
     )
 
     # Draw the "Lowest Common Denominator?" clickable text
     lcd_button_rect = draw_text(
-        "LCD?",
+        "Lowest Common Denominator?",
         font,
         text_color,
         x=0,
-        y=HEIGHT * 0.8,
+        y=HEIGHT * 0.7,
         center=True,
         enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
+        return_rect=True
     )
 
-    # Draw the "Continue" button
-    continue_button_rect = draw_text(
-        "Continue",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.9,
-        center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
-    )
-
+    # Draw the "Continue" and, if applicable, "Skip" buttons
+    continue_button_rect = draw_continue_button()
+    skip_button_rect = None
+    if perfect_score_yesterday:
+        skip_button_rect = draw_skip_button()
     pygame.display.flip()
 
-    # Wait for a click on either the LCD button or the Continue button
+    # Event loop to wait for button clicks
     waiting = True
+    skip_clicked = False
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -8881,17 +8949,73 @@ def lowest_common_denominator_quiz_intro():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if lcd_button_rect.collidepoint(mouse_pos):
-                    # Show the LCD explanation if "Lowest Common Denominator?" is clicked
+                    # Show LCD explanation
                     display_lcd_explanation()
                     waiting = False
                 elif continue_button_rect.collidepoint(mouse_pos):
-                    # Move to the next part of the quiz if "Continue" is clicked
+                    # Move on to the next part if "Continue" is clicked
                     waiting = False
+                elif skip_button_rect and skip_button_rect.collidepoint(mouse_pos):
+                    # Skip if "Skip" is clicked
+                    skip_clicked = True
+                    waiting = False
+
+    # Handle skip functionality
+    if skip_clicked:
+        try:
+            connection = sqlite3.connect('learniverse.db')
+            cursor = connection.cursor()
+
+            # Get the current time and format without microseconds
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Retrieve lesson ID for recording skip
+            cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Lowest Common Denominator Quiz',))
+            result = cursor.fetchone()
+            if result:
+                lesson_id = result[0]
+                # Insert session lesson with NULL values for performance metrics
+                cursor.execute('''
+                    INSERT INTO session_lessons (
+                        session_id, lesson_id, start_time, end_time,
+                        total_time, questions_asked, questions_correct, avg_time_per_question, percent_correct
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    session_id, lesson_id, current_time, current_time,
+                    None, None, None, None, None  # NULL values for performance metrics
+                ))
+
+                connection.commit()
+                log_entry = create_log_message("Session recorded as skipped with NULL values.")
+                log_message(log_entry)
+
+        except sqlite3.Error as e:
+            log_entry = create_log_message(f"Error recording skipped session: {e}")
+            log_message(log_entry)
+            connection.rollback()
+
+        finally:
+            cursor.close()
+            connection.close()
+
+        # Return "skip" to indicate the lesson was skipped
+        return "skip"
+
+    # Return "continue" to proceed with the quiz
+    return "continue"
+
 
 
 def lowest_common_denominator_quiz(session_id):
     """Presents a quiz on solving for the lowest common denominator and updates the session results."""
     global current_student  # Access the global current student
+    
+    # Display the introductory screen and get the user's choice to proceed or skip
+    intro_result = lowest_common_denominator_quiz_intro(session_id)
+
+    if intro_result == "skip":
+        # If the user chose to skip, return default values indicating no questions were asked
+        return 0, 0, None
 
     # Retrieve the lesson_id for LCD Problems
     connection = sqlite3.connect('learniverse.db')
@@ -8912,7 +9036,7 @@ def lowest_common_denominator_quiz(session_id):
     connection.close()
 
     # Start by displaying the introduction and clickable LCD explanation
-    lowest_common_denominator_quiz_intro()
+    # lowest_common_denominator_quiz_intro()
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -10077,7 +10201,9 @@ def session_manager():
                        # "double_digit_subtraction",          #Math
                        # "subtraction_borrowing",             #Math
                        # "single_digit_multiplication",       #Math
-                       "single_by_double_multiplication",   #Math
+                       # "single_by_double_multiplication",   #Math
+                       # "single_denominator_addition",       #Math
+                       "lowest_common_denominator_quiz",      #Math
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
@@ -10103,7 +10229,7 @@ def session_manager():
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
                        # "rainbow_numbers",                   #Math
-                       # "lowest_common_denominator_quiz",      #Math
+                       
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
                        # "skip_counting_kanji",               #JP
