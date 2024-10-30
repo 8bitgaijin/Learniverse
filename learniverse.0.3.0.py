@@ -6468,10 +6468,22 @@ def double_digit_addition(session_id):
         log_message(log_entry)
         cursor.close()
         connection.close()
-        return 0, 0, 0  # No questions asked, no correct answers, no time taken
+        return 0, 0, None  # Return default values if lesson ID not found
 
     cursor.close()
     connection.close()
+
+    # Check if the student got a perfect score on this lesson yesterday
+    perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Double Digit Addition')
+    
+    # Log the result of the perfect score check
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    log_entry = create_log_message(
+        f"Student: {current_student}, Lesson: 'Double Digit Addition', "
+        f"Date: {yesterday}, 100%: {'Yes' if perfect_score_yesterday else 'No'}"
+    )
+    log_message(log_entry)
 
     # Display the introductory message
     screen.fill(screen_color)
@@ -6486,7 +6498,64 @@ def double_digit_addition(session_id):
         enable_shadow=True
     )
 
-    draw_and_wait_continue_button()
+    # Draw the "Continue..." and, if applicable, "Skip..." buttons
+    continue_rect = draw_continue_button()
+    skip_rect = None
+    if perfect_score_yesterday:
+        skip_rect = draw_skip_button()
+    pygame.display.flip()
+
+    # Event loop to wait for the "Continue..." or "Skip..." button click
+    waiting = True
+    skip_clicked = False
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if continue_rect.collidepoint(mouse_pos):
+                    waiting = False
+                elif skip_rect and skip_rect.collidepoint(mouse_pos):
+                    print("skip clicked")
+                    skip_clicked = True
+                    waiting = False
+
+    # If skip was clicked, record session with NULL values for scores and return early
+    if skip_clicked:
+        try:
+            connection = sqlite3.connect('learniverse.db')
+            cursor = connection.cursor()
+            
+            # Format the current time to match the desired format without microseconds
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Insert the session lesson with NULL values for performance metrics
+            cursor.execute('''
+                INSERT INTO session_lessons (
+                    session_id, lesson_id, start_time, end_time,
+                    total_time, questions_asked, questions_correct, avg_time_per_question, percent_correct
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                session_id, addition_lesson_id, current_time, current_time,
+                None, None, None, None, None  # NULL values for performance metrics
+            ))
+            
+            connection.commit()
+            log_entry = create_log_message("Session recorded as skipped with NULL values.")
+            log_message(log_entry)
+
+        except sqlite3.Error as e:
+            log_entry = create_log_message(f"Error recording skipped session: {e}")
+            log_message(log_entry)
+            connection.rollback()
+        
+        finally:
+            cursor.close()
+            connection.close()
+        
+        return 0, 0, None  # Return default values if the lesson was skipped
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -6509,10 +6578,7 @@ def double_digit_addition(session_id):
 
         while not question_complete:
             screen.fill(screen_color)
-
-            # Draw the math problem
             display_math_problem(num1, num2, user_input, first_input)
-
             pygame.display.flip()
 
             for event in pygame.event.get():
@@ -6589,6 +6655,7 @@ def double_digit_addition(session_id):
         bonus_game_selector()
 
     return total_questions, correct_answers, average_time
+
 
 
 def triple_digit_addition(session_id):
@@ -9678,7 +9745,8 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       "single_digit_addition",             #Math
+                       # "single_digit_addition",             #Math
+                       "double_digit_addition",             #Math
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
