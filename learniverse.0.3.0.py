@@ -5803,15 +5803,7 @@ def bonus_game_cat_pong():
                     if check_continue_click(mouse_pos, continue_rect):
                         waiting = False  # Continue after the "Continue..." button is clicked
 
-
-
-
-
-
-
-
-                    
-                    
+           
 ##############################
 ### Math Problem Functions ###
 ##############################
@@ -8495,9 +8487,6 @@ def display_same_denominator_explanation():
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False  # Move to the next line
 
-    # After the explanation, return to the original introduction screen
-    single_denominator_addition_intro()
-
 
 def single_denominator_addition_intro(session_id):
     """
@@ -8881,9 +8870,6 @@ def display_lcd_explanation():
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     waiting = False  # Move to the next line
 
-    # After the explanation, return to the original introduction screen
-    # lowest_common_denominator_quiz_intro()
-
 
 def lowest_common_denominator_quiz_intro(session_id):
     """
@@ -9003,7 +8989,6 @@ def lowest_common_denominator_quiz_intro(session_id):
 
     # Return "continue" to proceed with the quiz
     return "continue"
-
 
 
 def lowest_common_denominator_quiz(session_id):
@@ -9150,28 +9135,55 @@ def lowest_common_denominator_quiz(session_id):
 def draw_shape(shape_type):
     """Draw a specific shape on the screen based on the shape type."""
     if shape_type == "circle":
-        pygame.draw.circle(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)
+        pygame.draw.circle(screen, text_color, (WIDTH // 2, HEIGHT * 0.6), 100, 5)
     elif shape_type == "oval":
-        pygame.draw.ellipse(screen, text_color, (WIDTH // 3, HEIGHT // 3, 200, 100), 5)
+        pygame.draw.ellipse(screen, text_color, (WIDTH // 2 - 100, HEIGHT * 0.6, 200, 100), 5)
     elif shape_type == "square":
-        pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 150, 150), 5)
+        pygame.draw.rect(screen, text_color, (WIDTH // 2 - 75, HEIGHT * 0.6, 150, 150), 5)
     elif shape_type == "rectangle":
-        pygame.draw.rect(screen, text_color, (WIDTH // 3, HEIGHT // 3, 200, 100), 5)
+        pygame.draw.rect(screen, text_color, (WIDTH // 2 - 100, HEIGHT * 0.6, 200, 100), 5)
     elif shape_type == "triangle":
-        pygame.draw.polygon(screen, text_color, [(WIDTH // 2, HEIGHT // 4), (WIDTH // 3, HEIGHT // 2), (2 * WIDTH // 3, HEIGHT // 2)], 5)
+        pygame.draw.polygon(
+            screen, 
+            text_color, 
+            [
+                (WIDTH // 2, HEIGHT // 3),        # New peak point, lowered to HEIGHT // 3
+                (WIDTH // 3, HEIGHT // 1.8),      # Left base point slightly lowered
+                (2 * WIDTH // 3, HEIGHT // 1.8)   # Right base point slightly lowered
+            ], 
+            5
+        )
     elif shape_type == "pentagon":
         draw_regular_polygon(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 5)  # Pentagon with 5 sides
     elif shape_type == "hexagon":
         draw_regular_polygon(screen, text_color, (WIDTH // 2, HEIGHT // 2), 100, 6)  # Hexagon with 6 sides
     elif shape_type == "parallelogram":
-        pygame.draw.polygon(screen, text_color, [(WIDTH // 4, HEIGHT // 2), (WIDTH // 2, HEIGHT // 2), (3 * WIDTH // 4, HEIGHT // 3), (WIDTH // 2, HEIGHT // 3)], 5)
+        pygame.draw.polygon(
+            screen, 
+            text_color, 
+            [
+                (WIDTH // 4, HEIGHT // 1.5),        # Lowered left base point
+                (WIDTH // 2, HEIGHT // 1.5),        # Lowered right base point
+                (3 * WIDTH // 4, HEIGHT // 2.2),    # Lowered upper right point
+                (WIDTH // 2, HEIGHT // 2.2)         # Lowered upper left point
+            ], 
+            5
+        )
     elif shape_type == "rhombus":
-        pygame.draw.polygon(screen, text_color, [
-            (WIDTH // 2, HEIGHT // 4),           # Top vertex
-            (WIDTH // 3, HEIGHT // 2),           # Left vertex
-            (WIDTH // 2, 3 * HEIGHT // 4),       # Bottom vertex
-            (2 * WIDTH // 3, HEIGHT // 2)        # Right vertex
-        ], 5)
+        pygame.draw.polygon(
+            screen, 
+            text_color, 
+            [
+                (WIDTH // 2, HEIGHT // 2.5),           # Lowered top vertex
+                (WIDTH // 3, HEIGHT // 1.7),           # Lowered left vertex
+                (WIDTH // 2, HEIGHT // 1.3),           # Lowered bottom vertex
+                (2 * WIDTH // 3, HEIGHT // 1.7)        # Lowered right vertex
+            ], 
+            5
+        )
+
+
+
     elif shape_type == "trapezoid":
         pygame.draw.polygon(screen, text_color, [(WIDTH // 3, HEIGHT // 2), (2 * WIDTH // 3, HEIGHT // 2), (3 * WIDTH // 4, HEIGHT // 3), (WIDTH // 4, HEIGHT // 3)], 5)
     elif shape_type == "star":
@@ -10203,7 +10215,8 @@ def session_manager():
                        # "single_digit_multiplication",       #Math
                        # "single_by_double_multiplication",   #Math
                        # "single_denominator_addition",       #Math
-                       "lowest_common_denominator_quiz",      #Math
+                       # "lowest_common_denominator_quiz",      #Math
+                       "basic_shapes_quiz",
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
@@ -10214,7 +10227,7 @@ def session_manager():
                        # "japanese_animals_teach",            #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
-                       # "basic_shapes_quiz",
+                       
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
