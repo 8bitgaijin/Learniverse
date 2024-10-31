@@ -4406,7 +4406,7 @@ def draw_and_wait_continue_button():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
@@ -4435,14 +4435,14 @@ def draw_skip_button():
 
 
 def display_text_and_wait(text):
-    """Clears the screen, displays the given text, and waits for a mouse click."""
+    """Clears the screen, displays the given text, and waits for a left mouse click."""
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Only left-click
                 running = False
 
         # screen.fill(screen_color)  # Clear the screen with the current theme's background color
@@ -4871,7 +4871,7 @@ def bonus_game_fat_tuna():
 
         # Check for "Continue..." button click without stopping the animation
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     controls_displayed = True  # Exit the loop and continue to gameplay
@@ -5009,7 +5009,7 @@ def bonus_game_fat_tuna():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
@@ -5161,7 +5161,7 @@ def bonus_game_no_fish():
 
         # Check for "Continue..." button click without stopping the animation
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     controls_displayed = True  # Exit the loop and continue to gameplay
@@ -5297,7 +5297,7 @@ def bonus_game_no_fish():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
@@ -5452,7 +5452,7 @@ def bonus_game_falling_fish():
 
         # Check for "Continue..." button click without stopping the animation
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     controls_displayed = True  # Exit the loop and continue to gameplay
@@ -5587,7 +5587,7 @@ def bonus_game_falling_fish():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False  # Continue after the "Continue..." button is clicked
@@ -5703,7 +5703,7 @@ def bonus_game_cat_pong():
 
         # Check for "Continue..." button click
         for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     controls_displayed = True
@@ -5798,7 +5798,7 @@ def bonus_game_cat_pong():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()  
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
                     if check_continue_click(mouse_pos, continue_rect):
                         waiting = False  # Continue after the "Continue..." button is clicked
@@ -6000,7 +6000,7 @@ def rainbow_numbers(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -6299,7 +6299,7 @@ def single_digit_addition(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -6505,7 +6505,7 @@ def double_digit_addition(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -6991,7 +6991,7 @@ def single_digit_subtraction(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -7197,7 +7197,7 @@ def double_digit_subtraction(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -7685,7 +7685,7 @@ def subtraction_borrowing(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -7908,7 +7908,7 @@ def single_digit_multiplication(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -8114,7 +8114,7 @@ def single_by_double_multiplication(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
@@ -8484,7 +8484,7 @@ def display_same_denominator_explanation():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting = False  # Move to the next line
 
 
@@ -8549,7 +8549,7 @@ def single_denominator_addition_intro(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if explanation_button_rect.collidepoint(mouse_pos):
                     # Show the explanation if "Same Denominator?" is clicked
@@ -8867,7 +8867,7 @@ def display_lcd_explanation():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting = False  # Move to the next line
 
 
@@ -8932,7 +8932,7 @@ def lowest_common_denominator_quiz_intro(session_id):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if lcd_button_rect.collidepoint(mouse_pos):
                     # Show LCD explanation
@@ -9261,18 +9261,30 @@ def display_basic_shapes_explanation():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting = False  # Move to the next step
 
-    # After the explanation, return to the original introduction screen
-    basic_shapes_quiz_intro()
 
-
-def basic_shapes_quiz_intro():
+def basic_shapes_quiz_intro(session_id):
     """
     Display the introduction for the basic geometric shapes quiz with
-    two clickable buttons: "What are basic shapes?" and "Continue".
+    three clickable buttons: "What are basic shapes?", "Continue", and "Skip" if applicable.
     """
+    global current_student  # Access the global current student
+
+    # Check if the student got a perfect score on this lesson recently
+    perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Basic Geometric Shapes')
+    
+    # Log the result of the perfect score check
+    today = datetime.now().date()
+    yesterday = today - timedelta(days=1)
+    log_entry = create_log_message(
+        f"Student: {current_student}, Lesson: 'Basic Geometric Shapess', "
+        f"Date: {yesterday}, 100%: {'Yes' if perfect_score_yesterday else 'No'}"
+    )
+    log_message(log_entry)
+
+    # Display the introductory message
     screen.fill(screen_color)
 
     # Draw the main instructional text
@@ -9284,8 +9296,7 @@ def basic_shapes_quiz_intro():
         y=HEIGHT * 0.4,
         max_width=WIDTH * 0.95,
         center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color
+        enable_shadow=True
     )
 
     # Draw the "What are basic shapes?" clickable text
@@ -9294,36 +9305,28 @@ def basic_shapes_quiz_intro():
         font,
         text_color,
         x=0,
-        y=HEIGHT * 0.8,
+        y=HEIGHT * 0.7,
         center=True,
         enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
+        return_rect=True  # Return the rect to check if it's clicked
     )
 
-    # Draw the "Continue" button
-    continue_button_rect = draw_text(
-        "Continue",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.9,
-        center=True,
-        enable_shadow=True,
-        # shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can check if it's clicked
-    )
-
+    # Draw the "Continue" and "Skip" buttons using the standard functions
+    continue_button_rect = draw_continue_button()
+    skip_button_rect = None
+    if perfect_score_yesterday:
+        skip_button_rect = draw_skip_button()
     pygame.display.flip()
 
-    # Wait for a click on either the explanation button or the Continue button
+    # Event loop to wait for button clicks
     waiting = True
+    skip_clicked = False
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if explanation_button_rect.collidepoint(mouse_pos):
                     # Show the explanation if "What are basic shapes?" is clicked
@@ -9332,6 +9335,55 @@ def basic_shapes_quiz_intro():
                 elif continue_button_rect.collidepoint(mouse_pos):
                     # Move to the next part of the quiz if "Continue" is clicked
                     waiting = False
+                elif skip_button_rect and skip_button_rect.collidepoint(mouse_pos):
+                    # Skip if "Skip" is clicked
+                    skip_clicked = True
+                    waiting = False
+
+    # Handle skip functionality
+    if skip_clicked:
+        try:
+            connection = sqlite3.connect('learniverse.db')
+            cursor = connection.cursor()
+
+            # Get the current time without microseconds
+            current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Retrieve lesson ID for recording skip
+            cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Basic Shapes Quiz',))
+            result = cursor.fetchone()
+            if result:
+                lesson_id = result[0]
+                # Insert session lesson with NULL values for performance metrics
+                cursor.execute('''
+                    INSERT INTO session_lessons (
+                        session_id, lesson_id, start_time, end_time,
+                        total_time, questions_asked, questions_correct, avg_time_per_question, percent_correct
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    session_id, lesson_id, current_time, current_time,
+                    None, None, None, None, None  # NULL values for performance metrics
+                ))
+
+                connection.commit()
+                log_entry = create_log_message("Session recorded as skipped with NULL values.")
+                log_message(log_entry)
+
+        except sqlite3.Error as e:
+            log_entry = create_log_message(f"Error recording skipped session: {e}")
+            log_message(log_entry)
+            connection.rollback()
+
+        finally:
+            cursor.close()
+            connection.close()
+
+        # Return "skip" to indicate the lesson was skipped
+        return "skip"
+
+    # Return "continue" to proceed with the quiz
+    return "continue"
+
 
 
 def draw_shapes_for_quiz(correct_shape):
@@ -9401,6 +9453,12 @@ def basic_shapes_quiz(session_id):
     """
     global current_student  # Access the global current student
 
+    # Display the introduction and check if it should be skipped
+    intro_result = basic_shapes_quiz_intro(session_id)
+    if intro_result == "skip":
+        # Exit early with default values if the quiz is skipped
+        return 0, 0, None
+
     # Retrieve the lesson_id for Basic Geometric Shapes
     connection = sqlite3.connect('learniverse.db')
     cursor = connection.cursor()
@@ -9418,9 +9476,6 @@ def basic_shapes_quiz(session_id):
 
     cursor.close()
     connection.close()
-
-    # Start by displaying the introduction
-    basic_shapes_quiz_intro()
 
     # Start the lesson timer
     lesson_start_time = time.time()
@@ -9480,7 +9535,7 @@ def basic_shapes_quiz(session_id):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
 
                     # Check if the student clicked any shape
@@ -9588,7 +9643,7 @@ def show_fibonacci_explanation(COUNT_TO):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting_for_click = False
 
         # Move to the next sentence
@@ -9651,7 +9706,7 @@ def skip_counting_fibonacci_intro(COUNT_TO):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()  # Use get_pos to ensure accurate click position
                 if explanation_button_rect.collidepoint(mouse_pos):
                     # Show the explanation if "Fibonacci numbers?" is clicked
@@ -9765,7 +9820,7 @@ def show_prime_explanation(COUNT_TO):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     waiting_for_click = False
 
         # Move to the next sentence
@@ -9828,7 +9883,7 @@ def skip_counting_primes_intro(COUNT_TO):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()  # Use get_pos to ensure accurate click position
                 if explanation_button_rect.collidepoint(mouse_pos):
                     # Show the explanation if "Prime numbers?" is clicked
@@ -10041,7 +10096,7 @@ def main_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 # Check if "Start" was clicked
                 if start_rect and start_rect.collidepoint(mouse_pos):
@@ -10111,7 +10166,7 @@ def student_select_menu():
                 pygame.quit()
                 sys.exit()
 
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 # Check if a student was clicked
                 for rect, student_name in student_rects:
@@ -10216,7 +10271,7 @@ def session_manager():
                        # "single_by_double_multiplication",   #Math
                        # "single_denominator_addition",       #Math
                        # "lowest_common_denominator_quiz",      #Math
-                       "basic_shapes_quiz",
+                       # "basic_shapes_quiz",
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
@@ -10228,6 +10283,7 @@ def session_manager():
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
+                       "japanese_animals_quiz",             #JP
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
@@ -10858,7 +10914,7 @@ def greet_student():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  # Correctly exit the program
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
 
                 # Check if the Japanese text is clicked
@@ -10966,7 +11022,7 @@ def streak_check():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if button_rect.collidepoint(mouse_pos):
                     waiting = False  # Exit the loop when the button is clicked
@@ -11227,7 +11283,7 @@ def day_of_the_week():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
 
                 # Check if the Japanese text is clicked
@@ -11313,7 +11369,7 @@ def month_of_the_year():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()  
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
 
                 # Check if the Japanese text is clicked
@@ -11596,7 +11652,7 @@ def display_hiragana_quiz(screen, hiragana_char, options):
         y=HEIGHT // 3,
         center=True,
         enable_shadow=True,
-        shadow_color=BLACK,
+        # shadow_color=BLACK,
         use_japanese_font=True
     )
 
@@ -11614,7 +11670,7 @@ def display_hiragana_quiz(screen, hiragana_char, options):
             y=y_pos + i * answer_buffer,
             center=True,
             enable_shadow=True,
-            shadow_color=BLACK,
+            # shadow_color=BLACK,
             return_rect=True
         )
         option_rects.append((option_rect, option))
@@ -11658,7 +11714,7 @@ def quiz_loop(lesson_title, character_subset, total_questions):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = event.pos
                     for rect, option in option_rects:
                         if rect.collidepoint(mouse_pos):
@@ -12006,7 +12062,7 @@ def vocab_teach(session_id, lesson_title):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 if repeat_button_rect.collidepoint(mouse_pos):
                     vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
@@ -12175,7 +12231,7 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN and not answer_clicked:  # Only check clicks if answer not already clicked
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not answer_clicked:  # Only check clicks if answer not already clicked
                     mouse_pos = event.pos
 
                     # Check if the kanji or furigana was clicked and repeat the audio if so
@@ -12418,7 +12474,7 @@ def display_quiz(screen, kanji, furigana, options):
         y=HEIGHT // 3,
         center=True,
         enable_shadow=True,
-        shadow_color=BLACK,
+        # shadow_color=BLACK,
         return_rect=True
     )
 
@@ -12431,14 +12487,14 @@ def display_quiz(screen, kanji, furigana, options):
         y=HEIGHT // 5,
         center=True,
         enable_shadow=True,
-        shadow_color=BLACK,
+        # shadow_color=BLACK,
         return_rect=True
     )
 
     # Draw the multiple-choice options
     option_rects = []
-    y_pos = HEIGHT * 0.5
-    answer_buffer = HEIGHT * 0.1
+    y_pos = HEIGHT * 0.45
+    answer_buffer = HEIGHT * 0.11
 
     for i, option in enumerate(options):
         option_rect = draw_text(
@@ -12449,14 +12505,19 @@ def display_quiz(screen, kanji, furigana, options):
             y=y_pos + i * answer_buffer,
             center=True,
             enable_shadow=True,
-            shadow_color=BLACK,
+            # shadow_color=BLACK,
             return_rect=True
         )
+
+        # Reduce rect size to 95%
+        option_rect = option_rect.inflate(-option_rect.width * 0.01, -option_rect.height * 0.25)
+
         option_rects.append((option_rect, option))
 
     pygame.display.flip()
 
     return kanji_rect, furigana_rect, option_rects
+
 
 
 def options_menu():
@@ -12551,7 +12612,7 @@ def options_menu():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 
                 # Check if "Back to Main Menu" was clicked
