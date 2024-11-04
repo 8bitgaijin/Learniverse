@@ -11050,13 +11050,14 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       "hiragana_teach",                    #JP
+                       # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
                        # "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
+                       "skip_counting_japanese",            #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
@@ -12158,6 +12159,72 @@ def month_of_the_year():
                     waiting = False  # Exit the loop when "Continue..." is clicked
 
 
+# def skip_counting_japanese(COUNT_TO=30):
+#     """Performs skip counting in Arabic numerals up to COUNT_TO, while speaking the numbers in Japanese."""
+#     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+#     # Define a larger size for the Arabic numerals
+#     large_font_size = 200  # Adjust size as necessary
+
+#     # Initialize the larger font based on whether the current font is a file or system font
+#     if os.path.isfile(current_font_name_or_path):
+#         large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+#     else:
+#         large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
+
+#     # Clear the screen and inform the student about the activity
+#     screen.fill(screen_color)
+#     intro_message = f"Let's count in Japanese, up to {COUNT_TO}!"
+
+#     # Display the intro message and update the screen using the default global font
+#     draw_text(intro_message, 
+#               font, 
+#               text_color, 
+#               x=0, 
+#               y=HEIGHT * 0.4, 
+#               center=True, 
+#               enable_shadow=True, 
+#               shadow_color=shadow_color,
+#               max_width=WIDTH)
+    
+#     # Draw the "Continue..." button after the intro message
+#     draw_and_wait_continue_button()
+
+#     # Start counting from 1 to COUNT_TO
+#     for i in range(1, COUNT_TO + 1):
+#         # Clear the screen before displaying each number
+#         screen.fill(screen_color)
+
+#         # Convert the number to string for display
+#         number_str = str(i)
+
+#         # Display the number in the center of the screen using the larger font size
+#         draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+#         # Update the screen after drawing the number
+#         pygame.display.flip()
+
+#         # Speak the number aloud in Japanese 
+#         speak_japanese(number_str)
+
+#         # Pause for a second before showing the next number
+#         time.sleep(1)
+
+#     # After completing the skip counting, show a dynamic completion message using the default font
+#     completion_message = f"Great job! You counted up to {COUNT_TO}!"
+#     screen.fill(screen_color)
+#     draw_text(completion_message, 
+#               font, 
+#               text_color, 
+#               x=0, 
+#               y=HEIGHT * 0.4, 
+#               center=True, 
+#               enable_shadow=True, 
+#               shadow_color=shadow_color,
+#               max_width=WIDTH)
+
+#     # Draw the "Continue..." button after the completion message
+#     draw_and_wait_continue_button()
 def skip_counting_japanese(COUNT_TO=30):
     """Performs skip counting in Arabic numerals up to COUNT_TO, while speaking the numbers in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
@@ -12191,6 +12258,14 @@ def skip_counting_japanese(COUNT_TO=30):
 
     # Start counting from 1 to COUNT_TO
     for i in range(1, COUNT_TO + 1):
+        # Continuously check for events to prevent freezing and handle window focus
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:  # Window regains focus
+                pygame.display.flip()  # Redraw the screen
+
         # Clear the screen before displaying each number
         screen.fill(screen_color)
 
@@ -12224,7 +12299,6 @@ def skip_counting_japanese(COUNT_TO=30):
 
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
-
 
 def skip_counting_kanji(COUNT_TO=30):
     """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
