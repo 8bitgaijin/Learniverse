@@ -11050,7 +11050,7 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       # "hiragana_teach",                    #JP
+                       "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
@@ -12334,15 +12334,38 @@ def display_completion_message(lesson_type, student_level, url):
     draw_and_wait_continue_button()
 
 
-def teach_characters(character_subset, large_font):
-    """Displays each character in the subset and reads them aloud."""
-    for char in character_subset:
+# def teach_characters(character_subset, large_font):
+#     """Displays each character in the subset and reads them aloud."""
+#     for char in character_subset:
+#         screen.fill(screen_color)
+#         draw_text(char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True,
+#                   enable_shadow=True, shadow_color=shadow_color, font_override=large_font)
+#         pygame.display.flip()
+#         speak_japanese(char)
+#         time.sleep(1)
+def teach_characters(hiragana_subset, font):
+    """Displays each Hiragana character one by one and ensures the screen redraws with each."""
+    for char in hiragana_subset:
+        # Continuously process events to avoid freezing and handle window focus
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:  # Window regains focus
+                pygame.display.flip()  # Redraw the screen
+
+        # Clear the screen with the background color and display the current character
         screen.fill(screen_color)
-        draw_text(char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True,
-                  enable_shadow=True, shadow_color=shadow_color, font_override=large_font)
-        pygame.display.flip()
-        speak_japanese(char)
-        time.sleep(1)
+        character_surface = font.render(char, True, text_color)
+        character_rect = character_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        screen.blit(character_surface, character_rect)
+        pygame.display.flip()  # Update the display with the new character
+
+        # Play the corresponding WAV file for the character
+        speak_japanese(char)  # Use speak_japanese directly
+
+        # Optional: Small delay to control playback speed
+        time.sleep(0.5)
 
 
 def hiragana_teach(session_id):
@@ -12375,10 +12398,34 @@ def hiragana_teach(session_id):
 
     # Display the intro message and teach the characters
     display_intro_message('Hiragana', student_level)
-    teach_characters(hiragana_subset, large_japanese_font)
+
+    # Main loop to display each character
+    for char in hiragana_subset:
+        # Continuously check for events to prevent the window from freezing
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:  # Window regains focus
+                pygame.display.flip()  # Redraw the screen
+
+        # Clear the screen and display the current character
+        screen.fill(screen_color)
+        character_surface = large_japanese_font.render(char, True, text_color)
+        character_rect = character_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+        screen.blit(character_surface, character_rect)
+        pygame.display.flip()  # Update the display
+
+        # Play the WAV file
+        speak_japanese(char)  # Use speak_japanese directly
+
+        # Optional delay to control playback speed
+        time.sleep(0.5)
 
     # Show completion message and open the URL
     display_completion_message('Hiragana', student_level, "https://www.youtube.com/watch?v=bEPagHe6iUI")
+
+
 
 
 def katakana_teach(session_id):
