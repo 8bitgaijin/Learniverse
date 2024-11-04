@@ -11056,8 +11056,8 @@ def session_manager():
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
                        # "japanese_animals_quiz",             #JP
-                       # "japanese_animals_teach",            #JP
-                       "skip_counting_japanese",            #JP
+                       "japanese_animals_teach",            #JP
+                       # "skip_counting_japanese",            #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
@@ -12300,6 +12300,82 @@ def skip_counting_japanese(COUNT_TO=30):
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
 
+# def skip_counting_kanji(COUNT_TO=30):
+#     """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
+#     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
+
+#     # Define a larger size for the kanji numerals and furigana
+#     large_kanji_font_size = 200  # Adjust size as necessary
+#     furigana_font_size = 60
+
+#     # Initialize the fonts for kanji and furigana using a Japanese-supporting font
+#     if os.path.isfile(current_font_name_or_path):
+#         kanji_font = pygame.font.Font(current_font_name_or_path, large_kanji_font_size)
+#         furigana_font = pygame.font.Font(current_font_name_or_path, furigana_font_size)
+#     else:
+#         kanji_font = pygame.font.SysFont('msgothic', large_kanji_font_size)  # Example: MS Gothic or another font that supports Kanji
+#         furigana_font = pygame.font.SysFont('msgothic', furigana_font_size)
+
+#     # Dictionary to map numbers (1 to 30) to their corresponding Kanji and Furigana
+#     kanji_numbers = {
+#         1: ("一", "いち"), 2: ("二", "に"), 3: ("三", "さん"), 4: ("四", "よん"), 5: ("五", "ご"),
+#         6: ("六", "ろく"), 7: ("七", "なな"), 8: ("八", "はち"), 9: ("九", "きゅう"), 10: ("十", "じゅう"),
+#         11: ("十一", "じゅういち"), 12: ("十二", "じゅうに"), 13: ("十三", "じゅうさん"), 14: ("十四", "じゅうよん"),
+#         15: ("十五", "じゅうご"), 16: ("十六", "じゅうろく"), 17: ("十七", "じゅうなな"), 18: ("十八", "じゅうはち"),
+#         19: ("十九", "じゅうきゅう"), 20: ("二十", "にじゅう"), 21: ("二十一", "にじゅういち"),
+#         22: ("二十二", "にじゅうに"), 23: ("二十三", "にじゅうさん"), 24: ("二十四", "にじゅうよん"),
+#         25: ("二十五", "にじゅうご"), 26: ("二十六", "にじゅうろく"), 27: ("二十七", "にじゅうなな"),
+#         28: ("二十八", "にじゅうはち"), 29: ("二十九", "にじゅうきゅう"), 30: ("三十", "さんじゅう")
+#     }
+
+#     # Clear the screen and inform the student about the activity dynamically
+#     screen.fill(screen_color)
+#     intro_message = f"Let's count using kanji up to {COUNT_TO}!"
+
+#     # Display the intro message and update the screen using the default global font, with word wrapping
+#     draw_text(intro_message, 
+#               font, 
+#               text_color, 
+#               x=0, 
+#               y=HEIGHT * 0.4, 
+#               center=True, 
+#               enable_shadow=True, 
+#               shadow_color=shadow_color,
+#               max_width=WIDTH)
+
+#     # Draw the "Continue..." button after the intro message
+#     draw_and_wait_continue_button()
+
+#     # Start counting from 1 to COUNT_TO
+#     for i in range(1, COUNT_TO + 1):
+#         # Clear the screen before displaying each kanji
+#         screen.fill(screen_color)
+
+#         # Get the Kanji and Furigana for the current number
+#         kanji, furigana = kanji_numbers[i]
+
+#         # Display furigana above the kanji
+#         draw_text(furigana, furigana_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+#         # Display the kanji in the center of the screen using the larger font size
+#         draw_text(kanji, kanji_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
+
+#         # Update the screen after drawing the kanji and furigana
+#         pygame.display.flip()
+
+#         # Speak the number aloud in Japanese
+#         speak_japanese(furigana)
+
+#         # Pause for a second before showing the next number
+#         time.sleep(1)
+
+#     # After completing the skip counting, show a dynamic completion message using the default font, with word wrapping
+#     completion_message = f"Great job counting with kanji up to {COUNT_TO}!"
+#     screen.fill(screen_color)
+#     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
+
+#     # Draw the "Continue..." button after the completion message
+#     draw_and_wait_continue_button()
 def skip_counting_kanji(COUNT_TO=30):
     """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
@@ -12328,7 +12404,7 @@ def skip_counting_kanji(COUNT_TO=30):
         28: ("二十八", "にじゅうはち"), 29: ("二十九", "にじゅうきゅう"), 30: ("三十", "さんじゅう")
     }
 
-    # Clear the screen and inform the student about the activity dynamically
+    # Clear the screen and inform the student about the activity
     screen.fill(screen_color)
     intro_message = f"Let's count using kanji up to {COUNT_TO}!"
 
@@ -12348,6 +12424,14 @@ def skip_counting_kanji(COUNT_TO=30):
 
     # Start counting from 1 to COUNT_TO
     for i in range(1, COUNT_TO + 1):
+        # Process events to prevent freezing and handle window focus
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:  # Window regains focus
+                pygame.display.flip()  # Redraw the screen
+
         # Clear the screen before displaying each kanji
         screen.fill(screen_color)
 
@@ -12376,7 +12460,7 @@ def skip_counting_kanji(COUNT_TO=30):
 
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
-
+    
 
 def get_character_subset_by_level(student_level, character_list):
     """Returns the subset of characters (Hiragana, Katakana, etc.) to teach or quiz based on the student's level."""
@@ -12815,14 +12899,164 @@ def fetch_lesson_data(lesson_title, student_level):
     return lesson_data
 
 
+# def vocab_teach(session_id, lesson_title):
+#     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
+#     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
+
+#     # Get the student's current level for the lesson title (e.g., 'Japanese Colors', 'Japanese Body Parts')
+#     student_level = get_student_progress(session_id, lesson_title)
+
+#     # Dynamically fetch the dataset based on the student's level
+#     lesson_data = fetch_lesson_data(lesson_title, student_level)
+
+#     if lesson_data is None:
+#         log_message(f"Error: No lesson data found for {lesson_title} at level {student_level}")
+#         return
+
+#     # Font initialization for furigana and translation
+#     furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 50)
+    
+#     translation_font_size = 50
+#     if os.path.isfile(current_font_name_or_path):
+#         translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
+#     else:
+#         translation_font = pygame.font.SysFont(current_font_name_or_path, translation_font_size)
+
+#     # Intro message
+#     screen.fill(screen_color)
+#     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
+#     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
+#               enable_shadow=True, 
+#               # shadow_color=shadow_color, 
+#               max_width=WIDTH)
+#     draw_and_wait_continue_button()
+
+#     # Loop through each vocabulary item
+#     for item in lesson_data['questions']:
+#         screen.fill(screen_color)
+
+#         # Adjust the kanji font size dynamically based on kanji length
+#         kanji_length = len(item['kanji'])
+#         if kanji_length <= 3:
+#             kanji_font_size = 215
+#         else:
+#             kanji_font_size = 75
+
+#         # Initialize kanji font dynamically based on the determined size
+#         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
+
+#         # Display furigana, kanji, and translation
+#         draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
+#                   center=True, 
+#                   max_width=WIDTH,
+#                   enable_shadow=True, 
+#                   # shadow_color=shadow_color
+#                   )
+#         draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
+#                   center=True, 
+#                   enable_shadow=True, 
+#                   # shadow_color=shadow_color
+#                   )
+#         draw_text(item['translation'], translation_font, text_color, x=0, 
+#                   y=HEIGHT * 0.75, 
+#                   center=True, 
+#                   enable_shadow=True, 
+#                   # shadow_color=shadow_color, 
+#                   max_width=WIDTH)
+
+#         pygame.display.flip()
+#         speak_japanese(item['furigana'])
+#         time.sleep(1)
+
+#         # Try to show the image, assume JPG first and fallback to PNG
+#         image_loaded = False
+#         try:
+#             # Try loading the image as a JPG first
+#             jpg_image_path = item['image'].replace(".png", ".jpg") if item['image'].endswith(".png") else item['image'] + ".jpg"
+#             image = pygame.image.load(jpg_image_path)
+#             image_loaded = True
+#         except FileNotFoundError:
+#             try:
+#                 # If JPG not found, fallback to PNG
+#                 image = pygame.image.load(item['image'])
+#                 image_loaded = True
+#             except FileNotFoundError:
+#                 log_message(f"Image not found: {jpg_image_path} or {item['image']}. Displaying text only.")
+
+#         if image_loaded:
+#             # Resize and display the image if it was loaded successfully
+#             image = pygame.transform.scale(image, (WIDTH, HEIGHT))
+#             screen.blit(image, (0, 0))
+#             pygame.display.flip()
+#             speak_japanese(item['furigana'])
+#             time.sleep(1)
+#         else:
+#             # If no image is found, just display the text
+#             pygame.display.flip()
+
+#     # Completion message
+#     screen.fill(screen_color)
+#     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
+#     draw_text(completion_message, 
+#               translation_font, 
+#               text_color, 
+#               x=0, 
+#               y=HEIGHT * 0.4, 
+#               center=True, 
+#               enable_shadow=True, 
+#               # shadow_color=shadow_color, 
+#               max_width=WIDTH)
+
+#     # Check if there's a URL in the lesson data and open it in the browser
+#     if 'URL' in lesson_data and lesson_data['URL']:
+#         log_message(f"Opening URL: {lesson_data['URL']}")
+#         webbrowser.open(lesson_data['URL'])
+
+#     # Draw the "Repeat?" button (bottom left) and "Continue..." button (bottom right)
+#     repeat_text = "Repeat?"
+#     continue_text = "Continue..."
+
+#     # 10/24/2024
+#     continue_font_size = int(get_dynamic_font_size() * 0.8)  
+#     # Load the font using the dynamic size
+#     if os.path.isfile(current_font_name_or_path):
+#         # Load from a file path
+#         continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+#     else:
+#         # Load from system fonts
+#         continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+#     # Draw both text buttons and get their rects
+#     repeat_button_rect = draw_text(repeat_text, continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9,
+#                                    enable_shadow=True, 
+#                                    # shadow_color=shadow_color, 
+#                                    return_rect=True)
+#     continue_button_rect = draw_text(continue_text, continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9,
+#                                      enable_shadow=True, 
+#                                      # shadow_color=shadow_color, 
+#                                      return_rect=True)
+
+#     pygame.display.flip()
+
+#     # Wait for input
+#     button_clicked = False
+#     while not button_clicked:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = event.pos
+#                 if repeat_button_rect.collidepoint(mouse_pos):
+#                     vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
+#                     button_clicked = True
+#                 elif continue_button_rect.collidepoint(mouse_pos):
+#                     button_clicked = True  # Exit the loop and continue
 def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
-    # Get the student's current level for the lesson title (e.g., 'Japanese Colors', 'Japanese Body Parts')
+    # Get the student's current level for the lesson title
     student_level = get_student_progress(session_id, lesson_title)
-
-    # Dynamically fetch the dataset based on the student's level
     lesson_data = fetch_lesson_data(lesson_title, student_level)
 
     if lesson_data is None:
@@ -12842,9 +13076,7 @@ def vocab_teach(session_id, lesson_title):
     screen.fill(screen_color)
     intro_message = f"Let's learn {lesson_data['quiz_title']}!"
     draw_text(intro_message, translation_font, text_color, x=0, y=HEIGHT * 0.2, center=True, 
-              enable_shadow=True, 
-              # shadow_color=shadow_color, 
-              max_width=WIDTH)
+              enable_shadow=True, max_width=WIDTH)
     draw_and_wait_continue_button()
 
     # Loop through each vocabulary item
@@ -12853,36 +13085,38 @@ def vocab_teach(session_id, lesson_title):
 
         # Adjust the kanji font size dynamically based on kanji length
         kanji_length = len(item['kanji'])
-        if kanji_length <= 3:
-            kanji_font_size = 215
-        else:
-            kanji_font_size = 75
-
-        # Initialize kanji font dynamically based on the determined size
+        kanji_font_size = 215 if kanji_length <= 3 else 75
         kanji_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", kanji_font_size)
 
         # Display furigana, kanji, and translation
-        draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, 
-                  center=True, 
-                  max_width=WIDTH,
-                  enable_shadow=True, 
-                  # shadow_color=shadow_color
-                  )
-        draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, 
-                  center=True, 
-                  enable_shadow=True, 
-                  # shadow_color=shadow_color
-                  )
-        draw_text(item['translation'], translation_font, text_color, x=0, 
-                  y=HEIGHT * 0.75, 
-                  center=True, 
-                  enable_shadow=True, 
-                  # shadow_color=shadow_color, 
-                  max_width=WIDTH)
+        draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, max_width=WIDTH,
+                  enable_shadow=True)
+        draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True)
+        draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
+                  enable_shadow=True, max_width=WIDTH)
 
+        # Update the display after drawing text
         pygame.display.flip()
+        
+        # Speak the word aloud
         speak_japanese(item['furigana'])
         time.sleep(1)
+
+        # Handle focus and event processing for each word display
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:
+                # If focus is regained, redraw the current word and image
+                screen.fill(screen_color)
+                draw_text(item['furigana'], furigana_font, text_color, x=0, y=HEIGHT * 0.1, center=True, 
+                          max_width=WIDTH, enable_shadow=True)
+                draw_text(item['kanji'], kanji_font, text_color, x=0, y=HEIGHT * 0.3, center=True, 
+                          enable_shadow=True)
+                draw_text(item['translation'], translation_font, text_color, x=0, y=HEIGHT * 0.75, center=True, 
+                          enable_shadow=True, max_width=WIDTH)
+                pygame.display.flip()
 
         # Try to show the image, assume JPG first and fallback to PNG
         image_loaded = False
@@ -12910,64 +13144,48 @@ def vocab_teach(session_id, lesson_title):
             # If no image is found, just display the text
             pygame.display.flip()
 
-    # Completion message
+    # Completion message and buttons
     screen.fill(screen_color)
     completion_message = f"Great job! You just learned {lesson_data['quiz_title']}!"
-    draw_text(completion_message, 
-              translation_font, 
-              text_color, 
-              x=0, 
-              y=HEIGHT * 0.4, 
-              center=True, 
-              enable_shadow=True, 
-              # shadow_color=shadow_color, 
-              max_width=WIDTH)
+    draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+              enable_shadow=True, max_width=WIDTH)
 
-    # Check if there's a URL in the lesson data and open it in the browser
-    if 'URL' in lesson_data and lesson_data['URL']:
-        log_message(f"Opening URL: {lesson_data['URL']}")
-        webbrowser.open(lesson_data['URL'])
-
-    # Draw the "Repeat?" button (bottom left) and "Continue..." button (bottom right)
-    repeat_text = "Repeat?"
-    continue_text = "Continue..."
-
-    # 10/24/2024
+    # Draw "Repeat?" and "Continue..." buttons
     continue_font_size = int(get_dynamic_font_size() * 0.8)  
-    # Load the font using the dynamic size
     if os.path.isfile(current_font_name_or_path):
-        # Load from a file path
         continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
     else:
-        # Load from system fonts
         continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
-    # Draw both text buttons and get their rects
-    repeat_button_rect = draw_text(repeat_text, continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9,
-                                   enable_shadow=True, 
-                                   # shadow_color=shadow_color, 
-                                   return_rect=True)
-    continue_button_rect = draw_text(continue_text, continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9,
-                                     enable_shadow=True, 
-                                     # shadow_color=shadow_color, 
-                                     return_rect=True)
+
+    repeat_button_rect = draw_text("Repeat?", continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9, 
+                                   enable_shadow=True, return_rect=True)
+    continue_button_rect = draw_text("Continue...", continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9, 
+                                     enable_shadow=True, return_rect=True)
 
     pygame.display.flip()
 
-    # Wait for input
+    # Wait for input and handle events
     button_clicked = False
     while not button_clicked:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.ACTIVEEVENT and event.gain == 1:
+                # Redraw completion message and buttons when focus is regained
+                screen.fill(screen_color)
+                draw_text(completion_message, translation_font, text_color, x=0, y=HEIGHT * 0.4, center=True, 
+                          enable_shadow=True, max_width=WIDTH)
+                draw_text("Repeat?", continue_font, text_color, x=WIDTH * 0.05, y=HEIGHT * 0.9, enable_shadow=True)
+                draw_text("Continue...", continue_font, text_color, x=WIDTH * 0.55, y=HEIGHT * 0.9, enable_shadow=True)
+                pygame.display.flip()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 if repeat_button_rect.collidepoint(mouse_pos):
-                    vocab_teach(session_id, lesson_title)  # Restart the lesson if clicked
+                    vocab_teach(session_id, lesson_title)
                     button_clicked = True
                 elif continue_button_rect.collidepoint(mouse_pos):
-                    button_clicked = True  # Exit the loop and continue
-
+                    button_clicked = True
 
     
 
