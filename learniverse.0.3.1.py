@@ -18,6 +18,7 @@ import random
 import sqlite3
 import sys
 import time
+from unidecode import unidecode
 import webbrowser
 
 
@@ -4668,39 +4669,76 @@ def set_haruka_slow(engine):
     Parameters:
     engine (pyttsx3.Engine): The text-to-speech engine instance.
     """
-    # Try setting Ayumi as the voice if available
     ayumi_voice_id = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\MSTTS_V110_jaJP_AyumiM"
     haruka_voice_id = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
 
-    try:
-        # Attempt to set Ayumi
-        engine.setProperty('voice', ayumi_voice_id)
-        print("Ayumi voice set.")
-    except Exception:
-        # Fall back to Haruka if Ayumi is not available
-        engine.setProperty('voice', haruka_voice_id)
-        print("Ayumi not found; using Haruka as a fallback.")
+    # Get a list of available voices
+    voices = engine.getProperty('voices')
+    available_voice_ids = [voice.id for voice in voices]
+
+    # Check for Ayumi first
+    if ayumi_voice_id in available_voice_ids:
+        try:
+            engine.setProperty('voice', ayumi_voice_id)
+            print("Ayumi voice set.")
+        except Exception as e:
+            print(f"Failed to set Ayumi voice: {e}")
+    # Check for Haruka only if Ayumi is not found
+    elif haruka_voice_id in available_voice_ids:
+        try:
+            engine.setProperty('voice', haruka_voice_id)
+            print("Ayumi not found; using Haruka as a fallback.")
+        except Exception as e:
+            print(f"Failed to set Haruka voice: {e}")
+    else:
+        print("Neither Ayumi nor Haruka voices are available. Defaulting to system voice.")
 
     # Set the speech rate to 100 (slow)
     engine.setProperty('rate', 100)
+
     
     
+# def speak_japanese(text):
+#     """
+#     Set up the text-to-speech engine to use the Japanese voice and speak the given text.
+
+#     Parameters:
+#     text (str): The text to speak out loud in Japanese.
+#     """
+#     global engine  # Ensure we use the global engine
+
+#     # Set the voice to Haruka (Japanese) and slow down the rate
+#     set_haruka_slow(engine)
+    
+#     # Use the engine to say the given text
+#     engine.say(text)
+#     engine.runAndWait()  # Block while the speech finishes
 def speak_japanese(text):
     """
-    Set up the text-to-speech engine to use the Japanese voice and speak the given text.
+    Attempt to play a pre-rendered WAV file for the given Japanese text.
+    If the file does not exist or cannot be played, handle gracefully.
 
     Parameters:
-    text (str): The text to speak out loud in Japanese.
+    text (str): The Japanese text for which to play the corresponding WAV file.
     """
-    global engine  # Ensure we use the global engine
+    # Convert Japanese text to Romanized filename format
+    romaji_filename = unidecode(text)[:50]  # Truncate for safety
+    wav_file_path = f"assets/audio/{romaji_filename}.wav"
 
-    # Set the voice to Haruka (Japanese) and slow down the rate
-    set_haruka_slow(engine)
+    try:
+        # Check if the WAV file exists and play it
+        if os.path.isfile(wav_file_path):
+            sound = pygame.mixer.Sound(wav_file_path)
+            sound.play()
+            while pygame.mixer.get_busy():
+                pass  # Wait until the sound finishes playing
+            print(f"Played audio file: {wav_file_path}")
+        else:
+            raise FileNotFoundError(f"No audio file found for '{text}' at '{wav_file_path}'")
     
-    # Use the engine to say the given text
-    engine.say(text)
-    engine.runAndWait()  # Block while the speech finishes
-
+    except Exception as e:
+        # Log any error that occurs during file playback
+        print(f"Error playing audio for '{text}': {e}")
 
 ############################
 ### Bonus Game Functions ###
@@ -11022,7 +11060,7 @@ def session_manager():
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
-                       "japanese_animals_quiz",             #JP
+                       # "japanese_animals_quiz",             #JP
                        # "japanese_body_parts_teach",         #JP
                        # "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
