@@ -12677,6 +12677,52 @@ def quiz_intro_message(session_id, lesson_title, student_level):
 #             pygame.time.Clock().tick(60)
     
 #     return correct_answers, completion_times
+# def quiz_loop(lesson_title, character_subset, total_questions):
+#     """Handles the quiz loop, ensuring unique questions are selected from the weighted subset."""
+#     correct_answers = 0
+#     completion_times = []
+#     asked_characters = set()  # Track characters that have already been quizzed
+
+#     for problem_count in range(total_questions):
+#         # Select a unique character for the question
+#         character, correct_english = None, None
+#         while not character or (character, correct_english) in asked_characters:
+#             character, correct_english = random.choice(character_subset)
+
+#         # Add the chosen character to the set of asked characters
+#         asked_characters.add((character, correct_english))
+
+#         # Select incorrect answers, ensuring they don't duplicate the correct one
+#         incorrect_answers = random.sample([ch[1] for ch in character_subset if ch[1] != correct_english], 3)
+#         options = [correct_english] + incorrect_answers
+#         random.shuffle(options)
+        
+#         # Display the quiz options and get option rects
+#         option_rects = display_hiragana_quiz(screen, character, options)
+
+#         # Wait for student to select an option
+#         start_time = time.time()
+#         question_complete = False
+#         while not question_complete:
+#             for event in pygame.event.get():
+#                 if event.type == pygame.QUIT:
+#                     pygame.quit()
+#                     sys.exit()
+#                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                     mouse_pos = event.pos
+#                     for rect, option in option_rects:
+#                         if rect.collidepoint(mouse_pos):
+#                             time_taken = round(time.time() - start_time, 1)
+#                             completion_times.append(time_taken)
+#                             if option == correct_english:
+#                                 correct_answers += 1
+#                                 display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
+#                             else:
+#                                 display_result(f"Sorry, the correct answer is {correct_english}")
+#                             question_complete = True
+#             pygame.time.Clock().tick(60)
+    
+#     return correct_answers, completion_times
 def quiz_loop(lesson_title, character_subset, total_questions):
     """Handles the quiz loop, ensuring unique questions are selected from the weighted subset."""
     correct_answers = 0
@@ -12692,8 +12738,14 @@ def quiz_loop(lesson_title, character_subset, total_questions):
         # Add the chosen character to the set of asked characters
         asked_characters.add((character, correct_english))
 
-        # Select incorrect answers, ensuring they don't duplicate the correct one
-        incorrect_answers = random.sample([ch[1] for ch in character_subset if ch[1] != correct_english], 3)
+        # Select three unique incorrect answers
+        all_romaji_options = [ch[1] for ch in character_subset if ch[1] != correct_english]
+        incorrect_answers = set()
+        while len(incorrect_answers) < 3:
+            incorrect_answers.add(random.choice(all_romaji_options))
+        incorrect_answers = list(incorrect_answers)
+
+        # Combine correct answer and unique incorrect answers, then shuffle
         options = [correct_english] + incorrect_answers
         random.shuffle(options)
         
