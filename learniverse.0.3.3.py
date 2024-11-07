@@ -6584,43 +6584,6 @@ def bonus_game_generic():
 ### Math Problem Functions ###
 ##############################
 
-# def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=2.5):
-#     screen.fill(screen_color)
-    
-#     # Dynamically calculate positions based on screen size
-#     right_x = WIDTH * 0.55  # Right edge for alignment
-#     num1_y = HEIGHT * 0.4
-#     num2_y = HEIGHT * 0.5
-#     line_y = HEIGHT * 0.60
-#     sum_y = HEIGHT * 0.63
-    
-#     # Draw the first number (right-aligned) using draw_text
-#     num1_rect = draw_text(
-#         str(num1), font, text_color, right_x, num1_y, center=True, enable_shadow=True, return_rect=True
-#     )
-
-#     # Draw the plus sign (right-aligned with some offset)
-#     plus_sign_x = right_x - num1_rect.width - WIDTH * 0.1
-#     draw_text(
-#         "+", font, text_color, plus_sign_x, num2_y, center=False, enable_shadow=True, 
-#     )
-
-#     # Draw the second number placeholder or the input from the user (right-aligned)
-#     input_text = "?" if first_input else user_input
-#     input_rect = draw_text(
-#         input_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True, return_rect=True
-#     )
-
-#     # Calculate line width with a factor
-#     line_width = max(num1_rect.width, input_rect.width, font.size(str(num1 + num2))[0]) * line_length_factor
-#     pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
-
-#     # Draw the sum (right-aligned)
-#     draw_text(
-#         str(num1 + num2), font, text_color, right_x, sum_y, center=True, enable_shadow=True, 
-#     )
-
-#     pygame.display.flip()
 def display_rainbow_math_problem(num1, num2, user_input, first_input, line_length_factor=2.5):
     screen.fill(screen_color)
     
@@ -6634,8 +6597,8 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
     # Draw the first number (right-aligned)
     num1_text = str(num1)
     num1_width = font.size(num1_text)[0]
-    num1_rect = draw_text(
-        num1_text, font, text_color, right_x - num1_width, num1_y, center=False, enable_shadow=True, return_rect=True
+    draw_text(
+        num1_text, font, text_color, right_x - num1_width, num1_y, center=False, enable_shadow=True
     )
 
     # Draw the plus sign, aligned to num1's position
@@ -6647,8 +6610,8 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
     # Draw the second number or input placeholder (right-aligned)
     input_text = "?" if first_input else str(user_input)
     input_width = font.size(input_text)[0]
-    input_rect = draw_text(
-        input_text, font, text_color, right_x - input_width, num2_y, center=False, enable_shadow=True, return_rect=True
+    draw_text(
+        input_text, font, text_color, right_x - input_width, num2_y, center=False, enable_shadow=True
     )
 
     # Calculate line width based on max width of elements
@@ -6672,7 +6635,6 @@ def display_rainbow_math_problem(num1, num2, user_input, first_input, line_lengt
     )
 
     pygame.display.flip()
-
 
 
 def display_result(result_text, image_folder=None, use_lightning=False):
