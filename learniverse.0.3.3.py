@@ -12336,11 +12336,27 @@ def skip_counting_kanji(COUNT_TO=30):
     draw_and_wait_continue_button()
     
 
+# def get_character_subset_by_level(student_level, character_list):
+#     """Dynamically returns a subset of characters based on the student's level, with specific grouping sizes."""
+    
+#     # Define the group sizes by level
+#     group_sizes = [5, 5, 5, 5, 5, 5, 5, 3, 5, 3, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]  # Pattern for levels: 5 characters per level, except level 8 (3) and level 10 (3)
+
+#     # Calculate the total number of characters to include based on student level
+#     max_characters = 0
+#     for i in range(student_level):
+#         if i < len(group_sizes):
+#             max_characters += group_sizes[i]
+#         else:
+#             max_characters += 5  # Default to 5 characters per level after level 10 if list is longer
+
+#     # Return the subset up to the calculated number of characters
+#     return character_list[:max_characters]
 def get_character_subset_by_level(student_level, character_list):
     """Dynamically returns a subset of characters based on the student's level, with specific grouping sizes."""
     
     # Define the group sizes by level
-    group_sizes = [5, 5, 5, 5, 5, 5, 5, 3, 5, 3, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]  # Pattern for levels: 5 characters per level, except level 8 (3) and level 10 (3)
+    group_sizes = [5, 5, 5, 5, 5, 5, 5, 3, 5, 3, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 
     # Calculate the total number of characters to include based on student level
     max_characters = 0
@@ -12348,7 +12364,7 @@ def get_character_subset_by_level(student_level, character_list):
         if i < len(group_sizes):
             max_characters += group_sizes[i]
         else:
-            max_characters += 5  # Default to 5 characters per level after level 10 if list is longer
+            max_characters += 3  # Extend pattern with 3 characters per level after group_sizes
 
     # Return the subset up to the calculated number of characters
     return character_list[:max_characters]
@@ -12623,13 +12639,60 @@ def quiz_intro_message(session_id, lesson_title, student_level):
               )
     draw_and_wait_continue_button()
 
+
+# def quiz_loop(lesson_title, character_subset, total_questions):
+#     """Handles the quiz loop, question selection, and answers."""
+#     correct_answers = 0
+#     completion_times = []
+
+#     for problem_count in range(total_questions):
+#         character, correct_english = character_subset[problem_count % len(character_subset)]
+#         incorrect_answers = random.sample([ch[1] for ch in character_subset if ch[1] != correct_english], 3)
+#         options = [correct_english] + incorrect_answers
+#         random.shuffle(options)
+        
+#         # Display the quiz options and get option rects
+#         option_rects = display_hiragana_quiz(screen, character, options)
+
+#         # Wait for student to select an option
+#         start_time = time.time()
+#         question_complete = False
+#         while not question_complete:
+#             for event in pygame.event.get():
+#                 if event.type == pygame.QUIT:
+#                     pygame.quit()
+#                     sys.exit()
+#                 elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                     mouse_pos = event.pos
+#                     for rect, option in option_rects:
+#                         if rect.collidepoint(mouse_pos):
+#                             time_taken = round(time.time() - start_time, 1)
+#                             completion_times.append(time_taken)
+#                             if option == correct_english:
+#                                 correct_answers += 1
+#                                 display_result("Correct!", "assets/images/fast_cats", use_lightning=(time_taken < 3))
+#                             else:
+#                                 display_result(f"Sorry, the correct answer is {correct_english}")
+#                             question_complete = True
+#             pygame.time.Clock().tick(60)
+    
+#     return correct_answers, completion_times
 def quiz_loop(lesson_title, character_subset, total_questions):
-    """Handles the quiz loop, question selection, and answers."""
+    """Handles the quiz loop, ensuring unique questions are selected from the weighted subset."""
     correct_answers = 0
     completion_times = []
+    asked_characters = set()  # Track characters that have already been quizzed
 
     for problem_count in range(total_questions):
-        character, correct_english = character_subset[problem_count % len(character_subset)]
+        # Select a unique character for the question
+        character, correct_english = None, None
+        while not character or (character, correct_english) in asked_characters:
+            character, correct_english = random.choice(character_subset)
+
+        # Add the chosen character to the set of asked characters
+        asked_characters.add((character, correct_english))
+
+        # Select incorrect answers, ensuring they don't duplicate the correct one
         incorrect_answers = random.sample([ch[1] for ch in character_subset if ch[1] != correct_english], 3)
         options = [correct_english] + incorrect_answers
         random.shuffle(options)
@@ -12660,6 +12723,7 @@ def quiz_loop(lesson_title, character_subset, total_questions):
             pygame.time.Clock().tick(60)
     
     return correct_answers, completion_times
+
 
 def final_score_display(session_id, lesson_id, correct_answers, total_questions, completion_times, lesson_start_time, lesson_end_time, lesson_title):
     """Displays the final score and updates the student's progress."""
@@ -12751,6 +12815,11 @@ def hiragana_quiz(session_id):
 
     # Adjust the number of Hiragana characters based on the student's level
     hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
+    
+    # Favor the last few characters of the subset by duplicating them
+    hiragana_subset += hiragana_subset[-5:] * student_level  # Duplicate the last 5 characters for favoring
+
+    # Shuffle to randomize quiz questions
     random.shuffle(hiragana_subset)
 
     correct_answers = 0
