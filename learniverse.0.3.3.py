@@ -11064,8 +11064,8 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       # "hiragana_teach",                    #JP
-                       # "hiragana_quiz",                     #JP    
+                       "hiragana_teach",                    #JP
+                       "hiragana_quiz",                     #JP    
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
@@ -11090,7 +11090,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       "rainbow_numbers",                   #Math
+                       # "rainbow_numbers",                   #Math
                        
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
@@ -12174,72 +12174,6 @@ def month_of_the_year():
                     waiting = False  # Exit the loop when "Continue..." is clicked
 
 
-# def skip_counting_japanese(COUNT_TO=30):
-#     """Performs skip counting in Arabic numerals up to COUNT_TO, while speaking the numbers in Japanese."""
-#     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
-
-#     # Define a larger size for the Arabic numerals
-#     large_font_size = 200  # Adjust size as necessary
-
-#     # Initialize the larger font based on whether the current font is a file or system font
-#     if os.path.isfile(current_font_name_or_path):
-#         large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
-#     else:
-#         large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
-
-#     # Clear the screen and inform the student about the activity
-#     screen.fill(screen_color)
-#     intro_message = f"Let's count in Japanese, up to {COUNT_TO}!"
-
-#     # Display the intro message and update the screen using the default global font
-#     draw_text(intro_message, 
-#               font, 
-#               text_color, 
-#               x=0, 
-#               y=HEIGHT * 0.4, 
-#               center=True, 
-#               enable_shadow=True, 
-#               shadow_color=shadow_color,
-#               max_width=WIDTH)
-    
-#     # Draw the "Continue..." button after the intro message
-#     draw_and_wait_continue_button()
-
-#     # Start counting from 1 to COUNT_TO
-#     for i in range(1, COUNT_TO + 1):
-#         # Clear the screen before displaying each number
-#         screen.fill(screen_color)
-
-#         # Convert the number to string for display
-#         number_str = str(i)
-
-#         # Display the number in the center of the screen using the larger font size
-#         draw_text(number_str, large_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-
-#         # Update the screen after drawing the number
-#         pygame.display.flip()
-
-#         # Speak the number aloud in Japanese 
-#         speak_japanese(number_str)
-
-#         # Pause for a second before showing the next number
-#         time.sleep(1)
-
-#     # After completing the skip counting, show a dynamic completion message using the default font
-#     completion_message = f"Great job! You counted up to {COUNT_TO}!"
-#     screen.fill(screen_color)
-#     draw_text(completion_message, 
-#               font, 
-#               text_color, 
-#               x=0, 
-#               y=HEIGHT * 0.4, 
-#               center=True, 
-#               enable_shadow=True, 
-#               shadow_color=shadow_color,
-#               max_width=WIDTH)
-
-#     # Draw the "Continue..." button after the completion message
-#     draw_and_wait_continue_button()
 def skip_counting_japanese(COUNT_TO=30):
     """Performs skip counting in Arabic numerals up to COUNT_TO, while speaking the numbers in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
@@ -12315,82 +12249,7 @@ def skip_counting_japanese(COUNT_TO=30):
     # Draw the "Continue..." button after the completion message
     draw_and_wait_continue_button()
 
-# def skip_counting_kanji(COUNT_TO=30):
-#     """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
-#     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
 
-#     # Define a larger size for the kanji numerals and furigana
-#     large_kanji_font_size = 200  # Adjust size as necessary
-#     furigana_font_size = 60
-
-#     # Initialize the fonts for kanji and furigana using a Japanese-supporting font
-#     if os.path.isfile(current_font_name_or_path):
-#         kanji_font = pygame.font.Font(current_font_name_or_path, large_kanji_font_size)
-#         furigana_font = pygame.font.Font(current_font_name_or_path, furigana_font_size)
-#     else:
-#         kanji_font = pygame.font.SysFont('msgothic', large_kanji_font_size)  # Example: MS Gothic or another font that supports Kanji
-#         furigana_font = pygame.font.SysFont('msgothic', furigana_font_size)
-
-#     # Dictionary to map numbers (1 to 30) to their corresponding Kanji and Furigana
-#     kanji_numbers = {
-#         1: ("一", "いち"), 2: ("二", "に"), 3: ("三", "さん"), 4: ("四", "よん"), 5: ("五", "ご"),
-#         6: ("六", "ろく"), 7: ("七", "なな"), 8: ("八", "はち"), 9: ("九", "きゅう"), 10: ("十", "じゅう"),
-#         11: ("十一", "じゅういち"), 12: ("十二", "じゅうに"), 13: ("十三", "じゅうさん"), 14: ("十四", "じゅうよん"),
-#         15: ("十五", "じゅうご"), 16: ("十六", "じゅうろく"), 17: ("十七", "じゅうなな"), 18: ("十八", "じゅうはち"),
-#         19: ("十九", "じゅうきゅう"), 20: ("二十", "にじゅう"), 21: ("二十一", "にじゅういち"),
-#         22: ("二十二", "にじゅうに"), 23: ("二十三", "にじゅうさん"), 24: ("二十四", "にじゅうよん"),
-#         25: ("二十五", "にじゅうご"), 26: ("二十六", "にじゅうろく"), 27: ("二十七", "にじゅうなな"),
-#         28: ("二十八", "にじゅうはち"), 29: ("二十九", "にじゅうきゅう"), 30: ("三十", "さんじゅう")
-#     }
-
-#     # Clear the screen and inform the student about the activity dynamically
-#     screen.fill(screen_color)
-#     intro_message = f"Let's count using kanji up to {COUNT_TO}!"
-
-#     # Display the intro message and update the screen using the default global font, with word wrapping
-#     draw_text(intro_message, 
-#               font, 
-#               text_color, 
-#               x=0, 
-#               y=HEIGHT * 0.4, 
-#               center=True, 
-#               enable_shadow=True, 
-#               shadow_color=shadow_color,
-#               max_width=WIDTH)
-
-#     # Draw the "Continue..." button after the intro message
-#     draw_and_wait_continue_button()
-
-#     # Start counting from 1 to COUNT_TO
-#     for i in range(1, COUNT_TO + 1):
-#         # Clear the screen before displaying each kanji
-#         screen.fill(screen_color)
-
-#         # Get the Kanji and Furigana for the current number
-#         kanji, furigana = kanji_numbers[i]
-
-#         # Display furigana above the kanji
-#         draw_text(furigana, furigana_font, text_color, x=0, y=HEIGHT * 0.3, center=True, enable_shadow=True, shadow_color=shadow_color)
-
-#         # Display the kanji in the center of the screen using the larger font size
-#         draw_text(kanji, kanji_font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color)
-
-#         # Update the screen after drawing the kanji and furigana
-#         pygame.display.flip()
-
-#         # Speak the number aloud in Japanese
-#         speak_japanese(furigana)
-
-#         # Pause for a second before showing the next number
-#         time.sleep(1)
-
-#     # After completing the skip counting, show a dynamic completion message using the default font, with word wrapping
-#     completion_message = f"Great job counting with kanji up to {COUNT_TO}!"
-#     screen.fill(screen_color)
-#     draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True, enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-
-#     # Draw the "Continue..." button after the completion message
-#     draw_and_wait_continue_button()
 def skip_counting_kanji(COUNT_TO=30):
     """Performs skip counting using kanji, with furigana displayed above the kanji and numbers spoken in Japanese."""
     global screen_color, text_color, shadow_color, current_font_name_or_path, font  # Access theme-related globals
@@ -12478,8 +12337,20 @@ def skip_counting_kanji(COUNT_TO=30):
     
 
 def get_character_subset_by_level(student_level, character_list):
-    """Returns the subset of characters (Hiragana, Katakana, etc.) to teach or quiz based on the student's level."""
-    max_characters = min(student_level * 5, len(character_list))
+    """Dynamically returns a subset of characters based on the student's level, with specific grouping sizes."""
+    
+    # Define the group sizes by level
+    group_sizes = [5, 5, 5, 5, 5, 5, 5, 3, 5, 3, 5, 5, 5, 5, 5, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]  # Pattern for levels: 5 characters per level, except level 8 (3) and level 10 (3)
+
+    # Calculate the total number of characters to include based on student level
+    max_characters = 0
+    for i in range(student_level):
+        if i < len(group_sizes):
+            max_characters += group_sizes[i]
+        else:
+            max_characters += 5  # Default to 5 characters per level after level 10 if list is longer
+
+    # Return the subset up to the calculated number of characters
     return character_list[:max_characters]
 
 
@@ -12507,15 +12378,6 @@ def display_completion_message(lesson_type, student_level, url):
     draw_and_wait_continue_button()
 
 
-# def teach_characters(character_subset, large_font):
-#     """Displays each character in the subset and reads them aloud."""
-#     for char in character_subset:
-#         screen.fill(screen_color)
-#         draw_text(char, j_font, text_color, x=0, y=HEIGHT * 0.3, center=True,
-#                   enable_shadow=True, shadow_color=shadow_color, font_override=large_font)
-#         pygame.display.flip()
-#         speak_japanese(char)
-#         time.sleep(1)
 def teach_characters(hiragana_subset, font):
     """Displays each Hiragana character one by one and ensures the screen redraws with each."""
     for char in hiragana_subset:
@@ -12548,8 +12410,49 @@ def hiragana_teach(session_id):
     # Retrieve the student's current level for the Hiragana lesson
     student_level = get_student_progress(session_id, 'Hiragana')
 
+    # URLs for each level
+    level_urls = {
+        # Basic Hiragana
+        1: "https://www.youtube.com/watch?v=bEPagHe6iUI",  # あ
+        2: "https://www.youtube.com/watch?v=X4mCd2y-k4c",  # か
+        3: "https://www.youtube.com/watch?v=J9MvqJnj5kQ",  # さ
+        4: "https://www.youtube.com/watch?v=r9aH5OoyloM",  # た
+        5: "https://www.youtube.com/watch?v=rsL86uUTJpw",  # な
+        6: "https://www.youtube.com/watch?v=z_47dk9eFFs",  # は
+        7: "https://www.youtube.com/watch?v=_Hk2d4AO-Uk",  # ま
+        8: "https://www.youtube.com/watch?v=HBC2LrtoIWM",  # や
+        9: "https://www.youtube.com/watch?v=AmQ9kmom1v8",  # ら
+        10: "https://www.youtube.com/watch?v=awAReY29ZGs", # わ-ん
+        
+        # Voiced Hiragana
+        11: "https://www.youtube.com/watch?v=lW8V5uMMM-4", # が
+        12: "https://www.youtube.com/watch?v=QaL6JSCbpWo", # ざ
+        13: "https://www.youtube.com/watch?v=5yPgd1sR6KY", # だ
+        14: "https://www.youtube.com/watch?v=VYCJDaWWcIs", # ば
+        15: "https://www.youtube.com/watch?v=EZb3fs4Ntgc", # ぱ
+        
+        # Contracted Sounds (ya-yōon)
+        16: "https://www.youtube.com/watch?v=nGLciw6mZCo", # きゃ
+        17: "https://www.youtube.com/watch?v=Asy10OI-lFU", # しゃ
+        18: "https://www.youtube.com/watch?v=V34OFinfTbU", # ちゃ
+        
+        # Missing placeholders for levels with no URLs provided
+        19: "",  # にゃ (placeholder)
+        20: "",  # ひゃ (placeholder)
+        21: "",  # みゃ (placeholder)
+        22: "",  # りゃ (placeholder)
+        
+        # Voiced Contracted Sounds (ya-yōon)
+        23: "https://www.youtube.com/watch?v=k4XbM3pCNTs",  # ぎゃ
+        24: "",  # じゃ (placeholder)
+        25: "",  # びゃ (placeholder)
+        26: ""   # ぴゃ (placeholder)
+    }
+
+
     # List of the 46 basic hiragana characters
     hiragana_list = [
+        # Basic Hiragana
         "あ", "い", "う", "え", "お", 
         "か", "き", "く", "け", "こ", 
         "さ", "し", "す", "せ", "そ", 
@@ -12559,9 +12462,33 @@ def hiragana_teach(session_id):
         "ま", "み", "む", "め", "も", 
         "や", "ゆ", "よ", 
         "ら", "り", "る", "れ", "ろ", 
-        "わ", "を", 
-        "ん"
+        "わ", "を", "ん",
+        
+        # Voiced Hiragana - "ga", "za", "da", "ba" columns
+        "が", "ぎ", "ぐ", "げ", "ご",  # ga, gi, gu, ge, go
+        "ざ", "じ", "ず", "ぜ", "ぞ",  # za, ji, zu, ze, zo
+        "だ", "ぢ", "づ", "で", "ど",  # da, (ji), (zu), de, do
+        "ば", "び", "ぶ", "べ", "ぼ",  # ba, bi, bu, be, bo
+        
+        # "Pa" column with handakuten
+        "ぱ", "ぴ", "ぷ", "ぺ", "ぽ"   # pa, pi, pu, pe, po
+        
+        # Contracted Sounds (ya-yōon) 
+        "きゃ", "きゅ", "きょ",  # kya, kyu, kyo
+        "しゃ", "しゅ", "しょ",  # sha, shu, sho
+        "ちゃ", "ちゅ", "ちょ",  # cha, chu, cho
+        "にゃ", "にゅ", "にょ",  # nya, nyu, nyo
+        "ひゃ", "ひゅ", "ひょ",  # hya, hyu, hyo
+        "みゃ", "みゅ", "みょ",  # mya, myu, myo
+        "りゃ", "りゅ", "りょ",  # rya, ryu, ryo
+        
+        # Voiced Contracted Sounds (ya-yōon)
+        "ぎゃ", "ぎゅ", "ぎょ",  # gya, gyu, gyo
+        "じゃ", "じゅ", "じょ",  # ja, ju, jo
+        "びゃ", "びゅ", "びょ",  # bya, byu, byo
+        "ぴゃ", "ぴゅ", "ぴょ"   # pya, pyu, pyo
     ]
+
 
     # Get the subset of Hiragana based on the student's level
     hiragana_subset = get_character_subset_by_level(student_level, hiragana_list)
@@ -12582,11 +12509,19 @@ def hiragana_teach(session_id):
             elif event.type == pygame.ACTIVEEVENT and event.gain == 1:  # Window regains focus
                 pygame.display.flip()  # Redraw the screen
 
-        # Clear the screen and display the current character
+        # Clear the screen and display the current character with a shadow effect
         screen.fill(screen_color)
+        
+        # Render shadow character slightly offset
+        shadow_surface = large_japanese_font.render(char, True, shadow_color)
+        shadow_rect = shadow_surface.get_rect(center=(screen.get_width() // 2 + 5, screen.get_height() // 2 + 5))  # Offset shadow slightly
+        screen.blit(shadow_surface, shadow_rect)
+        
+        # Render main character on top of shadow
         character_surface = large_japanese_font.render(char, True, text_color)
         character_rect = character_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
         screen.blit(character_surface, character_rect)
+        
         pygame.display.flip()  # Update the display
 
         # Play the WAV file
@@ -12595,10 +12530,9 @@ def hiragana_teach(session_id):
         # Optional delay to control playback speed
         time.sleep(0.5)
 
-    # Show completion message and open the URL
-    display_completion_message('Hiragana', student_level, "https://www.youtube.com/watch?v=bEPagHe6iUI")
-
-
+    # Show completion message and open the appropriate URL based on level
+    completion_url = level_urls.get(student_level, "https://www.youtube.com/watch?v=s4RXDEVFO_E")  # Default to level 1 URL if level not found
+    display_completion_message('Hiragana', student_level, completion_url)
 
 
 def katakana_teach(session_id):
@@ -12778,6 +12712,7 @@ def hiragana_quiz(session_id):
 
     # List of Hiragana characters
     hiragana_list = [
+        # Basic Hiragana
         ('あ', 'a'), ('い', 'i'), ('う', 'u'), ('え', 'e'), ('お', 'o'),  # a, i, u, e, o
         ('か', 'ka'), ('き', 'ki'), ('く', 'ku'), ('け', 'ke'), ('こ', 'ko'),  # ka, ki, ku, ke, ko
         ('さ', 'sa'), ('し', 'shi'), ('す', 'su'), ('せ', 'se'), ('そ', 'so'),  # sa, shi, su, se, so
@@ -12787,7 +12722,31 @@ def hiragana_quiz(session_id):
         ('ま', 'ma'), ('み', 'mi'), ('む', 'mu'), ('め', 'me'), ('も', 'mo'),  # ma, mi, mu, me, mo
         ('や', 'ya'), ('ゆ', 'yu'), ('よ', 'yo'),  # ya, yu, yo
         ('ら', 'ra'), ('り', 'ri'), ('る', 'ru'), ('れ', 're'), ('ろ', 'ro'),  # ra, ri, ru, re, ro
-        ('わ', 'wa'), ('を', 'wo'), ('ん', 'n')  # wa, wo, n
+        ('わ', 'wa'), ('を', 'wo'), ('ん', 'n'),  # wa, wo, n
+    
+        # Voiced Hiragana - "ga", "za", "da", "ba" columns
+        ('が', 'ga'), ('ぎ', 'gi'), ('ぐ', 'gu'), ('げ', 'ge'), ('ご', 'go'),  # ga, gi, gu, ge, go
+        ('ざ', 'za'), ('じ', 'ji'), ('ず', 'zu'), ('ぜ', 'ze'), ('ぞ', 'zo'),  # za, ji, zu, ze, zo
+        ('だ', 'da'), ('ぢ', 'ji'), ('づ', 'zu'), ('で', 'de'), ('ど', 'do'),  # da, ji, zu, de, do
+        ('ば', 'ba'), ('び', 'bi'), ('ぶ', 'bu'), ('べ', 'be'), ('ぼ', 'bo'),  # ba, bi, bu, be, bo
+        
+        # "Pa" column with handakuten
+        ('ぱ', 'pa'), ('ぴ', 'pi'), ('ぷ', 'pu'), ('ぺ', 'pe'), ('ぽ', 'po'),  # pa, pi, pu, pe, po
+    
+        # Contracted Sounds (ya-yōon)
+        ('きゃ', 'kya'), ('きゅ', 'kyu'), ('きょ', 'kyo'),  # kya, kyu, kyo
+        ('しゃ', 'sha'), ('しゅ', 'shu'), ('しょ', 'sho'),  # sha, shu, sho
+        ('ちゃ', 'cha'), ('ちゅ', 'chu'), ('ちょ', 'cho'),  # cha, chu, cho
+        ('にゃ', 'nya'), ('にゅ', 'nyu'), ('にょ', 'nyo'),  # nya, nyu, nyo
+        ('ひゃ', 'hya'), ('ひゅ', 'hyu'), ('ひょ', 'hyo'),  # hya, hyu, hyo
+        ('みゃ', 'mya'), ('みゅ', 'myu'), ('みょ', 'myo'),  # mya, myu, myo
+        ('りゃ', 'rya'), ('りゅ', 'ryu'), ('りょ', 'ryo'),  # rya, ryu, ryo
+    
+        # Voiced Contracted Sounds (ya-yōon)
+        ('ぎゃ', 'gya'), ('ぎゅ', 'gyu'), ('ぎょ', 'gyo'),  # gya, gyu, gyo
+        ('じゃ', 'ja'), ('じゅ', 'ju'), ('じょ', 'jo'),  # ja, ju, jo
+        ('びゃ', 'bya'), ('びゅ', 'byu'), ('びょ', 'byo'),  # bya, byu, byo
+        ('ぴゃ', 'pya'), ('ぴゅ', 'pyu'), ('ぴょ', 'pyo')   # pya, pyu, pyo
     ]
 
     # Adjust the number of Hiragana characters based on the student's level
