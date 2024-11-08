@@ -6557,12 +6557,15 @@ def generate_math_problem(min_val, max_val, operation="add"):
 def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     screen.fill(screen_color)
 
+    # Control for minimum answer line width
+    min_line_width = 150  # Adjust this value as needed
+
     # Dynamically calculate positions based on screen size
     right_x = WIDTH * 0.55  # Right edge for alignment
     num1_y = HEIGHT * 0.4
     num2_y = HEIGHT * 0.5
-    line_y = HEIGHT * 0.585
-    sum_y = HEIGHT * 0.6
+    line_y = HEIGHT * 0.60
+    sum_y = HEIGHT * 0.65
 
     # Draw the first number (right-aligned with drop shadow)
     num1_text = str(num1)
@@ -6590,16 +6593,16 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
 
     # Calculate line width based on max width of elements
     max_width = max(num1_width, num2_width, font.size(str(num1 + num2))[0])
-    line_width = max_width * 2  # Adjust the line length factor if needed
+    line_width = max(max_width * 1.5, min_line_width)  # Ensures line width is at least min_line_width
 
     # Draw shadow for the answer line
     shadow_offset = 2
     pygame.draw.line(screen, shadow_color, 
-                     (right_x - line_width + shadow_offset, line_y + shadow_offset), 
-                     (right_x + shadow_offset, line_y + shadow_offset), 3)
+                     (right_x * 1.05 - line_width + shadow_offset, line_y + shadow_offset), 
+                     (right_x * 1.05 + shadow_offset, line_y + shadow_offset), 3)
 
     # Draw the actual answer line (sum line)
-    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
+    pygame.draw.line(screen, text_color, (right_x * 1.05 - line_width, line_y), (right_x * 1.05, line_y), 3)
 
     # Draw the sum placeholder or the user input (right-aligned with drop shadow)
     input_text = "?" if first_input else str(user_input)
@@ -6608,6 +6611,8 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
 
     # Refresh the display
     pygame.display.flip()
+
+
 
 
 def single_digit_addition(session_id):
