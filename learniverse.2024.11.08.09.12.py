@@ -10717,10 +10717,17 @@ def student_select_menu():
         for index, student in enumerate(students):
             student_name = student[1]
             student_y = HEIGHT * (0.2 + 0.1 * index)
+
+            # Measure the text width for precise rectangle creation
+            text_width, text_height = font.size(student_name)
+            student_rect = pygame.Rect((WIDTH // 2) - (text_width // 2), student_y, text_width, text_height)
+
             # Check if the mouse is over this student's name and set color accordingly
-            is_hovered = pygame.Rect(0, student_y, WIDTH, font.get_height()).collidepoint(mouse_pos)
+            is_hovered = student_rect.collidepoint(mouse_pos)
             student_color = shadow_color if is_hovered else text_color
-            student_rect = draw_text(student_name, font, student_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
+
+            # Draw the student's name with the appropriate color
+            draw_text(student_name, font, student_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
             student_rects.append((student_rect, student_name))
 
             # Generate particles if hovered
@@ -10799,6 +10806,7 @@ def student_select_menu():
                     student_input += event.unicode
 
         clock.tick(60)
+
 
 
 
