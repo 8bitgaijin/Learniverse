@@ -3824,7 +3824,7 @@ def perfect_score_lesson_skip(student_name, lesson_name):
         
         perfect_score_yesterday = cursor.fetchone()
 
-        # Log the retrieved data for debugging
+        # Log the retrieved data 
         if perfect_score_yesterday:
             log_entry = create_log_message(f"Perfect score found for student ID {student_id} on lesson ID {lesson_id}: {perfect_score_yesterday}")
             log_message(log_entry)
@@ -6497,6 +6497,63 @@ def generate_math_problem(min_val, max_val, operation="add"):
     return num1, num2, answer
 
 
+# def display_math_problem(num1, num2, user_input, first_input, operation="add"):
+#     screen.fill(screen_color)
+
+#     # Dynamically calculate positions based on screen size
+#     right_x = WIDTH * 0.55  # Right edge for alignment
+#     num1_y = HEIGHT * 0.4
+#     num2_y = HEIGHT * 0.5
+#     line_y = HEIGHT * 0.60
+#     sum_y = HEIGHT * 0.65
+
+#     # Draw the first number (right-aligned with drop shadow)
+#     num1_text = str(num1)
+#     draw_text(num1_text, font, text_color, right_x, num1_y, center=True, enable_shadow=True)
+
+#     # Determine the operation sign and adjust position to 0.1 of the screen width
+#     if operation == "add":
+#         operator_sign = "+"
+#     elif operation == "sub":
+#         operator_sign = "-"
+#     elif operation == "mul":
+#         operator_sign = "×"
+#     else:
+#         raise ValueError("Unsupported operation. Use 'add', 'sub', or 'mul'.")
+
+#     # Operator sign with one-tenth width alignment adjustment
+#     operator_sign_x = right_x - font.size(num1_text)[0] - WIDTH * 0.1
+#     draw_text(operator_sign, font, text_color, operator_sign_x, num2_y, enable_shadow=True)
+
+#     # Draw the second number (right-aligned with drop shadow)
+#     num2_text = str(num2)
+#     draw_text(num2_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True)
+
+#     # Draw a simplified line with a drop shadow
+#     line_width = WIDTH * 0.25  # Fixed to 1/4th of the screen width
+#     line_x_start = right_x - line_width
+#     shadow_offset = 2
+
+#     # Draw drop shadow line
+#     pygame.draw.line(screen, shadow_color, 
+#                      (line_x_start + shadow_offset, line_y + shadow_offset), 
+#                      (right_x + shadow_offset, line_y + shadow_offset), 3)
+
+#     # Draw main line
+#     pygame.draw.line(screen, text_color, 
+#                      (line_x_start, line_y), 
+#                      (right_x, line_y), 3)
+
+#     # Draw the sum placeholder or the user input (right-aligned with drop shadow)
+#     if first_input:
+#         input_text = "?"
+#     else:
+#         input_text = user_input
+
+#     draw_text(input_text, font, text_color, right_x, sum_y, center=True, enable_shadow=True)
+
+#     # Refresh the display
+#     pygame.display.flip()
 def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     screen.fill(screen_color)
 
@@ -6504,14 +6561,15 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     right_x = WIDTH * 0.55  # Right edge for alignment
     num1_y = HEIGHT * 0.4
     num2_y = HEIGHT * 0.5
-    line_y = HEIGHT * 0.60
-    sum_y = HEIGHT * 0.65
+    line_y = HEIGHT * 0.585
+    sum_y = HEIGHT * 0.6
 
     # Draw the first number (right-aligned with drop shadow)
     num1_text = str(num1)
-    draw_text(num1_text, font, text_color, right_x, num1_y, center=True, enable_shadow=True)
+    num1_width = font.size(num1_text)[0]
+    draw_text(num1_text, font, text_color, right_x - num1_width, num1_y, center=False, enable_shadow=True)
 
-    # Determine the operation sign and adjust position to 0.1 of the screen width
+    # Determine the operation sign and adjust position
     if operation == "add":
         operator_sign = "+"
     elif operation == "sub":
@@ -6521,36 +6579,32 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     else:
         raise ValueError("Unsupported operation. Use 'add', 'sub', or 'mul'.")
 
-    # Operator sign with one-tenth width alignment adjustment
-    operator_sign_x = right_x - font.size(num1_text)[0] - WIDTH * 0.1
-    draw_text(operator_sign, font, text_color, operator_sign_x, num2_y, enable_shadow=True)
+    # Operator sign, aligned to num1's position with a slight offset
+    operator_sign_x = right_x - num1_width - WIDTH * 0.1
+    draw_text(operator_sign, font, text_color, operator_sign_x, num2_y, center=False, enable_shadow=True)
 
     # Draw the second number (right-aligned with drop shadow)
     num2_text = str(num2)
-    draw_text(num2_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True)
+    num2_width = font.size(num2_text)[0]
+    draw_text(num2_text, font, text_color, right_x - num2_width, num2_y, center=False, enable_shadow=True)
 
-    # Draw a simplified line with a drop shadow
-    line_width = WIDTH * 0.25  # Fixed to 1/4th of the screen width
-    line_x_start = right_x - line_width
+    # Calculate line width based on max width of elements
+    max_width = max(num1_width, num2_width, font.size(str(num1 + num2))[0])
+    line_width = max_width * 2  # Adjust the line length factor if needed
+
+    # Draw shadow for the answer line
     shadow_offset = 2
-
-    # Draw drop shadow line
     pygame.draw.line(screen, shadow_color, 
-                     (line_x_start + shadow_offset, line_y + shadow_offset), 
+                     (right_x - line_width + shadow_offset, line_y + shadow_offset), 
                      (right_x + shadow_offset, line_y + shadow_offset), 3)
 
-    # Draw main line
-    pygame.draw.line(screen, text_color, 
-                     (line_x_start, line_y), 
-                     (right_x, line_y), 3)
+    # Draw the actual answer line (sum line)
+    pygame.draw.line(screen, text_color, (right_x - line_width, line_y), (right_x, line_y), 3)
 
     # Draw the sum placeholder or the user input (right-aligned with drop shadow)
-    if first_input:
-        input_text = "?"
-    else:
-        input_text = user_input
-
-    draw_text(input_text, font, text_color, right_x, sum_y, center=True, enable_shadow=True)
+    input_text = "?" if first_input else str(user_input)
+    input_width = font.size(input_text)[0]
+    draw_text(input_text, font, text_color, right_x - input_width, sum_y, center=False, enable_shadow=True)
 
     # Refresh the display
     pygame.display.flip()
@@ -10589,15 +10643,15 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       # "single_digit_addition",             #Math
-                       # "double_digit_addition",             #Math
-                       # "single_digit_subtraction",          #Math
-                       # "double_digit_subtraction",          #Math
-                       # "subtraction_borrowing",             #Math
-                       # "single_digit_multiplication",       #Math
-                       # "single_by_double_multiplication",   #Math
-                       # "single_denominator_addition",       #Math
-                       # "lowest_common_denominator_quiz",      #Math
+                       "single_digit_addition",             #Math
+                       "double_digit_addition",             #Math
+                       "single_digit_subtraction",          #Math
+                       "double_digit_subtraction",          #Math
+                       "subtraction_borrowing",             #Math
+                       "single_digit_multiplication",       #Math
+                       "single_by_double_multiplication",   #Math
+                       "single_denominator_addition",       #Math
+                       "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
                        # "hiragana_teach",                    #JP
