@@ -3057,11 +3057,9 @@ try:
 except FileNotFoundError as e:
     log_entry = create_log_message(f"Icon file not found: {e}")
     log_message(log_entry)
-    print("Icon file not found, continuing without a custom icon.")
 except pygame.error as e:
     log_entry = create_log_message(f"Failed to load icon: {e}")
     log_message(log_entry)
-    print("Failed to load icon, continuing without a custom icon.")
 
 # Pygame initialization
 # Initialize Pygame's main modules. If there's an issue, log the error and exit.
@@ -3775,24 +3773,29 @@ def perfect_score_lesson_skip(student_name, lesson_name):
         cursor.execute("SELECT id FROM students WHERE name = ?", (student_name,))
         student_result = cursor.fetchone()
         if not student_result:
-            print(f"Student '{student_name}' not found in the database.")
+            log_entry = create_log_message(f"Student '{student_name}' not found in the database.")
+            log_message(log_entry)
             return False
         student_id = student_result[0]
-        print(f"Student ID for '{student_name}': {student_id}")
+        log_entry = create_log_message(f"Student ID for '{student_name}': {student_id}")
+        log_message(log_entry)
 
         # Get lesson_id for the specified lesson name
         cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", (lesson_name,))
         lesson_result = cursor.fetchone()
         if not lesson_result:
-            print(f"Lesson '{lesson_name}' not found in the database.")
+            log_entry = create_log_message(f"Lesson '{lesson_name}' not found in the database.")
+            log_message(log_entry)
             return False
         lesson_id = lesson_result[0]
-        print(f"Lesson ID for '{lesson_name}': {lesson_id}")
+        log_entry = create_log_message(f"Lesson ID for '{lesson_name}': {lesson_id}")
+        log_message(log_entry)
 
         # Define date range for yesterday
         yesterday_start = (datetime.now() - timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
         yesterday_end = yesterday_start.replace(hour=23, minute=59, second=59)
-        print(f"Date range for yesterday: {yesterday_start} to {yesterday_end}")
+        log_entry = create_log_message(f"Date range for yesterday: {yesterday_start} to {yesterday_end}")
+        log_message(log_entry)
 
         # Find session_id(s) for the student within the sessions table
         cursor.execute('''
@@ -3804,9 +3807,11 @@ def perfect_score_lesson_skip(student_name, lesson_name):
         
         session_ids = [row[0] for row in cursor.fetchall()]
         if not session_ids:
-            print(f"No sessions found for student ID {student_id} on {yesterday_start.date()}")
+            log_entry = create_log_message(f"No sessions found for student ID {student_id} on {yesterday_start.date()}")
+            log_message(log_entry)
             return False
-        print(f"Session IDs for '{student_name}' on {yesterday_start.date()}: {session_ids}")
+        log_entry = create_log_message(f"Session IDs for '{student_name}' on {yesterday_start.date()}: {session_ids}")
+        log_message(log_entry)
 
         # Check session_lessons for perfect scores for this lesson within the sessions found
         cursor.execute('''
@@ -3821,15 +3826,18 @@ def perfect_score_lesson_skip(student_name, lesson_name):
 
         # Log the retrieved data for debugging
         if perfect_score_yesterday:
-            print(f"Perfect score found for student ID {student_id} on lesson ID {lesson_id}: {perfect_score_yesterday}")
+            log_entry = create_log_message(f"Perfect score found for student ID {student_id} on lesson ID {lesson_id}: {perfect_score_yesterday}")
+            log_message(log_entry)
         else:
-            print(f"No perfect score found for student ID {student_id} on lesson ID {lesson_id} on {yesterday_start.date()}.")
+            log_entry = create_log_message(f"No perfect score found for student ID {student_id} on lesson ID {lesson_id} on {yesterday_start.date()}.")
+            log_message(log_entry)
 
         # Return True if a perfect score was achieved yesterday, otherwise False
         return bool(perfect_score_yesterday)
 
     except sqlite3.Error as e:
-        print(f"Error checking perfect score: {e}")
+        log_entry = create_log_message(f"Error checking perfect score: {e}")
+        log_message(log_entry)
         return False
     finally:
         cursor.close()
@@ -3933,17 +3941,14 @@ def get_filtered_fonts():
         try:
             # Check if the font should be excluded based on the list
             if any(excluded in font_name for excluded in excluded_fonts):
-                # print(f"Excluding font: {font_name}")
                 continue
 
             # Attempt to use the font, which will validate if it's working
             pygame.font.SysFont(font_name, 12)  # Check font by loading it with small size
             filtered_fonts.append(font_name)
-            # print(f"Including font: {font_name}")
 
         except FileNotFoundError:
             # Log error for missing font
-            print(f"Font not found: {font_name}, excluding.")
             log_entry = create_log_message(f"Font not found and excluded: {font_name}")
             log_message(log_entry)
 
@@ -4661,58 +4666,6 @@ def speak_english(text):
     engine.runAndWait()  # Block while the speech finishes
     
     
-# def set_haruka_slow(engine):
-#     """
-#     Set the voice properties for the text-to-speech engine to use Ayumi by default,
-#     and fall back to Haruka if Ayumi is not available. The speaking rate is set to slow.
-
-#     Parameters:
-#     engine (pyttsx3.Engine): The text-to-speech engine instance.
-#     """
-#     ayumi_voice_id = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\MSTTS_V110_jaJP_AyumiM"
-#     haruka_voice_id = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\TTS_MS_JA-JP_HARUKA_11.0"
-
-#     # Get a list of available voices
-#     voices = engine.getProperty('voices')
-#     available_voice_ids = [voice.id for voice in voices]
-
-#     # Check for Ayumi first
-#     if ayumi_voice_id in available_voice_ids:
-#         try:
-#             engine.setProperty('voice', ayumi_voice_id)
-#             print("Ayumi voice set.")
-#         except Exception as e:
-#             print(f"Failed to set Ayumi voice: {e}")
-#     # Check for Haruka only if Ayumi is not found
-#     elif haruka_voice_id in available_voice_ids:
-#         try:
-#             engine.setProperty('voice', haruka_voice_id)
-#             print("Ayumi not found; using Haruka as a fallback.")
-#         except Exception as e:
-#             print(f"Failed to set Haruka voice: {e}")
-#     else:
-#         print("Neither Ayumi nor Haruka voices are available. Defaulting to system voice.")
-
-#     # Set the speech rate to 100 (slow)
-#     engine.setProperty('rate', 100)
-
-    
-    
-# def speak_japanese(text):
-#     """
-#     Set up the text-to-speech engine to use the Japanese voice and speak the given text.
-
-#     Parameters:
-#     text (str): The text to speak out loud in Japanese.
-#     """
-#     global engine  # Ensure we use the global engine
-
-#     # Set the voice to Haruka (Japanese) and slow down the rate
-#     set_haruka_slow(engine)
-    
-#     # Use the engine to say the given text
-#     engine.say(text)
-#     engine.runAndWait()  # Block while the speech finishes
 def speak_japanese(text):
     """
     Attempt to play a pre-rendered WAV file for the given Japanese text.
@@ -4732,13 +4685,16 @@ def speak_japanese(text):
             sound.play()
             while pygame.mixer.get_busy():
                 pass  # Wait until the sound finishes playing
-            print(f"Played audio file: {wav_file_path}")
+            log_entry = create_log_message(f"Played audio file: {wav_file_path}")
+            log_message(log_entry)
         else:
             raise FileNotFoundError(f"No audio file found for '{text}' at '{wav_file_path}'")
     
     except Exception as e:
         # Log any error that occurs during file playback
-        print(f"Error playing audio for '{text}': {e}")
+        log_entry = create_log_message(f"Error playing audio for '{text}': {e}")
+        log_message(log_entry)
+
 
 ############################
 ### Bonus Game Functions ###
@@ -5849,416 +5805,6 @@ def bonus_game_cat_pong():
                         waiting = False  # Continue after the "Continue..." button is clicked
 
            
-# def bonus_game_tuna_tower():
-#     """
-#     Runs the "Tuna Tower" bonus game, a vertical scroller.
-
-#     This function initializes the game environment, including background images,
-#     static platforms, the player's cat character, and the fat tuna collectible.
-#     The objective is to climb upward, jumping across platforms, and reach the fat tuna 
-#     to win the game.
-
-#     Game Elements:
-#         - Scaling factors adjust the size of sprites and movement speeds 
-#           based on the current resolution.
-#         - Platforms are static for now and do not spawn or fall periodically.
-    
-#     Gameplay Phases:
-#         1. Control Display: Shows the control instructions and a "Bonus Stage!" 
-#            message until the player clicks "Continue...".
-#         2. Gameplay: Player controls the cat character to jump between static platforms
-#            and ascend the tower, with a goal to reach the fat tuna. 
-#         3. End Phase: Displays a win message when the player reaches the fat tuna.
-
-#     Returns:
-#         None
-#     """
-#     # Check if the assets/images directory exists
-#     if not os.path.exists('assets/images'):
-#         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
-#         log_message(log_entry)
-#         return "main_menu"
-    
-#     # Calculate scaling factors based on the current resolution
-#     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
-#     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
-#     scale_factor = min(scale_factor_x, scale_factor_y)
-
-#     GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level one-third up from the bottom
-
-#     running = True
-#     win = False
-#     start_time = time.time()
-
-#     # Load images
-#     platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
-#     bonus_mode_background = select_random_background("assets/images/bonus_mode")
-#     gameplay_background = select_random_background("assets/images/bonus_bkgs")
-
-#     # Initialize static platforms with the image (no falling or random spawning)
-#     platforms = [
-#         Platform(platform_img, int(100 * scale_factor), int(600 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
-#         Platform(platform_img, int(400 * scale_factor), int(400 * scale_factor), int(200 * scale_factor), int(50 * scale_factor)),
-#         Platform(platform_img, int(700 * scale_factor), int(200 * scale_factor), int(200 * scale_factor), int(50 * scale_factor))
-#     ]
-    
-#     # Initialize the fat tuna collectible
-#     fat_tuna_img = pygame.image.load('assets/images/sprites/fat_tuna.png')
-#     fat_tuna_img = pygame.transform.scale(
-#         fat_tuna_img, 
-#         (int(fat_tuna_img.get_width() * scale_factor), int(fat_tuna_img.get_height() * scale_factor))
-#     )
-#     fat_tuna_rect = fat_tuna_img.get_rect(center=(WIDTH // 2, int(fat_tuna_img.get_height() * scale_factor) // 2))
-
-#     # Scale the text positions and movements
-#     text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
-#     text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
-#     text_dx *= scale_factor
-#     text_dy *= scale_factor
-
-#     # Initialize the cat at the GROUND_LEVEL
-#     player_img = pygame.image.load('assets/images/sprites/cat01.png')
-#     player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor), int(player_img.get_height() * scale_factor)))
-#     cat = Cat(player_img, WIDTH // 2, GROUND_LEVEL - player_img.get_rect().height, 25 * scale_factor, scale_factor)
-
-#     # Create a clock object to control the frame rate
-#     clock = pygame.time.Clock()
-
-#     # Load and play bonus game music
-#     bonus_music_directory = 'assets/music/bonus'
-#     random_mp3 = get_random_mp3(bonus_music_directory)
-    
-#     if random_mp3:
-#         music_loaded = load_mp3(random_mp3)
-#         if music_loaded:
-#             play_mp3()
-
-#     # Bonus Mode Display Phase (show controls and animated text)
-#     running = True
-#     controls_displayed = False
-#     start_time = time.time()
-
-#     while not controls_displayed:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-
-#         # Draw the bonus mode background (or fallback to navy blue)
-#         if bonus_mode_background:
-#             draw_background(bonus_mode_background)
-#         else:
-#             screen.fill(screen_color)
-
-#         # Render the controls
-#         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
-#         draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
-#         draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
-#         draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
-
-#         # Render the bouncing "Bonus Stage!" text
-#         text_surface = font.render("Bonus Stage!", True, text_color)
-#         text_width, text_height = text_surface.get_size()
-
-#         # Update text position
-#         text_x += text_dx
-#         text_y += text_dy
-
-#         # Check for collisions with the screen edges
-#         if text_x <= 0 or text_x >= WIDTH - text_width:
-#             text_dx = -text_dx
-#         if text_y <= 0 or text_y >= HEIGHT - text_height:
-#             text_dy = -text_dy
-
-#         # Draw the bouncing text at the new position
-#         screen.blit(text_surface, (text_x, text_y))
-
-#         # Draw the "Continue..." button below the controls
-#         continue_rect = draw_continue_button()
-#         pygame.display.flip()
-
-#         # Check for "Continue..." button click without stopping the animation
-#         for event in pygame.event.get():
-#             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     controls_displayed = True  # Exit the loop and continue to gameplay
-
-#         clock.tick(60)  # Keep the animation going at 60 FPS
-
-#     # Gameplay Phase
-#     try:
-#         start_time = time.time()
-#         while running:
-#             elapsed_time = int(time.time() - start_time)
-#             current_time = pygame.time.get_ticks()
-
-#             for event in pygame.event.get():
-#                 if event.type == pygame.QUIT:
-#                     running = False
-#                     pygame.mixer.music.stop()
-#                     pygame.quit()
-#                     sys.exit()
-#                 elif event.type == pygame.KEYDOWN:
-#                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-#                         running = False
-#                         pygame.mixer.music.stop()
-#                         return
-#                     elif event.key == pygame.K_SPACE or event.key == pygame.K_w:
-#                         cat.jump()
-
-#             cat.update(platforms)
-
-#             # Ensure the cat doesn't fall below the GROUND_LEVEL
-#             if cat.rect.y > GROUND_LEVEL - cat.rect.height:
-#                 cat.rect.y = GROUND_LEVEL - cat.rect.height  # Lock cat to ground level
-
-#             # Check for win condition by colliding with the fat tuna
-#             if cat.rect.colliderect(fat_tuna_rect):
-#                 win = True
-#                 running = False
-
-#             # Draw the gameplay background (or fallback to navy blue)
-#             if gameplay_background:
-#                 draw_background(gameplay_background)
-#             else:
-#                 screen.fill(screen_color)
-
-#             # Draw the static platforms first
-#             for platform in platforms:
-#                 platform.draw(screen)
-
-#             # Draw the fat tuna
-#             screen.blit(fat_tuna_img, fat_tuna_rect.topleft)
-
-#             # Draw the cat on top of everything else
-#             cat.draw(screen)
-
-#             # Draw the timer on top of all elements
-#             draw_text(f"{elapsed_time}", font, text_color, WIDTH // 4, HEIGHT // 60)
-
-#             pygame.display.flip()
-#             clock.tick(24)  # Control the frame rate
-
-#     finally:
-#         # Ensure music stops and resources are freed if an exception occurs
-#         stop_mp3()
-
-#     # End Phase
-#     if win:
-#         screen.fill(screen_color)
-#         draw_text(f"You caught the Fat Tuna in {elapsed_time} seconds!", 
-#                   font, 
-#                   text_color, 
-#                   WIDTH // 2, 
-#                   HEIGHT // 3, 
-#                   center=True, 
-#                   enable_shadow=True,
-#                   max_width=WIDTH)
-
-#     # Draw the "Continue..." button after game completion message
-#     continue_rect = draw_continue_button()
-
-#     pygame.display.flip()
-
-#     # Wait for the player to click "Continue..." after the game ends
-#     waiting = True
-#     while waiting:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()  
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     waiting = False  # Continue after the "Continue..." button is clicked
-# def bonus_game_tuna_tower():
-#     # Check if the assets/images directory exists
-#     if not os.path.exists('assets/images'):
-#         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
-#         log_message(log_entry)
-#         return "main_menu"
-    
-#     # Calculate scaling factors based on the current resolution
-#     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
-#     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
-#     scale_factor = min(scale_factor_x, scale_factor_y)
-
-#     GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
-
-#     # Control display phase setup
-#     running = True
-#     controls_displayed = False
-
-#     # Load tower tile image and scale it
-#     tower_tile_img = pygame.image.load('assets/images/sprites/towertile01.png')
-#     tower_tile_img = pygame.transform.scale(tower_tile_img, (int(64 * scale_factor), int(64 * scale_factor)))
-    
-#     # Load platform image and scale it
-#     platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
-#     platform_img = pygame.transform.scale(platform_img, (int(200 * scale_factor), int(50 * scale_factor)))
-    
-
-#     # Load cat image and scale to double its original size
-#     cat_img = pygame.image.load('assets/images/sprites/cat08.png')
-#     cat_img = pygame.transform.scale(cat_img, (int(cat_img.get_width() * 2 * scale_factor), int(cat_img.get_height() * 2 * scale_factor)))
-    
-#     # Cat position and movement variables
-#     cat_x = WIDTH // 2 - cat_img.get_width() // 2
-#     cat_y = int(GROUND_LEVEL) - cat_img.get_height()
-#     cat_speed = 25 * scale_factor  # Speed for horizontal movement
-#     cat_facing_right = True       # Track direction to manage flipping
-    
-#     # Platform position based on GROUND_LEVEL
-#     platform_x = WIDTH // 2 - platform_img.get_width() // 2
-#     platform_y = int(GROUND_LEVEL)  # Directly at ground level
-
-#     # Background scroll offset
-#     scroll_offset = 0
-#     base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
-
-#     # Jumping state variables
-#     is_jumping = False
-#     jump_start_time = 0
-#     jump_duration = 1  # Duration of jump up phase (in seconds)
-
-#     # Initialize bouncing text position and movement
-#     text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
-#     text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
-#     text_dx *= scale_factor
-#     text_dy *= scale_factor
-
-#     # Display control instructions
-#     while not controls_displayed:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-
-#         screen.fill(screen_color)
-
-#         # Render the controls text
-#         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
-#         draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
-#         draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
-#         draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
-
-#         # Render the bouncing "Bonus Stage!" text
-#         text_surface = font.render("Bonus Stage!", True, text_color)
-#         text_width, text_height = text_surface.get_size()
-
-#         # Update text position
-#         text_x += text_dx
-#         text_y += text_dy
-
-#         # Check for collisions with the screen edges and reverse direction if needed
-#         if text_x <= 0 or text_x >= WIDTH - text_width:
-#             text_dx = -text_dx
-#         if text_y <= 0 or text_y >= HEIGHT - text_height:
-#             text_dy = -text_dy
-
-#         # Draw the bouncing text at the updated position
-#         screen.blit(text_surface, (text_x, text_y))
-
-#         # Draw the "Continue..." button
-#         continue_rect = draw_continue_button()
-#         pygame.display.flip()
-
-#         # Check for "Continue..." button click
-#         for event in pygame.event.get():
-#             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     controls_displayed = True  # Exit the loop and move to gameplay
-
-#         clock.tick(60)
-
-#     # Gameplay Phase: Implement controls, jumping effect with easing, and scrolling background
-#     try:
-#         while running:
-#             current_time = time.time()
-
-#             for event in pygame.event.get():
-#                 if event.type == pygame.QUIT:
-#                     running = False
-#                     pygame.quit()
-#                     sys.exit()
-
-#             keys = pygame.key.get_pressed()
-
-#             # Handle left movement with "A" key
-#             if keys[pygame.K_a]:
-#                 cat_x -= cat_speed
-#                 if cat_facing_right:
-#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face left
-#                     cat_facing_right = False
-
-#             # Handle right movement with "D" key
-#             if keys[pygame.K_d]:
-#                 cat_x += cat_speed
-#                 if not cat_facing_right:
-#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face right
-#                     cat_facing_right = True
-
-#             # Initiate jump when "W" is pressed and cat is not already jumping
-#             if keys[pygame.K_w] and not is_jumping:
-#                 is_jumping = True
-#                 jump_start_time = current_time
-
-#             # Jumping logic with easing effect
-#             if is_jumping:
-#                 time_in_jump = current_time - jump_start_time
-#                 if time_in_jump < jump_duration:
-#                     # Accelerate up at the start, then decelerate toward the peak
-#                     scroll_speed = base_scroll_speed * (1 - time_in_jump / jump_duration)
-#                     scroll_offset += scroll_speed
-#                 elif time_in_jump < 2 * jump_duration:
-#                     # Accelerate back down after the peak
-#                     scroll_speed = base_scroll_speed * ((time_in_jump - jump_duration) / jump_duration)
-#                     scroll_offset -= scroll_speed
-#                 else:
-#                     is_jumping = False  # Reset jump after 3 seconds
-
-#             # Ensure the cat doesn't move off-screen
-#             if cat_x < 0:
-#                 cat_x = 0
-#             elif cat_x > WIDTH - cat_img.get_width():
-#                 cat_x = WIDTH - cat_img.get_width()
-
-#             # Fill the screen by tiling the tower tile image with a scrolling effect
-#             for x in range(0, WIDTH, tower_tile_img.get_width()):
-#                 for y in range(-tower_tile_img.get_height(), HEIGHT, tower_tile_img.get_height()):
-#                     screen.blit(tower_tile_img, (x, y + scroll_offset % tower_tile_img.get_height()))
-                    
-#             # Draw the platform directly below the cat
-#             screen.blit(platform_img, (platform_x, platform_y))
-
-#             # Draw the cat image at the updated position
-#             screen.blit(cat_img, (cat_x, cat_y))
-
-#             pygame.display.flip()
-#             clock.tick(24)
-
-#     finally:
-#         stop_mp3()  # Ensure any music stops when exiting
-
-#     # End Phase placeholder - can be used for displaying end-of-game messages
-#     screen.fill(screen_color)
-#     draw_text("Game Over!", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True)
-#     continue_rect = draw_continue_button()
-#     pygame.display.flip()
-
-#     # Wait for "Continue..." click after game ends
-#     waiting = True
-#     while waiting:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     waiting = False
 def bonus_game_tuna_tower():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -6459,18 +6005,6 @@ def bonus_game_tuna_tower():
                     waiting = False
 
 
-
-
-
-
-
-
-
-
-    
-
-
-
 # For later use
 def bonus_game_generic():
     # Check if the assets/images directory exists
@@ -6572,12 +6106,6 @@ def bonus_game_generic():
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
-
-
-
-
-
-
 
 
 ##############################
@@ -6795,7 +6323,8 @@ def rainbow_numbers(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -7094,7 +6623,8 @@ def single_digit_addition(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -7300,7 +6830,8 @@ def double_digit_addition(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -7786,7 +7317,8 @@ def single_digit_subtraction(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -7992,7 +7524,8 @@ def double_digit_subtraction(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -8480,7 +8013,8 @@ def subtraction_borrowing(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -8703,7 +8237,8 @@ def single_digit_multiplication(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -8909,7 +8444,8 @@ def single_by_double_multiplication(session_id):
                 if continue_rect.collidepoint(mouse_pos):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -9350,7 +8886,8 @@ def single_denominator_addition_intro(session_id):
                     waiting = False
                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
                     # Skip the lesson if "Skip" is clicked
-                    print("skip clicked")
+                    log_entry = create_log_message("skip clicked")
+                    log_message(log_entry)
                     skip_clicked = True
                     waiting = False
 
@@ -10902,10 +10439,7 @@ def main_menu():
             #         bonus_game_cat_pong()
                     # bonus_game_falling_fish()
             #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
-            #     elif event.key == pygame.K_r:
-            #         rainbow_numbers(45) # Fake session id to skip to rainbow numbers for testing
-            #     elif event.key == pygame.K_s:
-            #         skip_counting()
+
 
         clock.tick(60)
 
@@ -11042,7 +10576,8 @@ def session_manager():
 
     # If session could not be started, return to main menu
     if session_id == -1:
-        print(f"Error: Failed to start session for {current_student}.")
+        log_entry = create_log_message(f"Error: Failed to start session for {current_student}.")
+        log_message(log_entry)
         return "main_menu"
     
     #####################################
@@ -11065,10 +10600,10 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       "hiragana_teach",                    #JP
-                       "hiragana_quiz",                     #JP    
-                       "katakana_teach",                    #JP
-                       "katakana_quiz",                     #JP    
+                       # "hiragana_teach",                    #JP
+                       # "hiragana_quiz",                     #JP    
+                       # "katakana_teach",                    #JP
+                       # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
                        # "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
@@ -11254,11 +10789,8 @@ def session_manager():
             else:
                 log_message("Error: triple_digit_addition did not return a valid result.")
         elif lesson == "quad_digit_addition":
-            # print("Running quad digit addition")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = quad_digit_addition(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11267,11 +10799,8 @@ def session_manager():
             else:
                 log_message("Error: quad_digit_addition did not return a valid result.")
         elif lesson == "single_digit_subtraction":
-            # print("Running single digit subtraction")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = single_digit_subtraction(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11280,11 +10809,8 @@ def session_manager():
             else:
                 ("Error: single_digit_subtraction did not return a valid result.")
         elif lesson == "double_digit_subtraction":
-            # print("Running double digit subtraction")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = double_digit_subtraction(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11292,13 +10818,9 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 ("Error: double_digit_subtraction did not return a valid result.")
-        # subtraction_borrowing
         elif lesson == "subtraction_borrowing":
-            # print("Running double digit subtraction")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = subtraction_borrowing(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11307,11 +10829,8 @@ def session_manager():
             else:
                 ("Error: subtraction_borrowing did not return a valid result.")
         elif lesson == "triple_digit_subtraction":
-            # print("Running triple digit subtraction")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = triple_digit_subtraction(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11320,11 +10839,8 @@ def session_manager():
             else:
                 ("Error: triple_digit_subtraction did not return a valid result.")
         elif lesson == "quad_digit_subtraction":
-            # print("Running quad digit subtraction")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = quad_digit_subtraction(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11333,11 +10849,8 @@ def session_manager():
             else:
                 ("Error: quad_digit_subtraction did not return a valid result.")
         elif lesson == "single_digit_multiplication":
-            print("Running single digit multiplication")
-            # Run the lesson, passing session_id, and capture the return values
             lesson_result = single_digit_multiplication(session_id)
             
-            # Assuming lesson_result returns a tuple of (questions_asked, correct_answers, avg_time)
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11347,6 +10860,7 @@ def session_manager():
                 log_message("Error: single_digit_multiplication did not return a valid result.")
         elif lesson == "single_by_double_multiplication":
             lesson_result = single_by_double_multiplication(session_id)
+            
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11356,6 +10870,7 @@ def session_manager():
                 log_message("Error: single_by_double_multiplication did not return a valid result.")
         elif lesson == "double_digit_multiplication":
             lesson_result = double_digit_multiplication(session_id)
+            
             if lesson_result is not None:  # Ensure the function returned something
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11365,6 +10880,7 @@ def session_manager():
                 log_message("Error: double_digit_multiplication did not return a valid result.")
         elif lesson == "single_denominator_addition":
             lesson_result = single_denominator_addition(session_id)
+            
             if lesson_result is not None:  
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11409,10 +10925,8 @@ def session_manager():
         elif lesson == "katakana_teach":
             katakana_teach(session_id)
         elif lesson == "japanese_colors_teach":
-            # print("Teaching Japanese Colors")
             vocab_teach(session_id, 'Japanese Colors') 
         elif lesson == "japanese_body_parts_teach":
-            # print("Teaching Japanese Body Parts")
             vocab_teach(session_id, 'Japanese Body Parts') 
         elif lesson == "japanese_adjectives_teach":
             vocab_teach(session_id, 'Japanese Adjectives')
@@ -11457,8 +10971,8 @@ def session_manager():
             total_correct += correct_answers
             total_times.append(avg_time)
         elif lesson == "japanese_colors_quiz":
-            # print("Running Japanese Colors Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Colors') 
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11467,8 +10981,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Colors Quiz did not return a valid result.")
         elif lesson == "japanese_body_parts_quiz":
-            # print("Running Japanese Body Parts Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Body Parts')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11477,8 +10991,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Body Parts Quiz did not return a valid result.")
         elif lesson == "japanese_adjectives_quiz":
-            # print("Running Japanese Adjectives Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Adjectives')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11487,8 +11001,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Adjectives Quiz did not return a valid result.")
         elif lesson == "japanese_animals_quiz":
-            # print("Running Japanese Animals Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Animals')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11497,8 +11011,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Animals Quiz did not return a valid result.")
         elif lesson == "japanese_family_quiz":
-            # print("Running Japanese Family Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Family')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11507,8 +11021,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Family Quiz did not return a valid result.")
         elif lesson == "japanese_fruits_quiz":
-            # print("Running Japanese Fruits Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Fruits')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11517,8 +11031,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Fruits Quiz did not return a valid result.")
         elif lesson == "japanese_greetings_quiz":
-            # print("Running Japanese Greetings Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Greetings')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11527,8 +11041,8 @@ def session_manager():
             else:
                 log_message("Error: Japanese Greetings Quiz did not return a valid result.")
         elif lesson == "one_piece_quiz":
-            # print("Running One Piece Quiz")
             lesson_result = lesson_selector(session_id, 'One Piece Vocab')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11537,8 +11051,8 @@ def session_manager():
             else:
                 log_message("Error: One Piece Quiz did not return a valid result.")
         elif lesson == "japanese_self_introduction_quiz":
-            # print("Running Japanese Self Introduction Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Self Introduction')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11547,8 +11061,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Self Introduction Quiz did not return a valid result.")
         elif lesson == "japanese_nouns_quiz":
-            # print("Running Japanese Nouns Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Nouns')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11557,8 +11071,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Nouns Quiz did not return a valid result.")
         elif lesson == "japanese_time_quiz":
-            # print("Running Japanese Time Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Time')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11567,8 +11081,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Time Quiz did not return a valid result.")
         elif lesson == "japanese_vegtables_quiz":
-            # print("Running Japanese Vegtables Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Vegtables')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11577,8 +11091,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Vegtables Quiz did not return a valid result.")
         elif lesson == "japanese_verbs_quiz":
-            # print("Running Japanese Verbs Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Verbs')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11587,8 +11101,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Verbs Quiz did not return a valid result.")
         elif lesson == "japanese_song_sanpo_quiz":
-            # print("Running Japanese Song Sanpo Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Song Sanpo')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11597,8 +11111,8 @@ def session_manager():
             else:
                 log_message("Error:Japanese Song Sanpo Quiz did not return a valid result.")
         elif lesson == "japanese_song_zou_san_quiz":
-            # print("Running Japanese Song Zou-san Quiz")
             lesson_result = lesson_selector(session_id, 'Japanese Song Zou-san')
+            
             if lesson_result is not None:
                 questions_asked, correct_answers, avg_time = lesson_result
                 total_questions += questions_asked
@@ -11606,12 +11120,6 @@ def session_manager():
                 total_times.append(avg_time)
             else:
                 log_message("Error:Japanese Song Zou-san Quiz did not return a valid result.")
-        
-        
-        
-        
-
-
         
         # Check if there's another lesson or handle lesson completion here
         # You can add more lessons to `lessons_to_play` and logic here
