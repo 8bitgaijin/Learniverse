@@ -13287,6 +13287,11 @@ def display_quiz(screen, kanji, furigana, options):
 def options_menu():
     global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color
 
+    # Particle effect settings
+    particle_count = 2  # Number of particles to generate on hover per frame
+    particle_lifetime = 30  # Lifetime for each particle in frames
+    particles = []  # List to hold active particles
+
     # Get the filtered fonts list
     filtered_fonts = get_filtered_fonts() or ["arial"]
 
@@ -13305,7 +13310,7 @@ def options_menu():
         current_theme_index = list(color_themes.keys()).index("light")
 
     while True:
-        font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Update the font based on current font
+        font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())
         draw_background(options_background)
         mouse_pos = pygame.mouse.get_pos()
 
@@ -13315,46 +13320,72 @@ def options_menu():
         )
         left_buffer, right_buffer = 0.05, 0.95
 
-        # Determine hover colors based on mouse position
-        back_to_main_menu_color = shadow_color if pygame.Rect(0, back_to_main_y, WIDTH, font.get_height()).collidepoint(mouse_pos) else text_color
-        minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, volume_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, volume_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        resolution_minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, resolution_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        resolution_plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, resolution_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        theme_minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, theme_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        theme_plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, theme_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        left_arrow_color = shadow_color if pygame.Rect(WIDTH * left_buffer, font_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        right_arrow_color = shadow_color if pygame.Rect(WIDTH * right_buffer, font_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
-        credits_color = shadow_color if pygame.Rect(0, credits_y, WIDTH, font.get_height()).collidepoint(mouse_pos) else text_color
-
-        # Draw options with the hover effect
-        back_to_main_menu_rect = draw_text("Back to Main Menu", font, back_to_main_menu_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
+        # Draw each interactive element and calculate hover effects
+        back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
+        
+        # Volume Label and Percentage
         draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
-        draw_text(f"{int(music_volume * 100)}%", font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
-        minus_rect = draw_text("<", font, minus_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-        plus_rect = draw_text(">", font, plus_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+        volume_percentage = f"{int(music_volume * 100)}%"
+        draw_text(volume_percentage, font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
+        minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+        plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the resolution controls with hover effect
+        # Resolution Controls
         draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
         resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
         draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
-        resolution_minus_rect = draw_text("<", font, resolution_minus_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-        resolution_plus_rect = draw_text(">", font, resolution_plus_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+        resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+        resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the theme controls with hover effect
+        # Theme Label and Current Theme Name
         draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
-        theme_name = list(color_themes.keys())[current_theme_index]
-        draw_text(f"{theme_name.capitalize()}", font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
-        theme_minus_rect = draw_text("<", font, theme_minus_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-        theme_plus_rect = draw_text(">", font, theme_plus_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+        current_theme_name = list(color_themes.keys())[current_theme_index].capitalize()
+        draw_text(current_theme_name, font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
+        theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+        theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
 
-        # Display the current font with hover effect
-        left_arrow_rect = draw_text("<", font, left_arrow_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+        # Font Controls
+        left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
         draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
-        right_arrow_rect = draw_text(">", font, right_arrow_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+        right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the "Credits" option with hover effect
-        credits_rect = draw_text("Credits", font, credits_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
+        # Credits
+        credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
+
+        # Generate hover colors and particles if hovered
+        hover_elements = [
+            (back_to_main_menu_rect, "Back to Main Menu"),
+            (minus_rect, "<"), (plus_rect, ">"),
+            (resolution_minus_rect, "<"), (resolution_plus_rect, ">"),
+            (theme_minus_rect, "<"), (theme_plus_rect, ">"),
+            (left_arrow_rect, "<"), (right_arrow_rect, ">"),
+            (credits_rect, "Credits")
+        ]
+
+        for rect, text in hover_elements:
+            is_hovered = rect.collidepoint(mouse_pos)
+            color = shadow_color if is_hovered else text_color
+            y_pos = rect.y  # Get the y position from the rect for consistent placement
+            draw_text(text, font, color, rect.x, y_pos, screen, center=(text in ["Back to Main Menu", "Credits"]), enable_shadow=True)
+
+            # Generate particles on hover
+            if is_hovered:
+                for _ in range(particle_count):
+                    particle_color = random.choice([shadow_color, text_color, screen_color])
+                    particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                    particle.lifetime = particle_lifetime
+                    angle = random.uniform(0, 2 * math.pi)
+                    speed = random.uniform(1, 3)
+                    particle.dx = math.cos(angle) * speed
+                    particle.dy = math.sin(angle) * speed
+                    particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
 
         pygame.display.flip()
 
@@ -13414,6 +13445,8 @@ def options_menu():
                     credit_roll()
 
         clock.tick(60)
+
+
 
 
 
