@@ -13126,24 +13126,173 @@ def display_quiz(screen, kanji, furigana, options):
 
 
 
+# def options_menu():
+#     global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color  # Access the global variables
+
+#     # Get the filtered fonts list
+#     filtered_fonts = get_filtered_fonts()
+
+#     # Fallback to a default font if no valid fonts are found
+#     if not filtered_fonts:
+#         filtered_fonts = ["arial"]
+#         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
+#         log_message(log_entry)
+
+#     # Set the current font index to match the current_font_name_or_path
+#     if current_font_name_or_path in filtered_fonts:
+#         current_font_index = filtered_fonts.index(current_font_name_or_path)
+#     else:
+#         current_font_index = 0
+#         current_font_name_or_path = filtered_fonts[current_font_index]
+
+#     # Track the current theme index based on the current applied theme
+#     for theme_name, theme_values in color_themes.items():
+#         if (text_color == theme_values["text_color"] and
+#             shadow_color == theme_values["shadow_color"] and
+#             screen_color == theme_values["screen_color"]):
+#             current_theme_index = list(color_themes.keys()).index(theme_name)
+#             break
+#     else:
+#         current_theme_index = list(color_themes.keys()).index("light")  # Default to "light" if no match is found
+
+#     while True:
+#         font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Update the font based on current font
+#         # update_positions()
+
+#         # Draw the background for the options menu
+#         draw_background(options_background)
+
+#         # Y positions for consistent alignment
+#         volume_y = HEIGHT * 0.1  # line for the volume
+#         resolution_y = HEIGHT * 0.25  # line for the resolution
+#         theme_y = HEIGHT * 0.4  # line for the theme
+#         font_y = HEIGHT * 0.55  # line for the font
+#         credits_y = HEIGHT * 0.70  # line for the credits
+#         back_to_main_y = HEIGHT * 0.85
+#         left_buffer = 0.05
+#         right_buffer = 0.95
+
+#         # Draw the options and get rects for click detection
+#         back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
+
+#         # Draw the volume label, percentage, and control buttons with shadows
+#         draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
+#         draw_text(f"{int(music_volume * 100)}%", font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
+        
+#         # Calculate rects for volume control buttons based on the size of the rendered text
+#         minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+#         plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+
+#         # Draw the resolution controls with shadows
+#         draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
+#         resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
+#         draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
+        
+#         # Calculate rects for resolution control buttons
+#         resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+#         resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+
+#         # Draw the theme controls with shadows
+#         draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
+#         theme_name = list(color_themes.keys())[current_theme_index]
+#         draw_text(f"{theme_name.capitalize()}", font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
+        
+#         # Calculate rects for theme control buttons
+#         theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+#         theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+
+#         # Display the current font in use with < and > buttons
+#         left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+#         draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
+#         right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+
+#         # Draw the "Credits" option
+#         credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
+
+#         # Draw the exit button with a shadow
+#         # exit_rect = draw_exit_button()
+
+#         pygame.display.flip()
+
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = event.pos
+                
+#                 # Check if "Back to Main Menu" was clicked
+#                 if back_to_main_menu_rect and back_to_main_menu_rect.collidepoint(mouse_pos):
+#                     save_options()
+#                     return "main_menu"
+                
+#                 # Check if "-" button was clicked for volume
+#                 elif minus_rect and minus_rect.collidepoint(mouse_pos):
+#                     decrease_volume()
+                
+#                 # Check if "+" button was clicked for volume
+#                 elif plus_rect and plus_rect.collidepoint(mouse_pos):
+#                     increase_volume()
+
+#                 # Check if "-" button was clicked for resolution
+#                 if resolution_minus_rect and resolution_minus_rect.collidepoint(mouse_pos):
+#                     current_resolution_index = max(0, current_resolution_index - 1)
+#                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
+#                     # Center the window
+#                     pygame.display.quit()
+#                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
+#                     screen = pygame.display.set_mode(current_windowed_resolution)
+#                     WIDTH, HEIGHT = current_windowed_resolution
+#                     update_positions()
+
+#                 # Check if "+" button was clicked for resolution
+#                 if resolution_plus_rect and resolution_plus_rect.collidepoint(mouse_pos):
+#                     current_resolution_index = min(len(AVAILABLE_RESOLUTIONS) - 1, current_resolution_index + 1)
+#                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
+#                     # Center the window
+#                     pygame.display.quit()
+#                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
+#                     screen = pygame.display.set_mode(current_windowed_resolution)
+#                     WIDTH, HEIGHT = current_windowed_resolution
+#                     update_positions()
+                
+#                 # Check if "<" was clicked to go to the previous theme
+#                 if theme_minus_rect and theme_minus_rect.collidepoint(mouse_pos):
+#                     current_theme_index = (current_theme_index - 1) % len(color_themes)
+#                     apply_theme(list(color_themes.keys())[current_theme_index])
+                
+#                 # Check if ">" was clicked to go to the next theme
+#                 if theme_plus_rect and theme_plus_rect.collidepoint(mouse_pos):
+#                     current_theme_index = (current_theme_index + 1) % len(color_themes)
+#                     apply_theme(list(color_themes.keys())[current_theme_index])
+
+#                 # Check if "<" was clicked to go to the previous font
+#                 if left_arrow_rect and left_arrow_rect.collidepoint(mouse_pos):
+#                     current_font_index = (current_font_index - 1) % len(filtered_fonts)
+#                     current_font_name_or_path = filtered_fonts[current_font_index]
+                
+#                 # Check if ">" was clicked to go to the next font
+#                 if right_arrow_rect and right_arrow_rect.collidepoint(mouse_pos):
+#                     current_font_index = (current_font_index + 1) % len(filtered_fonts)
+#                     current_font_name_or_path = filtered_fonts[current_font_index]
+
+#                 # Check if "Credits" was clicked
+#                 if credits_rect and credits_rect.collidepoint(mouse_pos):
+#                     credit_roll()  # Trigger the credit roll
+
+#                 # Check if "X" was clicked
+#                 # check_exit_click(mouse_pos, exit_rect)
+
+#         clock.tick(60)
 def options_menu():
-    global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color  # Access the global variables
+    global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color
 
     # Get the filtered fonts list
-    filtered_fonts = get_filtered_fonts()
+    filtered_fonts = get_filtered_fonts() or ["arial"]
 
-    # Fallback to a default font if no valid fonts are found
-    if not filtered_fonts:
-        filtered_fonts = ["arial"]
-        log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
-        log_message(log_entry)
-
-    # Set the current font index to match the current_font_name_or_path
-    if current_font_name_or_path in filtered_fonts:
-        current_font_index = filtered_fonts.index(current_font_name_or_path)
-    else:
-        current_font_index = 0
-        current_font_name_or_path = filtered_fonts[current_font_index]
+    # Set the current font index to match the current font
+    current_font_index = filtered_fonts.index(current_font_name_or_path) if current_font_name_or_path in filtered_fonts else 0
+    current_font_name_or_path = filtered_fonts[current_font_index]
 
     # Track the current theme index based on the current applied theme
     for theme_name, theme_values in color_themes.items():
@@ -13153,67 +13302,63 @@ def options_menu():
             current_theme_index = list(color_themes.keys()).index(theme_name)
             break
     else:
-        current_theme_index = list(color_themes.keys()).index("light")  # Default to "light" if no match is found
+        current_theme_index = list(color_themes.keys()).index("light")
 
     while True:
         font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Update the font based on current font
-        # update_positions()
-
-        # Draw the background for the options menu
         draw_background(options_background)
+        mouse_pos = pygame.mouse.get_pos()
 
         # Y positions for consistent alignment
-        volume_y = HEIGHT * 0.1  # line for the volume
-        resolution_y = HEIGHT * 0.25  # line for the resolution
-        theme_y = HEIGHT * 0.4  # line for the theme
-        font_y = HEIGHT * 0.55  # line for the font
-        credits_y = HEIGHT * 0.70  # line for the credits
-        back_to_main_y = HEIGHT * 0.85
-        left_buffer = 0.05
-        right_buffer = 0.95
+        volume_y, resolution_y, theme_y, font_y, credits_y, back_to_main_y = (
+            HEIGHT * 0.1, HEIGHT * 0.25, HEIGHT * 0.4, HEIGHT * 0.55, HEIGHT * 0.7, HEIGHT * 0.85
+        )
+        left_buffer, right_buffer = 0.05, 0.95
 
-        # Draw the options and get rects for click detection
-        back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
+        # Determine hover colors based on mouse position
+        back_to_main_menu_color = shadow_color if pygame.Rect(0, back_to_main_y, WIDTH, font.get_height()).collidepoint(mouse_pos) else text_color
+        minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, volume_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, volume_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        resolution_minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, resolution_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        resolution_plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, resolution_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        theme_minus_color = shadow_color if pygame.Rect(WIDTH * left_buffer, theme_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        theme_plus_color = shadow_color if pygame.Rect(WIDTH * right_buffer, theme_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        left_arrow_color = shadow_color if pygame.Rect(WIDTH * left_buffer, font_y, font.size("<")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        right_arrow_color = shadow_color if pygame.Rect(WIDTH * right_buffer, font_y, font.size(">")[0], font.get_height()).collidepoint(mouse_pos) else text_color
+        credits_color = shadow_color if pygame.Rect(0, credits_y, WIDTH, font.get_height()).collidepoint(mouse_pos) else text_color
 
-        # Draw the volume label, percentage, and control buttons with shadows
+        # Draw options with the hover effect
+        back_to_main_menu_rect = draw_text("Back to Main Menu", font, back_to_main_menu_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
         draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
         draw_text(f"{int(music_volume * 100)}%", font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
-        
-        # Calculate rects for volume control buttons based on the size of the rendered text
-        minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-        plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+        minus_rect = draw_text("<", font, minus_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+        plus_rect = draw_text(">", font, plus_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the resolution controls with shadows
+        # Draw the resolution controls with hover effect
         draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
         resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
         draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
-        
-        # Calculate rects for resolution control buttons
-        resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-        resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+        resolution_minus_rect = draw_text("<", font, resolution_minus_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+        resolution_plus_rect = draw_text(">", font, resolution_plus_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the theme controls with shadows
+        # Draw the theme controls with hover effect
         draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
         theme_name = list(color_themes.keys())[current_theme_index]
         draw_text(f"{theme_name.capitalize()}", font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
-        
-        # Calculate rects for theme control buttons
-        theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-        theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+        theme_minus_rect = draw_text("<", font, theme_minus_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+        theme_plus_rect = draw_text(">", font, theme_plus_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
 
-        # Display the current font in use with < and > buttons
-        left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+        # Display the current font with hover effect
+        left_arrow_rect = draw_text("<", font, left_arrow_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
         draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
-        right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+        right_arrow_rect = draw_text(">", font, right_arrow_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
 
-        # Draw the "Credits" option
-        credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
-
-        # Draw the exit button with a shadow
-        # exit_rect = draw_exit_button()
+        # Draw the "Credits" option with hover effect
+        credits_rect = draw_text("Credits", font, credits_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
 
         pygame.display.flip()
 
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -13221,69 +13366,58 @@ def options_menu():
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = event.pos
                 
-                # Check if "Back to Main Menu" was clicked
                 if back_to_main_menu_rect and back_to_main_menu_rect.collidepoint(mouse_pos):
                     save_options()
                     return "main_menu"
                 
-                # Check if "-" button was clicked for volume
                 elif minus_rect and minus_rect.collidepoint(mouse_pos):
                     decrease_volume()
                 
-                # Check if "+" button was clicked for volume
                 elif plus_rect and plus_rect.collidepoint(mouse_pos):
                     increase_volume()
 
-                # Check if "-" button was clicked for resolution
                 if resolution_minus_rect and resolution_minus_rect.collidepoint(mouse_pos):
                     current_resolution_index = max(0, current_resolution_index - 1)
                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-                    # Center the window
                     pygame.display.quit()
                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
                     screen = pygame.display.set_mode(current_windowed_resolution)
                     WIDTH, HEIGHT = current_windowed_resolution
                     update_positions()
 
-                # Check if "+" button was clicked for resolution
                 if resolution_plus_rect and resolution_plus_rect.collidepoint(mouse_pos):
                     current_resolution_index = min(len(AVAILABLE_RESOLUTIONS) - 1, current_resolution_index + 1)
                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-                    # Center the window
                     pygame.display.quit()
                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
                     screen = pygame.display.set_mode(current_windowed_resolution)
                     WIDTH, HEIGHT = current_windowed_resolution
                     update_positions()
                 
-                # Check if "<" was clicked to go to the previous theme
                 if theme_minus_rect and theme_minus_rect.collidepoint(mouse_pos):
                     current_theme_index = (current_theme_index - 1) % len(color_themes)
                     apply_theme(list(color_themes.keys())[current_theme_index])
                 
-                # Check if ">" was clicked to go to the next theme
                 if theme_plus_rect and theme_plus_rect.collidepoint(mouse_pos):
                     current_theme_index = (current_theme_index + 1) % len(color_themes)
                     apply_theme(list(color_themes.keys())[current_theme_index])
 
-                # Check if "<" was clicked to go to the previous font
                 if left_arrow_rect and left_arrow_rect.collidepoint(mouse_pos):
                     current_font_index = (current_font_index - 1) % len(filtered_fonts)
                     current_font_name_or_path = filtered_fonts[current_font_index]
                 
-                # Check if ">" was clicked to go to the next font
                 if right_arrow_rect and right_arrow_rect.collidepoint(mouse_pos):
                     current_font_index = (current_font_index + 1) % len(filtered_fonts)
                     current_font_name_or_path = filtered_fonts[current_font_index]
 
-                # Check if "Credits" was clicked
                 if credits_rect and credits_rect.collidepoint(mouse_pos):
-                    credit_roll()  # Trigger the credit roll
-
-                # Check if "X" was clicked
-                # check_exit_click(mouse_pos, exit_rect)
+                    credit_roll()
 
         clock.tick(60)
+
+
+
+
 
 
 def save_options():
