@@ -10595,47 +10595,180 @@ def main_menu():
 
 
 
+# def student_select_menu():
+#     global font, current_student  # Make font and current_student global so they can be used across the function
+
+#     # Ensure font is initialized correctly
+#     if not font:
+#         font = pygame.font.SysFont('Arial', 32)  # Initialize font if it's not set
+
+#     # Initial variables for text input
+#     input_active = False  # Whether the text input box is active
+#     student_input = ''  # The current input from the user
+
+#     while True:
+#         # Draw the background for the student select menu
+#         draw_background(main_menu_background)
+
+#         # Retrieve students from the database
+#         students = get_students()  # Fetch students from the database
+
+#         # Draw a title for the student selection menu
+#         draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
+
+#         # Display students as clickable text options
+#         student_rects = []  # List to hold rects for each student for click detection
+#         for index, student in enumerate(students):
+#             student_name = student[1]  # Assuming the student name is in the second column
+#             student_y = HEIGHT * (0.2 + 0.1 * index)  # Space out the student names vertically
+#             student_rect = draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
+#             student_rects.append((student_rect, student_name))
+
+#         # Display the input box for adding new students
+#         input_box_rect = pygame.Rect(WIDTH * 0.33, HEIGHT * 0.80, WIDTH * 0.4, HEIGHT * 0.1)  # The size of the input box
+#         input_box_color = (255, 0, 0) if input_active else text_color  # Highlight input box when active
+#         pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box
+
+#         # Draw the "New Student" label
+#         draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
+
+#         # Draw the current student input text in the input box
+#         draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
+
+#         pygame.display.flip()  # Update the display
+
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = event.pos
+#                 # Check if a student was clicked
+#                 for rect, student_name in student_rects:
+#                     if rect.collidepoint(mouse_pos):
+#                         current_student = student_name  # Store the selected student's name
+#                         return "session_manager"  # Transition to the session manager
+                
+#                 # Check if the input box is clicked to activate text input
+#                 if input_box_rect.collidepoint(mouse_pos):
+#                     input_active = True
+#                 else:
+#                     input_active = False  # Deactivate text input if clicked outside the box
+
+#             elif event.type == pygame.KEYDOWN and input_active:
+#                 # Handle text input for the new student name
+#                 if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):  # Support both Enter keys
+#                     if student_input.strip():  # Only add if the input is not empty
+#                         add_student(student_input.strip())  # Add the student to the database
+#                         student_input = ''  # Clear the input after submission
+#                         input_active = False  # Deactivate the text input
+#                 elif event.key == pygame.K_BACKSPACE:  # Handle backspace to delete characters
+#                     student_input = student_input[:-1]
+#                 else:
+#                     student_input += event.unicode  # Append new character to the input
+
+
+#                 # Redraw the screen after updating the input
+#                 draw_background(main_menu_background)  # Redraw the background
+#                 draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
+
+#                 # Redraw students
+#                 for index, student in enumerate(students):
+#                     student_name = student[1]
+#                     student_y = HEIGHT * (0.2 + 0.1 * index)
+#                     draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True)
+
+#                 # Redraw input box and input text
+#                 pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Redraw the input box
+#                 draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
+#                 draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
+
+#                 # Update the screen
+#                 pygame.display.flip()
+
+#         clock.tick(60)
 def student_select_menu():
-    global font, current_student  # Make font and current_student global so they can be used across the function
+    global font, current_student
 
     # Ensure font is initialized correctly
     if not font:
-        font = pygame.font.SysFont('Arial', 32)  # Initialize font if it's not set
+        font = pygame.font.SysFont('Arial', 32)
 
     # Initial variables for text input
-    input_active = False  # Whether the text input box is active
-    student_input = ''  # The current input from the user
+    input_active = False
+    student_input = ''
+
+    # Particle effect settings
+    particle_count = 2  # Number of particles to generate per frame when hovered
+    particle_lifetime = 30  # Lifetime for each particle in frames
+    particles = []  # List to hold active particles
 
     while True:
-        # Draw the background for the student select menu
         draw_background(main_menu_background)
-
-        # Retrieve students from the database
         students = get_students()  # Fetch students from the database
 
         # Draw a title for the student selection menu
         draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
 
-        # Display students as clickable text options
-        student_rects = []  # List to hold rects for each student for click detection
+        # Display students as clickable text options with hover effect
+        student_rects = []
+        mouse_pos = pygame.mouse.get_pos()  # Get current mouse position
         for index, student in enumerate(students):
-            student_name = student[1]  # Assuming the student name is in the second column
-            student_y = HEIGHT * (0.2 + 0.1 * index)  # Space out the student names vertically
-            student_rect = draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
+            student_name = student[1]
+            student_y = HEIGHT * (0.2 + 0.1 * index)
+            # Check if the mouse is over this student's name and set color accordingly
+            is_hovered = pygame.Rect(0, student_y, WIDTH, font.get_height()).collidepoint(mouse_pos)
+            student_color = shadow_color if is_hovered else text_color
+            student_rect = draw_text(student_name, font, student_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
             student_rects.append((student_rect, student_name))
 
+            # Generate particles if hovered
+            if is_hovered:
+                for _ in range(particle_count):
+                    particle_color = random.choice([shadow_color, text_color, screen_color])
+                    particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                    particle.lifetime = particle_lifetime
+                    angle = random.uniform(0, 2 * math.pi)
+                    speed = random.uniform(1, 3)
+                    particle.dx = math.cos(angle) * speed
+                    particle.dy = math.sin(angle) * speed
+                    particles.append(particle)
+
         # Display the input box for adding new students
-        input_box_rect = pygame.Rect(WIDTH * 0.33, HEIGHT * 0.80, WIDTH * 0.4, HEIGHT * 0.1)  # The size of the input box
-        input_box_color = (255, 0, 0) if input_active else text_color  # Highlight input box when active
-        pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box
+        input_box_rect = pygame.Rect(WIDTH * 0.33, HEIGHT * 0.80, WIDTH * 0.4, HEIGHT * 0.1)
+        # Determine the color of the input box based on hover and active states
+        if input_active:
+            input_box_color = (255, 0, 0)  # Red when active
+        elif input_box_rect.collidepoint(mouse_pos):
+            input_box_color = shadow_color  # Shadow color on hover
+            # Generate particles if hovered over the input box
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+        else:
+            input_box_color = text_color  # Default color
 
-        # Draw the "New Student" label
+        pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box with the determined color
+
+        # Draw the "New Student" label and current input text
         draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
-
-        # Draw the current student input text in the input box
         draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
 
-        pygame.display.flip()  # Update the display
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -10647,47 +10780,27 @@ def student_select_menu():
                 # Check if a student was clicked
                 for rect, student_name in student_rects:
                     if rect.collidepoint(mouse_pos):
-                        current_student = student_name  # Store the selected student's name
+                        current_student = student_name
                         return "session_manager"  # Transition to the session manager
                 
                 # Check if the input box is clicked to activate text input
-                if input_box_rect.collidepoint(mouse_pos):
-                    input_active = True
-                else:
-                    input_active = False  # Deactivate text input if clicked outside the box
+                input_active = input_box_rect.collidepoint(mouse_pos)
 
             elif event.type == pygame.KEYDOWN and input_active:
                 # Handle text input for the new student name
-                if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):  # Support both Enter keys
-                    if student_input.strip():  # Only add if the input is not empty
-                        add_student(student_input.strip())  # Add the student to the database
-                        student_input = ''  # Clear the input after submission
-                        input_active = False  # Deactivate the text input
-                elif event.key == pygame.K_BACKSPACE:  # Handle backspace to delete characters
+                if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                    if student_input.strip():
+                        add_student(student_input.strip())
+                        student_input = ''
+                        input_active = False
+                elif event.key == pygame.K_BACKSPACE:
                     student_input = student_input[:-1]
                 else:
-                    student_input += event.unicode  # Append new character to the input
-
-
-                # Redraw the screen after updating the input
-                draw_background(main_menu_background)  # Redraw the background
-                draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
-
-                # Redraw students
-                for index, student in enumerate(students):
-                    student_name = student[1]
-                    student_y = HEIGHT * (0.2 + 0.1 * index)
-                    draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True)
-
-                # Redraw input box and input text
-                pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Redraw the input box
-                draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
-                draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
-
-                # Update the screen
-                pygame.display.flip()
+                    student_input += event.unicode
 
         clock.tick(60)
+
+
 
 
 def learniverse_explanation():
@@ -13125,165 +13238,6 @@ def display_quiz(screen, kanji, furigana, options):
     return kanji_rect, furigana_rect, option_rects
 
 
-
-# def options_menu():
-#     global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color  # Access the global variables
-
-#     # Get the filtered fonts list
-#     filtered_fonts = get_filtered_fonts()
-
-#     # Fallback to a default font if no valid fonts are found
-#     if not filtered_fonts:
-#         filtered_fonts = ["arial"]
-#         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
-#         log_message(log_entry)
-
-#     # Set the current font index to match the current_font_name_or_path
-#     if current_font_name_or_path in filtered_fonts:
-#         current_font_index = filtered_fonts.index(current_font_name_or_path)
-#     else:
-#         current_font_index = 0
-#         current_font_name_or_path = filtered_fonts[current_font_index]
-
-#     # Track the current theme index based on the current applied theme
-#     for theme_name, theme_values in color_themes.items():
-#         if (text_color == theme_values["text_color"] and
-#             shadow_color == theme_values["shadow_color"] and
-#             screen_color == theme_values["screen_color"]):
-#             current_theme_index = list(color_themes.keys()).index(theme_name)
-#             break
-#     else:
-#         current_theme_index = list(color_themes.keys()).index("light")  # Default to "light" if no match is found
-
-#     while True:
-#         font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Update the font based on current font
-#         # update_positions()
-
-#         # Draw the background for the options menu
-#         draw_background(options_background)
-
-#         # Y positions for consistent alignment
-#         volume_y = HEIGHT * 0.1  # line for the volume
-#         resolution_y = HEIGHT * 0.25  # line for the resolution
-#         theme_y = HEIGHT * 0.4  # line for the theme
-#         font_y = HEIGHT * 0.55  # line for the font
-#         credits_y = HEIGHT * 0.70  # line for the credits
-#         back_to_main_y = HEIGHT * 0.85
-#         left_buffer = 0.05
-#         right_buffer = 0.95
-
-#         # Draw the options and get rects for click detection
-#         back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
-
-#         # Draw the volume label, percentage, and control buttons with shadows
-#         draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
-#         draw_text(f"{int(music_volume * 100)}%", font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
-        
-#         # Calculate rects for volume control buttons based on the size of the rendered text
-#         minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-#         plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-
-#         # Draw the resolution controls with shadows
-#         draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
-#         resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
-#         draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
-        
-#         # Calculate rects for resolution control buttons
-#         resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-#         resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-
-#         # Draw the theme controls with shadows
-#         draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
-#         theme_name = list(color_themes.keys())[current_theme_index]
-#         draw_text(f"{theme_name.capitalize()}", font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
-        
-#         # Calculate rects for theme control buttons
-#         theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-#         theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-
-#         # Display the current font in use with < and > buttons
-#         left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
-#         draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
-#         right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
-
-#         # Draw the "Credits" option
-#         credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
-
-#         # Draw the exit button with a shadow
-#         # exit_rect = draw_exit_button()
-
-#         pygame.display.flip()
-
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = event.pos
-                
-#                 # Check if "Back to Main Menu" was clicked
-#                 if back_to_main_menu_rect and back_to_main_menu_rect.collidepoint(mouse_pos):
-#                     save_options()
-#                     return "main_menu"
-                
-#                 # Check if "-" button was clicked for volume
-#                 elif minus_rect and minus_rect.collidepoint(mouse_pos):
-#                     decrease_volume()
-                
-#                 # Check if "+" button was clicked for volume
-#                 elif plus_rect and plus_rect.collidepoint(mouse_pos):
-#                     increase_volume()
-
-#                 # Check if "-" button was clicked for resolution
-#                 if resolution_minus_rect and resolution_minus_rect.collidepoint(mouse_pos):
-#                     current_resolution_index = max(0, current_resolution_index - 1)
-#                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-#                     # Center the window
-#                     pygame.display.quit()
-#                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
-#                     screen = pygame.display.set_mode(current_windowed_resolution)
-#                     WIDTH, HEIGHT = current_windowed_resolution
-#                     update_positions()
-
-#                 # Check if "+" button was clicked for resolution
-#                 if resolution_plus_rect and resolution_plus_rect.collidepoint(mouse_pos):
-#                     current_resolution_index = min(len(AVAILABLE_RESOLUTIONS) - 1, current_resolution_index + 1)
-#                     current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-#                     # Center the window
-#                     pygame.display.quit()
-#                     center_window(current_windowed_resolution[0], current_windowed_resolution[1])
-#                     screen = pygame.display.set_mode(current_windowed_resolution)
-#                     WIDTH, HEIGHT = current_windowed_resolution
-#                     update_positions()
-                
-#                 # Check if "<" was clicked to go to the previous theme
-#                 if theme_minus_rect and theme_minus_rect.collidepoint(mouse_pos):
-#                     current_theme_index = (current_theme_index - 1) % len(color_themes)
-#                     apply_theme(list(color_themes.keys())[current_theme_index])
-                
-#                 # Check if ">" was clicked to go to the next theme
-#                 if theme_plus_rect and theme_plus_rect.collidepoint(mouse_pos):
-#                     current_theme_index = (current_theme_index + 1) % len(color_themes)
-#                     apply_theme(list(color_themes.keys())[current_theme_index])
-
-#                 # Check if "<" was clicked to go to the previous font
-#                 if left_arrow_rect and left_arrow_rect.collidepoint(mouse_pos):
-#                     current_font_index = (current_font_index - 1) % len(filtered_fonts)
-#                     current_font_name_or_path = filtered_fonts[current_font_index]
-                
-#                 # Check if ">" was clicked to go to the next font
-#                 if right_arrow_rect and right_arrow_rect.collidepoint(mouse_pos):
-#                     current_font_index = (current_font_index + 1) % len(filtered_fonts)
-#                     current_font_name_or_path = filtered_fonts[current_font_index]
-
-#                 # Check if "Credits" was clicked
-#                 if credits_rect and credits_rect.collidepoint(mouse_pos):
-#                     credit_roll()  # Trigger the credit roll
-
-#                 # Check if "X" was clicked
-#                 # check_exit_click(mouse_pos, exit_rect)
-
-#         clock.tick(60)
 def options_menu():
     global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color
 
