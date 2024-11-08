@@ -10447,9 +10447,69 @@ def load_options():
     update_positions()
 
 
+# def main_menu():
+#     global font  # Ensure we update the global font variable
+    
+#     # Check if music is currently playing
+#     if not pygame.mixer.music.get_busy():  # Returns False if no music is playing
+#         # If no music is playing, load and play a random MP3
+#         main_menu_music_directory = "assets/music/main_menu"
+#         random_mp3 = get_random_mp3(main_menu_music_directory)
+#         if random_mp3:
+#             music_loaded = load_mp3(random_mp3)
+#             if music_loaded:
+#                 play_mp3()  # Start playing the random music if successfully loaded
+
+#     while True:
+#         # Recalculate the font size dynamically based on the current resolution
+#         font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())  # Use the global font
+
+#         # Draw the background for the main menu
+#         draw_background(main_menu_background)
+        
+#         # Draw the text options using the new draw_text function with rects for click detection
+#         draw_text("Learniverse", font, text_color, 0, HEIGHT * 0.2, screen, center=True, enable_shadow=True, return_rect=False, max_width=WIDTH)
+#         start_rect = draw_text("Start", font, text_color, 0, HEIGHT * 0.55, screen, center=True, enable_shadow=True, return_rect=True)
+#         options_rect = draw_text("Options", font, text_color, 0, HEIGHT * 0.7, screen, center=True, enable_shadow=True, return_rect=True)
+#         explanation_rect = draw_text("Learniverse?", font, text_color, 0, HEIGHT * 0.85, screen, center=True, enable_shadow=True, return_rect=True)
+        
+#         # Draw the exit button using the new draw_text function and get its rect for click detection
+#         # exit_rect = draw_exit_button()
+        
+#         pygame.display.flip()
+
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = event.pos
+#                 # Check if "Start" was clicked
+#                 if start_rect and start_rect.collidepoint(mouse_pos):
+#                     return "student_select_menu"  # Return to indicate starting the game
+#                 # Check if "Options" was clicked
+#                 elif options_rect and options_rect.collidepoint(mouse_pos):
+#                     return "options_menu"  # Return to indicate transitioning to options menu
+#                 elif explanation_rect and explanation_rect.collidepoint(mouse_pos):
+#                     return "learniverse_explanation"  # Return to indicate transitioning to options menu
+#             # elif event.type == pygame.KEYDOWN:
+#             #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+#             #         bonus_game_tuna_tower()
+#             #         bonus_game_cat_pong()
+#                     # bonus_game_falling_fish()
+#             #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+
+
+#         clock.tick(60)
 def main_menu():
     global font  # Ensure we update the global font variable
-    
+
+    # Particle effect settings
+    particle_count = 1  # Number of particles to generate on hover
+    particle_lifetime = 30  # Lifetime for each particle in frames
+
+    particles = []  # List to hold active particles
+
     # Check if music is currently playing
     if not pygame.mixer.music.get_busy():  # Returns False if no music is playing
         # If no music is playing, load and play a random MP3
@@ -10467,40 +10527,72 @@ def main_menu():
         # Draw the background for the main menu
         draw_background(main_menu_background)
         
-        # Draw the text options using the new draw_text function with rects for click detection
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Draw the title (not clickable)
         draw_text("Learniverse", font, text_color, 0, HEIGHT * 0.2, screen, center=True, enable_shadow=True, return_rect=False, max_width=WIDTH)
+
+        # Initially draw each text option and get their rects for hover detection
         start_rect = draw_text("Start", font, text_color, 0, HEIGHT * 0.55, screen, center=True, enable_shadow=True, return_rect=True)
         options_rect = draw_text("Options", font, text_color, 0, HEIGHT * 0.7, screen, center=True, enable_shadow=True, return_rect=True)
         explanation_rect = draw_text("Learniverse?", font, text_color, 0, HEIGHT * 0.85, screen, center=True, enable_shadow=True, return_rect=True)
-        
-        # Draw the exit button using the new draw_text function and get its rect for click detection
-        # exit_rect = draw_exit_button()
-        
+
+        # Check hover state for each option and set colors accordingly
+        start_color = shadow_color if start_rect.collidepoint(mouse_pos) else text_color
+        options_color = shadow_color if options_rect.collidepoint(mouse_pos) else text_color
+        explanation_color = shadow_color if explanation_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw each text option with hover effect based on color checks
+        draw_text("Start", font, start_color, 0, HEIGHT * 0.55, screen, center=True, enable_shadow=True)
+        draw_text("Options", font, options_color, 0, HEIGHT * 0.7, screen, center=True, enable_shadow=True)
+        draw_text("Learniverse?", font, explanation_color, 0, HEIGHT * 0.85, screen, center=True, enable_shadow=True)
+
+        # Particle effect on hover
+        if start_rect.collidepoint(mouse_pos) or options_rect.collidepoint(mouse_pos) or explanation_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):
+                color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], color)
+                particle.lifetime = particle_lifetime  # Override the random lifetime with our controlled particle_lifetime
+                
+                # Set random angle and speed for 360-degree direction
+                angle = random.uniform(0, 2 * math.pi)  # Random angle in radians
+                speed = random.uniform(1, 3)  # Adjust speed range as needed
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:  # Iterate over a copy of the list
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        # Flip the display
         pygame.display.flip()
 
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = event.pos
-                # Check if "Start" was clicked
-                if start_rect and start_rect.collidepoint(mouse_pos):
+                # Check which option was clicked
+                if start_rect.collidepoint(event.pos):
                     return "student_select_menu"  # Return to indicate starting the game
-                # Check if "Options" was clicked
-                elif options_rect and options_rect.collidepoint(mouse_pos):
+                elif options_rect.collidepoint(event.pos):
                     return "options_menu"  # Return to indicate transitioning to options menu
-                elif explanation_rect and explanation_rect.collidepoint(mouse_pos):
-                    return "learniverse_explanation"  # Return to indicate transitioning to options menu
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-            #         bonus_game_tuna_tower()
-            #         bonus_game_cat_pong()
-                    # bonus_game_falling_fish()
-            #         bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+                elif explanation_rect.collidepoint(event.pos):
+                    return "learniverse_explanation"  # Return to indicate transitioning to explanation
+
+        # Control the frame rate
+        clock.tick(120)
 
 
-        clock.tick(60)
+
+
 
 
 def student_select_menu():
