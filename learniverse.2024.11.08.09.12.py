@@ -3126,6 +3126,10 @@ options_background = select_random_background("assets/images/options/")
 # Initialize Text to Speech
 engine = pyttsx3.init()
 
+# Initialize separate channels for different sounds
+THUNDER_CHANNEL = pygame.mixer.Channel(1)
+GREETING_CHANNEL = pygame.mixer.Channel(2)
+pygame.mixer.set_num_channels(16)
 
 ##########################
 ### Database Functions ###
@@ -4081,12 +4085,111 @@ def grow_tree(screen, start_x, start_y, max_depth, max_branches):
         branch_thickness = max(1, branch_thickness - 1)  # Decrease thickness with each level
 
     
+# def draw_lightning(screen, start_pos, end_pos, background_image, font, text_color, correct_message="CORRECT!"):
+#     """
+#     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
+#     while keeping the background image and 'CORRECT!' text intact, using the student's personalized settings.
+#     """
+    
+#     # Prepare colors for the lightning
+#     start_color = (173, 216, 230)  # Light blue
+#     end_color = (255, 255, 255)    # White
+
+#     BOLT_SEGMENTS = 10  # Number of segments for each bolt
+#     FLASH_COUNT = 10    # Number of bolts per flash burst
+#     BOLT_FLASH_DURATION = 40  # Duration to display each flash (milliseconds)
+
+#     # Load the background image (which will always exist in this version)
+#     bg_image = pygame.image.load(background_image)
+
+#     # Resize the background image to fit the screen size
+#     bg_image = pygame.transform.scale(bg_image, (screen.get_width(), screen.get_height()))
+    
+#     # Load the thunder sound effect
+#     thunder_sound = pygame.mixer.Sound('assets/SFX/loud-thunder-192165.wav')
+
+#     for _ in range(3):  # Number of flash bursts
+#         # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
+#         screen.blit(bg_image, (0, 0))
+
+#         # Step 2: Draw the "CORRECT!" message using the draw_text function
+#         draw_text(
+#             text=correct_message,
+#             font=font,
+#             color=text_color,
+#             x=0,  # X position is set to 0 for centering later
+#             y=screen.get_height() * 0.2,  # Y position places the text above the image
+#             center=True,
+#             enable_shadow=True,  # Optionally enable shadow
+#         )
+
+#         # Step 3.1: Play the thunder sound effect for each lightning flash burst
+#         thunder_sound.play()
+
+#         # Step 3.2: Draw multiple lightning bolts in this frame
+#         for _ in range(FLASH_COUNT):
+#             current_pos = start_pos
+#             for i in range(BOLT_SEGMENTS):
+#                 fraction = i / BOLT_SEGMENTS
+#                 color = (
+#                     int(start_color[0] + (end_color[0] - start_color[0]) * fraction),
+#                     int(start_color[1] + (end_color[1] - start_color[1]) * fraction),
+#                     int(start_color[2] + (end_color[2] - start_color[2]) * fraction)
+#                 )
+
+#                 next_x = current_pos[0] + random.randint(-BOLT_SPREAD, BOLT_SPREAD)
+#                 next_y = current_pos[1] + (end_pos[1] - start_pos[1]) // BOLT_SEGMENTS
+#                 next_pos = (next_x, next_y)
+
+#                 # Draw the segment of the lightning bolt
+#                 pygame.draw.line(screen, color, current_pos, next_pos, 2)
+#                 current_pos = next_pos
+
+#             # Draw the final segment of the bolt
+#             pygame.draw.line(screen, end_color, current_pos, end_pos, 2)
+
+#         # Step 4: Display the lightning on top of the background and "CORRECT!" message
+#         pygame.display.flip()
+
+#         # Step 5: Hold the lightning flash for a brief moment
+#         pygame.time.delay(BOLT_FLASH_DURATION)
+
+#         # Step 6: Clear the screen by redrawing the background and the "CORRECT!" message (erasing previous bolts)
+#         screen.blit(bg_image, (0, 0))
+#         draw_text(
+#             text=correct_message,
+#             font=font,
+#             color=text_color,
+#             x=0,  # X position is set to 0 for centering later
+#             y=screen.get_height() * 0.2,  # Y position places the text above the image
+#             center=True,
+#             enable_shadow=True,  # Optionally enable shadow
+#         )
+
+#         # Step 7: Refresh the screen to apply the cleared frame
+#         pygame.display.flip()
+
+#         # Short delay before the next flash burst
+#         pygame.time.delay(20)
+
+#     # Step 8: Redraw the background and "CORRECT!" message after the lightning effect
+#     screen.blit(bg_image, (0, 0))
+#     draw_text(
+#         text=correct_message,
+#         font=font,
+#         color=text_color,
+#         x=0,  # X position is set to 0 for centering later
+#         y=screen.get_height() * 0.2,  # Y position places the text above the image
+#         center=True,
+#         enable_shadow=True,  # Optionally enable shadow
+#     )
+#     pygame.display.flip()  # Final refresh with background and text intact
 def draw_lightning(screen, start_pos, end_pos, background_image, font, text_color, correct_message="CORRECT!"):
     """
     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
-    while keeping the background image and 'CORRECT!' text intact, using the student's personalized settings.
+    while keeping the background image and 'CORRECT!' text intact.
     """
-    
+
     # Prepare colors for the lightning
     start_color = (173, 216, 230)  # Light blue
     end_color = (255, 255, 255)    # White
@@ -4095,17 +4198,15 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
     FLASH_COUNT = 10    # Number of bolts per flash burst
     BOLT_FLASH_DURATION = 40  # Duration to display each flash (milliseconds)
 
-    # Load the background image (which will always exist in this version)
+    # Load and scale the background image to fit the screen
     bg_image = pygame.image.load(background_image)
-
-    # Resize the background image to fit the screen size
     bg_image = pygame.transform.scale(bg_image, (screen.get_width(), screen.get_height()))
-    
+
     # Load the thunder sound effect
     thunder_sound = pygame.mixer.Sound('assets/SFX/loud-thunder-192165.wav')
 
     for _ in range(3):  # Number of flash bursts
-        # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
+        # Step 1: Redraw the background to clear previous lightning bolts
         screen.blit(bg_image, (0, 0))
 
         # Step 2: Draw the "CORRECT!" message using the draw_text function
@@ -4119,10 +4220,10 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             enable_shadow=True,  # Optionally enable shadow
         )
 
-        # Step 3.1: Play the thunder sound effect for each lightning flash burst
+        # Step 3: Play the thunder sound effect (automatically assigns channel)
         thunder_sound.play()
 
-        # Step 3.2: Draw multiple lightning bolts in this frame
+        # Step 4: Draw multiple lightning bolts in this frame
         for _ in range(FLASH_COUNT):
             current_pos = start_pos
             for i in range(BOLT_SEGMENTS):
@@ -4133,6 +4234,7 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
                     int(start_color[2] + (end_color[2] - start_color[2]) * fraction)
                 )
 
+                # Randomly vary the next segment position for a jagged effect
                 next_x = current_pos[0] + random.randint(-BOLT_SPREAD, BOLT_SPREAD)
                 next_y = current_pos[1] + (end_pos[1] - start_pos[1]) // BOLT_SEGMENTS
                 next_pos = (next_x, next_y)
@@ -4144,13 +4246,13 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             # Draw the final segment of the bolt
             pygame.draw.line(screen, end_color, current_pos, end_pos, 2)
 
-        # Step 4: Display the lightning on top of the background and "CORRECT!" message
+        # Step 5: Display the lightning on top of the background and "CORRECT!" message
         pygame.display.flip()
 
-        # Step 5: Hold the lightning flash for a brief moment
+        # Step 6: Hold the lightning flash for a brief moment
         pygame.time.delay(BOLT_FLASH_DURATION)
 
-        # Step 6: Clear the screen by redrawing the background and the "CORRECT!" message (erasing previous bolts)
+        # Step 7: Clear the screen by redrawing the background and "CORRECT!" message (erasing previous bolts)
         screen.blit(bg_image, (0, 0))
         draw_text(
             text=correct_message,
@@ -4162,13 +4264,13 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
             enable_shadow=True,  # Optionally enable shadow
         )
 
-        # Step 7: Refresh the screen to apply the cleared frame
+        # Step 8: Refresh the screen to apply the cleared frame
         pygame.display.flip()
 
         # Short delay before the next flash burst
         pygame.time.delay(20)
 
-    # Step 8: Redraw the background and "CORRECT!" message after the lightning effect
+    # Step 9: Redraw the background and "CORRECT!" message after the lightning effect
     screen.blit(bg_image, (0, 0))
     draw_text(
         text=correct_message,
@@ -4180,6 +4282,7 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
         enable_shadow=True,  # Optionally enable shadow
     )
     pygame.display.flip()  # Final refresh with background and text intact
+
 
 
 def generate_perlin_cloud(x_offset):
@@ -4399,6 +4502,36 @@ def draw_continue_button():
     continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
 
     return continue_rect
+# def draw_continue_button():
+#     global current_font_name_or_path  # Ensure we're using the global variable for font
+
+#     # Update the dynamic font size for the continue button based on the current resolution
+#     continue_font_size = int(get_dynamic_font_size() * 0.8)
+
+#     # Recreate the font with the new size using the current font name or path
+#     if os.path.isfile(current_font_name_or_path):
+#         continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+#     else:
+#         continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+
+#     # Calculate the position for the "Continue..." text to be at 55% across the screen width
+#     x_position = WIDTH * 0.55
+#     y_position = HEIGHT * 0.90  # 90% down the screen
+
+#     # Define the text and check if the mouse is hovering over the button
+#     continue_text = "Continue..."
+#     mouse_pos = pygame.mouse.get_pos()
+#     text_width, text_height = continue_font.size(continue_text)
+#     continue_rect = pygame.Rect(x_position, y_position, text_width, text_height)
+
+#     # Determine the color based on hover state
+#     color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+#     # Use draw_text to render the continue button with the hover color and drop shadow
+#     continue_rect = draw_text(continue_text, continue_font, color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
+
+#     return continue_rect
+
 
 
 def draw_and_wait_continue_button():
@@ -4666,6 +4799,34 @@ def speak_english(text):
     engine.runAndWait()  # Block while the speech finishes
     
     
+# def speak_japanese(text):
+#     """
+#     Attempt to play a pre-rendered WAV file for the given Japanese text.
+#     If the file does not exist or cannot be played, handle gracefully.
+
+#     Parameters:
+#     text (str): The Japanese text for which to play the corresponding WAV file.
+#     """
+#     # Convert Japanese text to Romanized filename format
+#     romaji_filename = unidecode(text)[:50]  # Truncate for safety
+#     wav_file_path = f"assets/audio/{romaji_filename}.wav"
+
+#     try:
+#         # Check if the WAV file exists and play it
+#         if os.path.isfile(wav_file_path):
+#             sound = pygame.mixer.Sound(wav_file_path)
+#             sound.play()
+#             while pygame.mixer.get_busy():
+#                 pass  # Wait until the sound finishes playing
+#             log_entry = create_log_message(f"Played audio file: {wav_file_path}")
+#             log_message(log_entry)
+#         else:
+#             raise FileNotFoundError(f"No audio file found for '{text}' at '{wav_file_path}'")
+    
+#     except Exception as e:
+#         # Log any error that occurs during file playback
+#         log_entry = create_log_message(f"Error playing audio for '{text}': {e}")
+#         log_message(log_entry)
 def speak_japanese(text):
     """
     Attempt to play a pre-rendered WAV file for the given Japanese text.
@@ -4674,17 +4835,15 @@ def speak_japanese(text):
     Parameters:
     text (str): The Japanese text for which to play the corresponding WAV file.
     """
-    # Convert Japanese text to Romanized filename format
-    romaji_filename = unidecode(text)[:50]  # Truncate for safety
+    # Convert Japanese text to a Romanized filename format
+    romaji_filename = unidecode(text)[:50]  # Truncate for safety in filenames
     wav_file_path = f"assets/audio/{romaji_filename}.wav"
 
     try:
         # Check if the WAV file exists and play it
         if os.path.isfile(wav_file_path):
             sound = pygame.mixer.Sound(wav_file_path)
-            sound.play()
-            while pygame.mixer.get_busy():
-                pass  # Wait until the sound finishes playing
+            sound.play()  # Play without specifying a channel, allowing automatic assignment
             log_entry = create_log_message(f"Played audio file: {wav_file_path}")
             log_message(log_entry)
         else:
@@ -4694,6 +4853,8 @@ def speak_japanese(text):
         # Log any error that occurs during file playback
         log_entry = create_log_message(f"Error playing audio for '{text}': {e}")
         log_message(log_entry)
+
+
 
 
 ############################
@@ -10591,103 +10752,6 @@ def main_menu():
         clock.tick(120)
 
 
-
-
-
-
-# def student_select_menu():
-#     global font, current_student  # Make font and current_student global so they can be used across the function
-
-#     # Ensure font is initialized correctly
-#     if not font:
-#         font = pygame.font.SysFont('Arial', 32)  # Initialize font if it's not set
-
-#     # Initial variables for text input
-#     input_active = False  # Whether the text input box is active
-#     student_input = ''  # The current input from the user
-
-#     while True:
-#         # Draw the background for the student select menu
-#         draw_background(main_menu_background)
-
-#         # Retrieve students from the database
-#         students = get_students()  # Fetch students from the database
-
-#         # Draw a title for the student selection menu
-#         draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
-
-#         # Display students as clickable text options
-#         student_rects = []  # List to hold rects for each student for click detection
-#         for index, student in enumerate(students):
-#             student_name = student[1]  # Assuming the student name is in the second column
-#             student_y = HEIGHT * (0.2 + 0.1 * index)  # Space out the student names vertically
-#             student_rect = draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True, return_rect=True)
-#             student_rects.append((student_rect, student_name))
-
-#         # Display the input box for adding new students
-#         input_box_rect = pygame.Rect(WIDTH * 0.33, HEIGHT * 0.80, WIDTH * 0.4, HEIGHT * 0.1)  # The size of the input box
-#         input_box_color = (255, 0, 0) if input_active else text_color  # Highlight input box when active
-#         pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Draw the input box
-
-#         # Draw the "New Student" label
-#         draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
-
-#         # Draw the current student input text in the input box
-#         draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
-
-#         pygame.display.flip()  # Update the display
-
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = event.pos
-#                 # Check if a student was clicked
-#                 for rect, student_name in student_rects:
-#                     if rect.collidepoint(mouse_pos):
-#                         current_student = student_name  # Store the selected student's name
-#                         return "session_manager"  # Transition to the session manager
-                
-#                 # Check if the input box is clicked to activate text input
-#                 if input_box_rect.collidepoint(mouse_pos):
-#                     input_active = True
-#                 else:
-#                     input_active = False  # Deactivate text input if clicked outside the box
-
-#             elif event.type == pygame.KEYDOWN and input_active:
-#                 # Handle text input for the new student name
-#                 if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):  # Support both Enter keys
-#                     if student_input.strip():  # Only add if the input is not empty
-#                         add_student(student_input.strip())  # Add the student to the database
-#                         student_input = ''  # Clear the input after submission
-#                         input_active = False  # Deactivate the text input
-#                 elif event.key == pygame.K_BACKSPACE:  # Handle backspace to delete characters
-#                     student_input = student_input[:-1]
-#                 else:
-#                     student_input += event.unicode  # Append new character to the input
-
-
-#                 # Redraw the screen after updating the input
-#                 draw_background(main_menu_background)  # Redraw the background
-#                 draw_text("Select a Student", font, text_color, 0, HEIGHT * 0.1, screen, center=True, enable_shadow=True)
-
-#                 # Redraw students
-#                 for index, student in enumerate(students):
-#                     student_name = student[1]
-#                     student_y = HEIGHT * (0.2 + 0.1 * index)
-#                     draw_text(student_name, font, text_color, 0, student_y, screen, center=True, enable_shadow=True)
-
-#                 # Redraw input box and input text
-#                 pygame.draw.rect(screen, input_box_color, input_box_rect, 2)  # Redraw the input box
-#                 draw_text("New Student:", font, text_color, WIDTH * 0.5, HEIGHT * 0.7, screen, enable_shadow=True, center=True)
-#                 draw_text(student_input, font, text_color, WIDTH * 0.45, HEIGHT * 0.8, screen, enable_shadow=True, center=True)
-
-#                 # Update the screen
-#                 pygame.display.flip()
-
-#         clock.tick(60)
 def student_select_menu():
     global font, current_student
 
@@ -10861,15 +10925,15 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       "single_digit_addition",             #Math
-                       "double_digit_addition",             #Math
-                       "single_digit_subtraction",          #Math
-                       "double_digit_subtraction",          #Math
-                       "subtraction_borrowing",             #Math
-                       "single_digit_multiplication",       #Math
-                       "single_by_double_multiplication",   #Math
-                       "single_denominator_addition",       #Math
-                       "lowest_common_denominator_quiz",      #Math
+                       # "single_digit_addition",             #Math
+                       # "double_digit_addition",             #Math
+                       # "single_digit_subtraction",          #Math
+                       # "double_digit_subtraction",          #Math
+                       # "subtraction_borrowing",             #Math
+                       # "single_digit_multiplication",       #Math
+                       # "single_by_double_multiplication",   #Math
+                       # "single_denominator_addition",       #Math
+                       # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
                        # "hiragana_teach",                    #JP
@@ -10877,7 +10941,7 @@ def session_manager():
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
-                       # "japanese_animals_quiz",             #JP
+                       "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
                        # "psalm_23",                          #ENG
@@ -11410,9 +11474,97 @@ def session_manager():
     return "main_menu"
 
 
+# def greet_student():
+#     global current_student  # Access global current_student
+#     global text_color, shadow_color, screen_color  # Access the theme-related globals
+    
+#     stop_mp3()
+
+#     # Get the current time
+#     current_time = datetime.now().time()
+
+#     # Determine the appropriate greeting based on the time of day
+#     if current_time >= datetime.strptime("00:01", "%H:%M").time() and current_time < datetime.strptime("12:00", "%H:%M").time():
+#         # Morning greeting
+#         greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
+#         greeting_message_jp = "おはようございます。"  # Good morning in Japanese
+#     elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("17:00", "%H:%M").time():
+#         # Afternoon greeting
+#         greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
+#         greeting_message_jp = "こんにちは。"  # Hello in Japanese
+#     else:
+#         # Evening greeting
+#         greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
+#         greeting_message_jp = "こんばんは。"  # Good evening in Japanese
+
+#     # Set a static sky blue background with Perlin clouds
+#     SKY_BLUE = (135, 206, 235)
+#     screen.fill(SKY_BLUE)  # Fill the screen with sky blue
+
+#     # Generate and blit Perlin clouds
+#     cloud_surface = generate_perlin_cloud(0)  # Use zero offset for static clouds
+#     screen.blit(cloud_surface, (0, 0))
+    
+#     # Start growing tree from the exact bottom center
+#     grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
+#     grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
+
+#     # Draw the English greeting message
+#     draw_text(
+#         greeting_message_eng, 
+#         font, 
+#         text_color,  
+#         x=0, 
+#         y=HEIGHT * 0.20, 
+#         max_width=WIDTH * 0.95, 
+#         center=True,  
+#         enable_shadow=True,  
+#         shadow_color=shadow_color  
+#     )
+
+#     # Draw the Japanese greeting message and return its rect for click detection
+#     japanese_text_rect = draw_text(
+#         greeting_message_jp, 
+#         j_font,  
+#         text_color, 
+#         x=0, 
+#         y=HEIGHT * 0.60,  
+#         max_width=WIDTH * 0.95, 
+#         center=True,  
+#         enable_shadow=True,  
+#         shadow_color=shadow_color,
+#         return_rect=True  # Return the rect so we can detect clicks
+#     )
+    
+#     # Draw the "Continue..." button wihtout draw_and_wait_continue_button()
+#     # As we do special stuff while waiting
+#     continue_rect = draw_continue_button()
+
+#     pygame.display.flip()  # Update the display
+
+#     # Use the reusable TTS function to speak the Japanese greeting aloud
+#     speak_japanese(greeting_message_jp)
+
+#     # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
+#     waiting = True
+#     while waiting:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()  # Correctly exit the program
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = pygame.mouse.get_pos()
+
+#                 # Check if the Japanese text is clicked
+#                 if japanese_text_rect.collidepoint(mouse_pos):
+#                     speak_japanese(greeting_message_jp)  # Replay the Japanese greeting
+
+#                 # Check if the "Continue..." button is clicked
+#                 if check_continue_click(mouse_pos, continue_rect):
+#                     waiting = False  # Exit the loop when "Continue..." is clicked
 def greet_student():
-    global current_student  # Access global current_student
-    global text_color, shadow_color, screen_color  # Access the theme-related globals
+    global current_student
+    global text_color, shadow_color, screen_color
     
     stop_mp3()
 
@@ -11421,31 +11573,24 @@ def greet_student():
 
     # Determine the appropriate greeting based on the time of day
     if current_time >= datetime.strptime("00:01", "%H:%M").time() and current_time < datetime.strptime("12:00", "%H:%M").time():
-        # Morning greeting
         greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
         greeting_message_jp = "おはようございます。"  # Good morning in Japanese
     elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("17:00", "%H:%M").time():
-        # Afternoon greeting
         greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
         greeting_message_jp = "こんにちは。"  # Hello in Japanese
     else:
-        # Evening greeting
         greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
         greeting_message_jp = "こんばんは。"  # Good evening in Japanese
 
-    # Set a static sky blue background with Perlin clouds
+    # Set a static sky blue background with Perlin clouds and static elements
     SKY_BLUE = (135, 206, 235)
-    screen.fill(SKY_BLUE)  # Fill the screen with sky blue
-
-    # Generate and blit Perlin clouds
-    cloud_surface = generate_perlin_cloud(0)  # Use zero offset for static clouds
+    screen.fill(SKY_BLUE)
+    cloud_surface = generate_perlin_cloud(0)  # Static clouds
     screen.blit(cloud_surface, (0, 0))
-    
-    # Start growing tree from the exact bottom center
+
+    # Draw trees and static greeting text once
     grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
     grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
-
-    # Draw the English greeting message
     draw_text(
         greeting_message_eng, 
         font, 
@@ -11458,7 +11603,7 @@ def greet_student():
         shadow_color=shadow_color  
     )
 
-    # Draw the Japanese greeting message and return its rect for click detection
+    # Draw initial Japanese greeting and "Continue..." button text
     japanese_text_rect = draw_text(
         greeting_message_jp, 
         j_font,  
@@ -11469,35 +11614,80 @@ def greet_student():
         center=True,  
         enable_shadow=True,  
         shadow_color=shadow_color,
-        return_rect=True  # Return the rect so we can detect clicks
+        return_rect=True
     )
-    
-    # Draw the "Continue..." button wihtout draw_and_wait_continue_button()
-    # As we do special stuff while waiting
-    continue_rect = draw_continue_button()
 
-    pygame.display.flip()  # Update the display
+    continue_font_size = int(get_dynamic_font_size() * 0.8)
+    continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+    continue_text = "Continue..."
+    continue_x_position = WIDTH * 0.55
+    continue_y_position = HEIGHT * 0.90
+    text_width, text_height = continue_font.size(continue_text)
+    continue_rect = pygame.Rect(continue_x_position, continue_y_position, text_width, text_height)
 
-    # Use the reusable TTS function to speak the Japanese greeting aloud
-    speak_japanese(greeting_message_jp)
+    # Create a static background surface to avoid redrawing static elements every frame
+    static_background = screen.copy()  # Save current screen as the static background
+    pygame.display.flip()
+    speak_japanese(greeting_message_jp)  # Play initial greeting
 
-    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
+    # Particle effect settings
+    particle_count = 3
+    particle_lifetime = 30
+    particles = []
+
+    # Main event loop for dynamic elements
     waiting = True
     while waiting:
+        # Blit the static background to clear the screen each frame
+        screen.blit(static_background, (0, 0))
+
+        # Get current mouse position for hover detection
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover colors for the Japanese text and "Continue..." button
+        japanese_text_color = shadow_color if japanese_text_rect.collidepoint(mouse_pos) else text_color
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the hoverable elements without touching the static background
+        draw_text(greeting_message_jp, j_font, japanese_text_color, 0, HEIGHT * 0.60, screen, center=True, enable_shadow=True, shadow_color=shadow_color)
+        draw_text(continue_text, continue_font, continue_color, continue_x_position, continue_y_position, screen, enable_shadow=True)
+
+        # Generate particles if hovering over Japanese text or "Continue..."
+        if japanese_text_rect.collidepoint(mouse_pos) or continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()
+
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()  # Correctly exit the program
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
+                if japanese_text_rect.collidepoint(event.pos):
+                    speak_japanese(greeting_message_jp)
+                elif continue_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
 
-                # Check if the Japanese text is clicked
-                if japanese_text_rect.collidepoint(mouse_pos):
-                    speak_japanese(greeting_message_jp)  # Replay the Japanese greeting
+        clock.tick(60)
 
-                # Check if the "Continue..." button is clicked
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Exit the loop when "Continue..." is clicked
+
+
 
 
 def streak_check():
