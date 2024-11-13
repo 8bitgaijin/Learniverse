@@ -10941,7 +10941,7 @@ def session_manager():
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
-                       "japanese_animals_quiz",             #JP
+                       # "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
                        # "psalm_23",                          #ENG
@@ -10954,7 +10954,7 @@ def session_manager():
                        # "japanese_animals_teach",            #JP
                        # "japanese_colors_quiz",              #JP
                        
-                       # "japanese_fruits_teach",             #JP
+                       "japanese_fruits_teach",             #JP
                        # "japanese_fruits_quiz",              #JP
                        # "japanese_colors_teach",             #JP
                        # "japanese_colors_quiz",             #JP
@@ -12378,6 +12378,9 @@ def run_teach(session_id, lesson_name, character_list, level_urls):
     """Generalized function to teach Japanese characters based on the student's level."""
     global screen_color, text_color, shadow_color  # Access theme-related globals
 
+    # Set the wait time in milliseconds
+    wait_time = 1500  
+
     # Retrieve the student's current level for the specified lesson
     student_level = get_student_progress(session_id, lesson_name)
 
@@ -12418,8 +12421,8 @@ def run_teach(session_id, lesson_name, character_list, level_urls):
         # Play the WAV file
         speak_japanese(char)
 
-        # Optional delay to control playback speed
-        time.sleep(0.5)
+        # Wait for the specified delay before moving to the next character
+        pygame.time.delay(wait_time)
 
     # Show completion message and open the appropriate URL based on level
     completion_url = level_urls.get(student_level, level_urls.get(1))  # Default to level 1 URL if level not found
@@ -12857,6 +12860,9 @@ def vocab_teach(session_id, lesson_title):
     """Displays vocabulary (furigana, kanji, and translation) and reads them aloud using Japanese TTS."""
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
+    # Set the wait time in milliseconds
+    wait_time = 1500
+
     # Get the student's current level for the lesson title
     student_level = get_student_progress(session_id, lesson_title)
     lesson_data = fetch_lesson_data(lesson_title, student_level)
@@ -12902,7 +12908,9 @@ def vocab_teach(session_id, lesson_title):
         
         # Speak the word aloud
         speak_japanese(item['furigana'])
-        time.sleep(1)
+        # time.sleep(1)
+        # Replace each instance of time.sleep(1) with:
+        pygame.time.delay(wait_time)
 
         # Handle focus and event processing for each word display
         for event in pygame.event.get():
@@ -12941,7 +12949,9 @@ def vocab_teach(session_id, lesson_title):
             screen.blit(image, (0, 0))
             pygame.display.flip()
             speak_japanese(item['furigana'])
-            time.sleep(1)
+            # time.sleep(1)
+            # Replace each instance of time.sleep(1) with:
+            pygame.time.delay(wait_time)
         else:
             # If no image is found, just display the text
             pygame.display.flip()
