@@ -56,6 +56,7 @@ TRUNK_COLOR = (139, 69, 19)  # Brown for trunk and branches
 LEAF_COLOR = (34, 139, 34)   # Green for leaves
 LIGHTNING_COLOR = (255, 255, 255)
 SKY_BLUE = (135, 206, 235)  # Sky blue background
+DARK_BLUE = (10, 10, 40)
 
 # Student selectable color themes
 color_themes = {
@@ -3847,7 +3848,68 @@ def perfect_score_lesson_skip(student_name, lesson_name):
         cursor.close()
         connection.close()
         
+
+# TODO Finish implementing incomplete session logic and stuff
+def was_last_session_incomplete_today(student_name):
+    """Check if the last session started today for the student (by name) was incomplete (no end_time)."""
+    try:
+        # Connect to the database to fetch the student ID based on name
+        connection = sqlite3.connect('learniverse.db')
+        cursor = connection.cursor()
         
+        # Look up the student ID based on the name
+        cursor.execute("SELECT id FROM students WHERE name = ?", (student_name,))
+        result = cursor.fetchone()
+        
+        if result is None:
+            log_message(f"Error: Student '{student_name}' not found.")
+            cursor.close()
+            connection.close()
+            return False  # No student found with this name
+        
+        student_id = result[0]  # Extract the student ID
+
+        # Get today's date in YYYY-MM-DD format
+        today_date = datetime.now().strftime("%Y-%m-%d")
+        
+        # Query for the latest session started today for this student
+        cursor.execute('''
+            SELECT session_id, start_time, end_time
+            FROM sessions
+            WHERE student_id = ? AND DATE(start_time) = ?
+            ORDER BY start_time DESC
+            LIMIT 1
+        ''', (student_id, today_date))
+        
+        result = cursor.fetchone()
+        
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+        
+        # Debug logging for fetched result
+        if result:
+            session_id, start_time, end_time = result
+            log_message(f"Debug: Last session ID for today is {session_id}, start_time: {start_time}, end_time: {end_time}")
+        else:
+            log_message("Debug: No session found for today.")
+            return False  # No session found for today means no incomplete session
+        
+        # Determine if the session is incomplete
+        is_incomplete = end_time is None
+        log_message(f"Debug: Session ID {session_id} is marked incomplete: {is_incomplete}")
+        return is_incomplete
+
+    except sqlite3.Error as e:
+        log_entry = create_log_message(f"Database error checking last session for student '{student_name}': {e}")
+        log_message(log_entry)
+        return False  # Treat any database error as "no incomplete session" to prevent crash
+    except Exception as e:
+        log_entry = create_log_message(f"Unexpected error checking last session for student '{student_name}': {e}")
+        log_message(log_entry)
+        return False
+
+
 ######################
 ### Font Functions ###
 ######################
@@ -4084,106 +4146,7 @@ def grow_tree(screen, start_x, start_y, max_depth, max_branches):
         branches = new_branches
         branch_thickness = max(1, branch_thickness - 1)  # Decrease thickness with each level
 
-    
-# def draw_lightning(screen, start_pos, end_pos, background_image, font, text_color, correct_message="CORRECT!"):
-#     """
-#     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
-#     while keeping the background image and 'CORRECT!' text intact, using the student's personalized settings.
-#     """
-    
-#     # Prepare colors for the lightning
-#     start_color = (173, 216, 230)  # Light blue
-#     end_color = (255, 255, 255)    # White
 
-#     BOLT_SEGMENTS = 10  # Number of segments for each bolt
-#     FLASH_COUNT = 10    # Number of bolts per flash burst
-#     BOLT_FLASH_DURATION = 40  # Duration to display each flash (milliseconds)
-
-#     # Load the background image (which will always exist in this version)
-#     bg_image = pygame.image.load(background_image)
-
-#     # Resize the background image to fit the screen size
-#     bg_image = pygame.transform.scale(bg_image, (screen.get_width(), screen.get_height()))
-    
-#     # Load the thunder sound effect
-#     thunder_sound = pygame.mixer.Sound('assets/SFX/loud-thunder-192165.wav')
-
-#     for _ in range(3):  # Number of flash bursts
-#         # Step 1: Redraw the background at the start of each frame to clear previous lightning bolts
-#         screen.blit(bg_image, (0, 0))
-
-#         # Step 2: Draw the "CORRECT!" message using the draw_text function
-#         draw_text(
-#             text=correct_message,
-#             font=font,
-#             color=text_color,
-#             x=0,  # X position is set to 0 for centering later
-#             y=screen.get_height() * 0.2,  # Y position places the text above the image
-#             center=True,
-#             enable_shadow=True,  # Optionally enable shadow
-#         )
-
-#         # Step 3.1: Play the thunder sound effect for each lightning flash burst
-#         thunder_sound.play()
-
-#         # Step 3.2: Draw multiple lightning bolts in this frame
-#         for _ in range(FLASH_COUNT):
-#             current_pos = start_pos
-#             for i in range(BOLT_SEGMENTS):
-#                 fraction = i / BOLT_SEGMENTS
-#                 color = (
-#                     int(start_color[0] + (end_color[0] - start_color[0]) * fraction),
-#                     int(start_color[1] + (end_color[1] - start_color[1]) * fraction),
-#                     int(start_color[2] + (end_color[2] - start_color[2]) * fraction)
-#                 )
-
-#                 next_x = current_pos[0] + random.randint(-BOLT_SPREAD, BOLT_SPREAD)
-#                 next_y = current_pos[1] + (end_pos[1] - start_pos[1]) // BOLT_SEGMENTS
-#                 next_pos = (next_x, next_y)
-
-#                 # Draw the segment of the lightning bolt
-#                 pygame.draw.line(screen, color, current_pos, next_pos, 2)
-#                 current_pos = next_pos
-
-#             # Draw the final segment of the bolt
-#             pygame.draw.line(screen, end_color, current_pos, end_pos, 2)
-
-#         # Step 4: Display the lightning on top of the background and "CORRECT!" message
-#         pygame.display.flip()
-
-#         # Step 5: Hold the lightning flash for a brief moment
-#         pygame.time.delay(BOLT_FLASH_DURATION)
-
-#         # Step 6: Clear the screen by redrawing the background and the "CORRECT!" message (erasing previous bolts)
-#         screen.blit(bg_image, (0, 0))
-#         draw_text(
-#             text=correct_message,
-#             font=font,
-#             color=text_color,
-#             x=0,  # X position is set to 0 for centering later
-#             y=screen.get_height() * 0.2,  # Y position places the text above the image
-#             center=True,
-#             enable_shadow=True,  # Optionally enable shadow
-#         )
-
-#         # Step 7: Refresh the screen to apply the cleared frame
-#         pygame.display.flip()
-
-#         # Short delay before the next flash burst
-#         pygame.time.delay(20)
-
-#     # Step 8: Redraw the background and "CORRECT!" message after the lightning effect
-#     screen.blit(bg_image, (0, 0))
-#     draw_text(
-#         text=correct_message,
-#         font=font,
-#         color=text_color,
-#         x=0,  # X position is set to 0 for centering later
-#         y=screen.get_height() * 0.2,  # Y position places the text above the image
-#         center=True,
-#         enable_shadow=True,  # Optionally enable shadow
-#     )
-#     pygame.display.flip()  # Final refresh with background and text intact
 def draw_lightning(screen, start_pos, end_pos, background_image, font, text_color, correct_message="CORRECT!"):
     """
     Draws lightning bolts quickly flashing on the screen, clearing each frame of lightning
@@ -4282,7 +4245,6 @@ def draw_lightning(screen, start_pos, end_pos, background_image, font, text_colo
         enable_shadow=True,  # Optionally enable shadow
     )
     pygame.display.flip()  # Final refresh with background and text intact
-
 
 
 def generate_perlin_cloud(x_offset):
@@ -4502,36 +4464,6 @@ def draw_continue_button():
     continue_rect = draw_text("Continue...", continue_font, text_color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
 
     return continue_rect
-# def draw_continue_button():
-#     global current_font_name_or_path  # Ensure we're using the global variable for font
-
-#     # Update the dynamic font size for the continue button based on the current resolution
-#     continue_font_size = int(get_dynamic_font_size() * 0.8)
-
-#     # Recreate the font with the new size using the current font name or path
-#     if os.path.isfile(current_font_name_or_path):
-#         continue_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
-#     else:
-#         continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
-
-#     # Calculate the position for the "Continue..." text to be at 55% across the screen width
-#     x_position = WIDTH * 0.55
-#     y_position = HEIGHT * 0.90  # 90% down the screen
-
-#     # Define the text and check if the mouse is hovering over the button
-#     continue_text = "Continue..."
-#     mouse_pos = pygame.mouse.get_pos()
-#     text_width, text_height = continue_font.size(continue_text)
-#     continue_rect = pygame.Rect(x_position, y_position, text_width, text_height)
-
-#     # Determine the color based on hover state
-#     color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
-
-#     # Use draw_text to render the continue button with the hover color and drop shadow
-#     continue_rect = draw_text(continue_text, continue_font, color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
-
-#     return continue_rect
-
 
 
 def draw_and_wait_continue_button():
@@ -4799,34 +4731,6 @@ def speak_english(text):
     engine.runAndWait()  # Block while the speech finishes
     
     
-# def speak_japanese(text):
-#     """
-#     Attempt to play a pre-rendered WAV file for the given Japanese text.
-#     If the file does not exist or cannot be played, handle gracefully.
-
-#     Parameters:
-#     text (str): The Japanese text for which to play the corresponding WAV file.
-#     """
-#     # Convert Japanese text to Romanized filename format
-#     romaji_filename = unidecode(text)[:50]  # Truncate for safety
-#     wav_file_path = f"assets/audio/{romaji_filename}.wav"
-
-#     try:
-#         # Check if the WAV file exists and play it
-#         if os.path.isfile(wav_file_path):
-#             sound = pygame.mixer.Sound(wav_file_path)
-#             sound.play()
-#             while pygame.mixer.get_busy():
-#                 pass  # Wait until the sound finishes playing
-#             log_entry = create_log_message(f"Played audio file: {wav_file_path}")
-#             log_message(log_entry)
-#         else:
-#             raise FileNotFoundError(f"No audio file found for '{text}' at '{wav_file_path}'")
-    
-#     except Exception as e:
-#         # Log any error that occurs during file playback
-#         log_entry = create_log_message(f"Error playing audio for '{text}': {e}")
-#         log_message(log_entry)
 def speak_japanese(text):
     """
     Attempt to play a pre-rendered WAV file for the given Japanese text.
@@ -4853,8 +4757,6 @@ def speak_japanese(text):
         # Log any error that occurs during file playback
         log_entry = create_log_message(f"Error playing audio for '{text}': {e}")
         log_message(log_entry)
-
-
 
 
 ############################
@@ -5465,256 +5367,6 @@ def bonus_game_no_fish():
                     waiting = False  # Continue after the "Continue..." button is clicked
 
 
-# def bonus_game_falling_fish():
-#     """
-#     Runs the "Falling Fish" bonus game.
-
-#     This function launches a game where the player controls a cat character to collect falling fish for points 
-#     and avoid falling bombs that cause a game-over. Fish appear at intervals, falling from the top, while 
-#     bombs spawn as obstacles for the player to avoid. The player gains a point each time the cat collides 
-#     with a fish and loses if the cat collides with a bomb.
-
-#     Game Elements:
-#         - Scaling factors dynamically adjust sprite sizes and speeds based on screen resolution.
-#         - Bombs spawn at intervals, falling as obstacles for the player to avoid.
-#         - Fish spawn randomly from the top of the screen, giving points when collected.
-
-#     Gameplay Phases:
-#         1. Control Display Phase: Shows control instructions and an animated "Bonus Stage!" 
-#            message until the player clicks "Continue...".
-#         2. Gameplay Phase: The player controls the cat character to collect fish and avoid bombs.
-#         3. Game Over Phase: Displays a "Game Over" message indicating if the player was hit by a bomb.
-
-#     Returns:
-#         None
-#     """
-#     # Check if the assets/images directory exists
-#     if not os.path.exists('assets/images'):
-#         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
-#         log_message(log_entry)
-#         return "main_menu"
-    
-#     # Calculate scaling factors based on the current resolution
-#     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
-#     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
-#     scale_factor = min(scale_factor_x, scale_factor_y)
-
-#     # FALL_SPEED = 13 * scale_factor  # Base speed for falling objects, scaled
-#     BOMB_SPAWN_INTERVAL = 600  # Time interval (milliseconds) between bomb spawns
-#     FISH_SPAWN_INTERVAL = 1000  # Time interval (milliseconds) between fish spawns
-#     BOMB_FALL_SPEED = 35 * scale_factor  # Speed for the falling bombs
-#     FISH_FALL_SPEED = 24 * scale_factor  # Speed for the falling fish
-    
-#     running = True
-#     game_over = False
-#     death_cause = None  # Variable to store the cause of death
-#     score = 0  # Initialize the score
-#     start_time = time.time()
-#     last_bomb_spawn_time = 0  # Track last bomb spawn time
-#     last_fish_spawn_time = 0  # Track last fish spawn time
-
-#     # Load images
-#     bonus_mode_background = select_random_background("assets/images/bonus_mode")
-#     gameplay_background = select_random_background("assets/images/bonus_bkgs")
-
-#     # Load and scale the bomb image
-#     bomb_img = pygame.image.load('assets/images/sprites/bomb.png')
-#     bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * scale_factor), int(bomb_img.get_height() * scale_factor)))
-#     bombs = []  # List to hold bombs
-
-#     # Load fish images from directory and filter for .jpg and .png files
-#     fish_dir = 'assets/images/sprites/fish'
-#     fish_images = [
-#         os.path.join(fish_dir, file) for file in os.listdir(fish_dir)
-#         if file.lower().endswith(('.jpg', '.png'))
-#     ]
-#     fishes = []
-
-#     # Scale the text positions and movements
-#     text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
-#     text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
-#     text_dx *= scale_factor
-#     text_dy *= scale_factor
-
-#     # Initialize the cat
-#     player_img = pygame.image.load('assets/images/sprites/cat08.png')
-#     player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor * 2), int(player_img.get_height() * scale_factor * 2)))
-#     cat = Cat(player_img, WIDTH // 2, HEIGHT - player_img.get_rect().height, 25 * scale_factor, scale_factor)
-
-#     # Create a clock object to control the frame rate
-#     clock = pygame.time.Clock()
-
-#     # Load and play bonus game music
-#     bonus_music_directory = 'assets/music/bonus'
-#     random_mp3 = get_random_mp3(bonus_music_directory)
-    
-#     if random_mp3:
-#         music_loaded = load_mp3(random_mp3)
-#         if music_loaded:
-#             play_mp3()
-
-#     # Bonus Mode Display Phase (show controls and animated text)
-#     controls_displayed = False
-#     start_time = time.time()
-
-#     while not controls_displayed:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-
-#         # Draw the bonus mode background (or fallback to navy blue)
-#         if bonus_mode_background:
-#             draw_background(bonus_mode_background)
-#         else:
-#             screen.fill(screen_color)
-
-#         # Render the controls
-#         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
-#         draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
-#         draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
-#         draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
-
-#         # Render the bouncing "Bonus Stage!" text
-#         text_surface = font.render("Bonus Stage!", True, text_color)
-#         text_width, text_height = text_surface.get_size()
-
-#         # Update text position
-#         text_x += text_dx
-#         text_y += text_dy
-
-#         # Check for collisions with the screen edges
-#         if text_x <= 0 or text_x >= WIDTH - text_width:
-#             text_dx = -text_dx
-#         if text_y <= 0 or text_y >= HEIGHT - text_height:
-#             text_dy = -text_dy
-
-#         # Draw the bouncing text at the new position
-#         screen.blit(text_surface, (text_x, text_y))
-
-#         # Draw the "Continue..." button below the controls
-#         continue_rect = draw_continue_button()
-#         pygame.display.flip()
-
-#         # Check for "Continue..." button click without stopping the animation
-#         for event in pygame.event.get():
-#             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     controls_displayed = True  # Exit the loop and continue to gameplay
-
-#         clock.tick(60)  # Keep the animation going at 60 FPS
-
-#     # Gameplay Phase
-#     try:
-#         start_time = time.time()
-#         while running:
-#             elapsed_time = int(time.time() - start_time)
-#             current_time = pygame.time.get_ticks()
-
-#             for event in pygame.event.get():
-#                 if event.type == pygame.QUIT:
-#                     running = False
-#                     pygame.mixer.music.stop()
-#                     pygame.quit()
-#                     sys.exit()
-#                 elif event.type == pygame.KEYDOWN:
-#                     if event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER:
-#                         running = False
-#                         pygame.mixer.music.stop()
-#                         return
-#                     elif event.key == pygame.K_SPACE or event.key == pygame.K_w:
-#                         cat.jump()
-
-#             cat.update()
-
-#             # Check for game over condition (bomb collision)
-#             for bomb in bombs:
-#                 if cat.rect.colliderect(bomb.rect):
-#                     death_cause = "bomb"
-#                     game_over = True
-#                     running = False
-
-#             # Check for fish collision
-#             for fish in fishes[:]:
-#                 if cat.rect.colliderect(fish.rect):
-#                     score += 1
-#                     fishes.remove(fish)  # Remove fish upon collision
-
-#             # Spawn new bombs
-#             if current_time - last_bomb_spawn_time > BOMB_SPAWN_INTERVAL:
-#                 new_bomb = Bomb(bomb_img, random.randint(0, WIDTH - bomb_img.get_width()), 0, BOMB_FALL_SPEED)
-#                 bombs.append(new_bomb)
-#                 last_bomb_spawn_time = current_time
-
-#             # Spawn new fish
-#             if current_time - last_fish_spawn_time > FISH_SPAWN_INTERVAL and fish_images:
-#                 fish_img_path = random.choice(fish_images)
-#                 fish_img = pygame.image.load(fish_img_path)
-#                 fish_img = pygame.transform.scale(fish_img, (int(fish_img.get_width() * scale_factor), int(fish_img.get_height() * scale_factor)))
-#                 new_fish = Fish(fish_img, random.randint(0, WIDTH - fish_img.get_width()), 0, FISH_FALL_SPEED)
-#                 fishes.append(new_fish)
-#                 last_fish_spawn_time = current_time
-
-#             # Update bombs and fish positions
-#             for bomb in bombs:
-#                 bomb.update()
-#             for fish in fishes:
-#                 fish.update()
-
-#             # Draw the gameplay background (or fallback to navy blue)
-#             if gameplay_background:
-#                 draw_background(gameplay_background)
-#             else:
-#                 screen.fill(screen_color)
-
-#             # Draw the bombs
-#             for bomb in bombs:
-#                 bomb.draw(screen)
-
-#             # Draw the fishes
-#             for fish in fishes:
-#                 fish.draw(screen)
-
-#             # Draw the cat on top of everything else
-#             cat.draw(screen)
-
-#             # Draw the score on top of all elements
-#             draw_text(f"Score: {score}", font, text_color, WIDTH // 4, HEIGHT // 60, enable_shadow=True)
-
-#             pygame.display.flip()
-#             clock.tick(24)  # Control the frame rate
-
-#     finally:
-#         # Ensure music stops and resources are freed if an exception occurs
-#         stop_mp3()
-
-#     # Game Over Phase
-#     if game_over:
-#         screen.fill(screen_color)
-#         if death_cause == "bomb":
-#             death_message = "Game Over! You were hit by a bomb."
-#         else:
-#             death_message = "Game Over!"
-
-#         draw_text(death_message, font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True, max_width=WIDTH)
-
-#     # Draw the "Continue..." button after game completion message
-#     continue_rect = draw_continue_button()
-
-#     pygame.display.flip()
-
-#     # Wait for the player to click "Continue..." after the game ends
-#     waiting = True
-#     while waiting:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()  
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     waiting = False  # Continue after the "Continue..." button is clicked
 def bonus_game_falling_fish():
     """
     Runs the "Falling Fish" bonus game with an additional special item (cat food) 
@@ -5955,8 +5607,7 @@ def bonus_game_falling_fish():
                         log_message("Player continued after game over")
 
 
-
-
+# TODO implement this, make it fun
 def bonus_game_cat_pong():
     """
     Runs the "Cat Pong" bonus game.
@@ -6167,7 +5818,8 @@ def bonus_game_cat_pong():
                     if check_continue_click(mouse_pos, continue_rect):
                         waiting = False  # Continue after the "Continue..." button is clicked
 
-           
+
+# TODO implement this, make it fun, this was William's idea        
 def bonus_game_tuna_tower():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -6368,7 +6020,7 @@ def bonus_game_tuna_tower():
                     waiting = False
 
 
-# For later use
+# TODO For later use
 def bonus_game_generic():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -6860,63 +6512,6 @@ def generate_math_problem(min_val, max_val, operation="add"):
     return num1, num2, answer
 
 
-# def display_math_problem(num1, num2, user_input, first_input, operation="add"):
-#     screen.fill(screen_color)
-
-#     # Dynamically calculate positions based on screen size
-#     right_x = WIDTH * 0.55  # Right edge for alignment
-#     num1_y = HEIGHT * 0.4
-#     num2_y = HEIGHT * 0.5
-#     line_y = HEIGHT * 0.60
-#     sum_y = HEIGHT * 0.65
-
-#     # Draw the first number (right-aligned with drop shadow)
-#     num1_text = str(num1)
-#     draw_text(num1_text, font, text_color, right_x, num1_y, center=True, enable_shadow=True)
-
-#     # Determine the operation sign and adjust position to 0.1 of the screen width
-#     if operation == "add":
-#         operator_sign = "+"
-#     elif operation == "sub":
-#         operator_sign = "-"
-#     elif operation == "mul":
-#         operator_sign = "×"
-#     else:
-#         raise ValueError("Unsupported operation. Use 'add', 'sub', or 'mul'.")
-
-#     # Operator sign with one-tenth width alignment adjustment
-#     operator_sign_x = right_x - font.size(num1_text)[0] - WIDTH * 0.1
-#     draw_text(operator_sign, font, text_color, operator_sign_x, num2_y, enable_shadow=True)
-
-#     # Draw the second number (right-aligned with drop shadow)
-#     num2_text = str(num2)
-#     draw_text(num2_text, font, text_color, right_x, num2_y, center=True, enable_shadow=True)
-
-#     # Draw a simplified line with a drop shadow
-#     line_width = WIDTH * 0.25  # Fixed to 1/4th of the screen width
-#     line_x_start = right_x - line_width
-#     shadow_offset = 2
-
-#     # Draw drop shadow line
-#     pygame.draw.line(screen, shadow_color, 
-#                      (line_x_start + shadow_offset, line_y + shadow_offset), 
-#                      (right_x + shadow_offset, line_y + shadow_offset), 3)
-
-#     # Draw main line
-#     pygame.draw.line(screen, text_color, 
-#                      (line_x_start, line_y), 
-#                      (right_x, line_y), 3)
-
-#     # Draw the sum placeholder or the user input (right-aligned with drop shadow)
-#     if first_input:
-#         input_text = "?"
-#     else:
-#         input_text = user_input
-
-#     draw_text(input_text, font, text_color, right_x, sum_y, center=True, enable_shadow=True)
-
-#     # Refresh the display
-#     pygame.display.flip()
 def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     screen.fill(screen_color)
 
@@ -6974,8 +6569,6 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
 
     # Refresh the display
     pygame.display.flip()
-
-
 
 
 def single_digit_addition(session_id):
@@ -10895,11 +10488,11 @@ def main_menu():
                     return "options_menu"  # Return to indicate transitioning to options menu
                 elif explanation_rect.collidepoint(event.pos):
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     # bonus_game_tuna_tower()
                     # bonus_game_cat_pong()
-                    bonus_game_falling_fish()
+                    # bonus_game_falling_fish()
                     # bonus_game_fat_tuna() # Skip directly to the bonus game for debug
 
         # Control the frame rate
@@ -11061,7 +10654,16 @@ def learniverse_explanation():
 def session_manager():
     global current_student  # Access global current_student
 
-    # Step 1: Start the session and log in database
+    
+    
+    # Step 1, check on an incomplete session BEFORE we start a new one
+    is_session_incomplete = was_last_session_incomplete_today(current_student)
+    print("Current student variable")
+    print(current_student)
+    print("Debug: is the last session today complete?")
+    print(is_session_incomplete)
+    
+    # Step 2: Start the session and log in database
     session_id = start_new_session(current_student)
 
     # If session could not be started, return to main menu
@@ -11069,6 +10671,8 @@ def session_manager():
         log_entry = create_log_message(f"Error: Failed to start session for {current_student}.")
         log_message(log_entry)
         return "main_menu"
+    
+    
     
     #####################################
     ### Step 2: Logic for lesson flow ###
@@ -11166,29 +10770,29 @@ def session_manager():
                        "japanese_family_teach",             #JP
                        "skip_counting_primes",              #Math
                        
-                       "japanese_family_quiz",              #JP
+                       # "japanese_family_quiz",              #JP
                        
                        "skip_counting_kanji",               #JP
-                       "japanese_fruits_teach",             #JP
-                       "japanese_fruits_quiz",              #JP
-                       "japanese_greetings_teach",          #JP
-                       "japanese_greetings_quiz",           #JP
-                       "one_piece_teach",                   #JP
-                       "one_piece_quiz",                    #JP
-                       "japanese_self_introduction_teach",  #JP
-                       "japanese_self_introduction_quiz",   #JP
-                       "japanese_nouns_teach",              #JP
-                       "japanese_nouns_quiz",               #JP
-                       "japanese_time_teach",               #JP
-                       "japanese_time_quiz",                #JP
-                       "japanese_vegtables_teach",          #JP
-                       "japanese_vegtables_quiz",           #JP
-                       "japanese_verbs_teach",              #JP
-                       "japanese_verbs_quiz",               #JP
+                       # "japanese_fruits_teach",             #JP
+                       # "japanese_fruits_quiz",              #JP
+                       # "japanese_greetings_teach",          #JP
+                       # "japanese_greetings_quiz",           #JP
+                       # "one_piece_teach",                   #JP
+                       # "one_piece_quiz",                    #JP
+                       # "japanese_self_introduction_teach",  #JP
+                       # "japanese_self_introduction_quiz",   #JP
+                       # "japanese_nouns_teach",              #JP
+                       # "japanese_nouns_quiz",               #JP
+                       # "japanese_time_teach",               #JP
+                       # "japanese_time_quiz",                #JP
+                       # "japanese_vegtables_teach",          #JP
+                       # "japanese_vegtables_quiz",           #JP
+                       # "japanese_verbs_teach",              #JP
+                       # "japanese_verbs_quiz",               #JP
                        "japanese_song_zou_san_teach",       #JP
-                       "japanese_song_zou_san_quiz",        #JP
+                       # "japanese_song_zou_san_quiz",        #JP
                        "japanese_song_sanpo_teach",         #JP
-                       "japanese_song_sanpo_quiz",          #JP
+                       # "japanese_song_sanpo_quiz",          #JP
                        
                        "psalm_23",                          #ENG
                        
@@ -11844,12 +11448,176 @@ def greet_student():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Colors: White to light blue
+def random_snow_color():
+    return (
+        random.randint(200, 255),  # Red: High for white/light blue
+        random.randint(200, 255),  # Green: High for white/light blue
+        random.randint(255, 255)   # Blue: Max for light blue
+    )
+
+# Snowflake Particle class
+class SnowflakeParticle:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_snow_color()
+        self.size = random.randint(5, 15)
+        self.speed = random.uniform(1, 2)  # Vertical speed
+        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if snowflake hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        for i in range(6):  # Six lines radiating from center
+            angle = i * math.pi / 3  # 60 degrees between each line
+            end_x = self.x + math.cos(angle) * self.size
+            end_y = self.y + math.sin(angle) * self.size
+            pygame.draw.line(surface, self.color, (self.x, self.y), (end_x, end_y), 1)
+
+
+# Colors: Brown, Red, and Orange with intermediate shades
+LEAF_COLORS = [
+    (139, 69, 19),   # Brown
+    (160, 82, 45),   # Light Brown
+    (205, 92, 92),   # Rosy Brown
+    (255, 69, 0),    # Red
+    (255, 99, 71),   # Tomato
+    (255, 140, 0),   # Dark Orange
+    (255, 165, 0),   # Orange
+    (255, 185, 15),  # Light Orange
+    (218, 165, 32),  # Goldenrod
+    (184, 134, 11)   # Dark Goldenrod
+]
+
+# Random color generator for leaves
+def random_leaf_color():
+    return random.choice(LEAF_COLORS)
+
+# Leaf Particle class
+class LeafParticle:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_leaf_color()
+        self.width = random.randint(10, 20)  # Width of the oval
+        self.height = random.randint(5, 10)  # Height of the oval
+        self.speed = random.uniform(1, 2)  # Vertical speed
+        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if leaf hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        pygame.draw.ellipse(surface, self.color, (self.x, self.y, self.width, self.height))
+
+
+# Colors: Pink shades for sakura petals
+SAKURA_COLORS = [
+    (255, 182, 193),  # Light Pink
+    (255, 192, 203),  # Pink
+    (255, 105, 180),  # Hot Pink
+    (250, 128, 114),  # Salmon Pink
+]
+
+# Random color generator for sakura petals
+def random_sakura_color():
+    return random.choice(SAKURA_COLORS)
+
+# Sakura Blossom Particle class
+class SakuraBlossom:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_sakura_color()
+        self.size = random.randint(10, 20)  # Blossom size
+        self.speed = random.uniform(0.5, 1.5)  # Vertical speed
+        self.sway = random.uniform(0.3, 1.0)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 1000) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if blossom hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        center_x, center_y = self.x, self.y
+        petal_distance = self.size * 0.4  # Distance of petals from center (closer to center)
+        petal_width = self.size * 0.7
+        petal_height = self.size * 0.4
+
+        for i in range(5):  # Draw five petals
+            angle = i * (2 * math.pi / 5)  # Divide circle into 5 angles
+            petal_x = center_x + math.cos(angle) * petal_distance
+            petal_y = center_y + math.sin(angle) * petal_distance
+            pygame.draw.ellipse(surface, self.color, (petal_x, petal_y, petal_width, petal_height))
+
+
 def streak_check():
     global angle_x, angle_y, angle_z, hue  # Declare global for cube rotation and color
     global text_color, shadow_color, screen_color, current_font_name_or_path  # Access the theme-related globals
 
-    # Fill the screen with the background color from the applied theme
-    screen.fill(screen_color)
+    # Initialize particles for snowflakes, leaves, or sakura blossoms
+    particles = []
 
     # Query the student's streak
     streak_days = student_streak_query()
@@ -11857,40 +11625,41 @@ def streak_check():
     # Check if the student is on a streak and create the message
     if streak_days > 1:
         message = f"Great job! You've been on a streak for {streak_days} days in a row!"
-        show_cube = True  # Show the rotating cube only if the streak is more than 1 day
+        show_cube = True
     elif streak_days == 1:
         message = "You're on a 1-day streak! Keep it up!"
-        show_cube = True  # Also show the cube for a 1-day streak
+        show_cube = True
     else:
         message = "Let's start a streak today! Keep it up!"
-        show_cube = False  # Do not show the cube if there is no streak
+        show_cube = False
 
-    # Display the streak message
-    draw_text(
-        message, 
-        font, 
-        text_color, 
-        x=0, 
-        y=HEIGHT * 0.25, 
-        max_width=WIDTH * 0.8,  # Wrap text within 80% of the screen width
-        center=True, 
-        enable_shadow=True, 
-        shadow_color=shadow_color
-    )
+    # Check the current month
+    current_month = datetime.now().month  # Using datetime to get the current month
+    is_december = current_month == 12
+    is_november = current_month == 11
+    is_april = current_month == 4
 
-    # --- Dynamic font size for the "Continue..." button ---
-    # Calculate dynamic font size based on current resolution
-    continue_font_size = int(get_dynamic_font_size() * 0.8)  # Adjust size as necessary
+    # Set the background color and particle type based on the month
+    if is_december:
+        background_color = (10, 10, 40)  # DARK_BLUE for December
+        particle_class = SnowflakeParticle
+    elif is_november:
+        background_color = (30, 15, 10)  # Dark earthy background for November
+        particle_class = LeafParticle
+    elif is_april:
+        background_color = (220, 220, 255)  # Light blue spring sky for April
+        particle_class = SakuraBlossom
+    else:
+        background_color = screen_color  # Default screen color
+        particle_class = None  # No particles in other months
 
-    # Load the font using the dynamic size
+    # Prepare the "Continue..." button
+    continue_font_size = int(get_dynamic_font_size() * 0.8)
     if os.path.isfile(current_font_name_or_path):
-        # Load from a file path
         button_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
     else:
-        # Load from system fonts
         button_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
 
-    # Draw the "Continue..." button with a drop shadow at the specified position
     button_text = "Continue..."
     button_color = text_color
 
@@ -11903,15 +11672,15 @@ def streak_check():
         y=HEIGHT * 0.9,
         enable_shadow=True,
         shadow_color=shadow_color,
-        return_rect=True  # Return the rect for click detection
+        return_rect=True
     )
 
     waiting = True
     while waiting:
-        # Clear the screen with the background color on each frame
-        screen.fill(screen_color)
+        # Clear the screen with the appropriate background color
+        screen.fill(background_color)
 
-        # Redraw the streak message
+        # Draw the streak message
         draw_text(
             message, 
             font, 
@@ -11924,7 +11693,7 @@ def streak_check():
             shadow_color=shadow_color
         )
 
-        # Redraw the "Continue..." button
+        # Draw the "Continue..." button
         draw_text(
             button_text,
             button_font,
@@ -11934,6 +11703,16 @@ def streak_check():
             enable_shadow=True,
             shadow_color=shadow_color
         )
+
+        # Generate new particles if the month is November, December, or April
+        if particle_class and len(particles) < 1000:  # Cap the total particles
+            particles.append(particle_class())
+
+        # Update and draw particles
+        if particle_class:
+            for particle in particles:
+                particle.update()
+                particle.draw(screen)
 
         # Handle events
         for event in pygame.event.get():
@@ -11945,23 +11724,44 @@ def streak_check():
                 if button_rect.collidepoint(mouse_pos):
                     waiting = False  # Exit the loop when the button is clicked
 
-        # *** Only draw the rotating cube if the streak is active (streak > 0) ***
+        # Draw the rotating cube if streak > 0
         if show_cube:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            draw_wireframe_cube(screen, mouse_x, mouse_y)  # Call the cube rendering function
+            draw_wireframe_cube(screen, mouse_x, mouse_y)
 
-            # Update the cube rotation and color (hue)
+            # Update the cube's rotation and color
             hue += 0.00833
             if hue > 1.0:
                 hue -= 1.0
 
-        # Refresh the display with the updated cube, text, and button
+        # Refresh the display
         pygame.display.flip()
-
-        # Cap the frame rate to 60 FPS
         clock.tick(60)
 
     return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ############################
@@ -13015,7 +12815,7 @@ def vocab_teach(session_id, lesson_title):
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
     # Set the wait time in milliseconds
-    wait_time = 1500
+    wait_time = 2000
 
     # Get the student's current level for the lesson title
     student_level = get_student_progress(session_id, lesson_title)
@@ -13253,6 +13053,8 @@ def display_result_with_image(result_text, image_file=None, use_lightning=False)
 def japanese_quiz(session_id, lesson_title, lesson_data):
     """Presents a quiz on the given dataset and returns the result."""
     global screen_color, text_color  # Access theme-related globals
+    
+
 
     # Display intro screen for the quiz
     screen.fill(screen_color)
@@ -13544,13 +13346,14 @@ def display_quiz(screen, kanji, furigana, options):
     Draws the kanji, furigana, and multiple-choice options on the screen.
     Returns the rects for kanji, furigana, and the option rects for handling clicks.
     """
-    screen.fill(NAVY_BLUE)
+    global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
+    screen.fill(screen_color)
 
     # Draw the Kanji on the screen
     kanji_rect = draw_text(
         kanji,
         j_font,  # Assuming you have a separate kanji font loaded
-        WHITE,
+        text_color,
         x=WIDTH // 2,
         y=HEIGHT // 3,
         center=True,
@@ -13563,7 +13366,7 @@ def display_quiz(screen, kanji, furigana, options):
     furigana_rect = draw_text(
         furigana,
         j_font,
-        WHITE,
+        text_color,
         x=WIDTH // 2,
         y=HEIGHT // 5,
         center=True,
@@ -13581,7 +13384,7 @@ def display_quiz(screen, kanji, furigana, options):
         option_rect = draw_text(
             option,
             font,  # Use your default or specific font here
-            WHITE,
+            text_color,
             x=WIDTH // 2,
             y=y_pos + i * answer_buffer,
             center=True,
