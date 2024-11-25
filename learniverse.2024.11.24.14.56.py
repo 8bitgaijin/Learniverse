@@ -11119,7 +11119,7 @@ def session_manager():
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
-                       # "katakana_teach",                    #JP
+                       "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
                        # "japanese_animals_quiz",             #JP
@@ -11144,7 +11144,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       "rainbow_numbers",                   #Math
+                       # "rainbow_numbers",                   #Math
                        
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
@@ -12788,26 +12788,171 @@ def get_character_subset_by_level(student_level, character_list):
 
 def display_intro_message(lesson_type, student_level):
     """Displays the intro message for the lesson."""
-    screen.fill(screen_color)
-    intro_message = f"Let's learn {lesson_type}! You are currently on level {student_level}."
-    draw_text(intro_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True,
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH)
-    draw_and_wait_continue_button()
+    # Particle effect settings
+    particles = []
+    particle_count = 3
+    particle_lifetime = 30
+
+    # Main event loop
+    waiting = True
+    while waiting:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+
+        # Display the intro message
+        intro_message = f"Let's learn {lesson_type}! You are currently on level {student_level}."
+        draw_text(
+            intro_message,
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.4,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            max_width=WIDTH
+        )
+
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover color for the "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Generate particles if hovering over the "Continue..." button
+        if continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):  # Limit particle generation per frame
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Check if "Continue..." button is clicked
+                if continue_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
+
+        # Cap the frame rate
+        clock.tick(60)
 
 
 def display_completion_message(lesson_type, student_level, url):
     """Displays the completion message with a dynamic level and opens a URL if provided."""
-    screen.fill(screen_color)
-    completion_message = f"Great job studying {lesson_type} at level {student_level}!"
-    draw_text(completion_message, font, text_color, x=0, y=HEIGHT * 0.4, center=True,
-              enable_shadow=True, shadow_color=shadow_color, max_width=WIDTH * 0.95)
-    
     # Open URL if provided
     if url:
         log_message(f"Opening URL: {url}")
         webbrowser.open(url)
-    
-    draw_and_wait_continue_button()
+
+    # Particle effect settings
+    particles = []
+    particle_count = 3
+    particle_lifetime = 30
+
+    # Main event loop
+    waiting = True
+    while waiting:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+
+        # Display the completion message
+        completion_message = f"Great job studying {lesson_type} at level {student_level}!"
+        draw_text(
+            completion_message,
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.4,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            max_width=WIDTH * 0.95
+        )
+
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover color for the "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Generate particles if hovering over the "Continue..." button
+        if continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):  # Limit particle generation per frame
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # Check if "Continue..." button is clicked
+                if continue_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
+
+        # Cap the frame rate
+        clock.tick(60)
 
 
 def teach_characters(hiragana_subset, font):
