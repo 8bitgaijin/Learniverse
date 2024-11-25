@@ -4929,7 +4929,8 @@ def bonus_game_selector():
     """
     bonus_games = [bonus_game_fat_tuna, 
                    bonus_game_no_fish, 
-                   bonus_game_falling_fish]
+                   bonus_game_falling_fish,
+                   bonus_game_cat_pong]
                     #, bonus_game_dolphin_dive, bonus_game_star_splash]
     selected_game = random.choice(bonus_games)
     selected_game()
@@ -5551,7 +5552,7 @@ def bonus_game_falling_fish():
         game_over = False
         death_cause = None
         score = 0
-        start_time = time.time()
+        # start_time = time.time()
         last_bomb_spawn_time = 0
         last_fish_spawn_time = 0
         last_cat_food_spawn_time = 0  # Special item spawn timer
@@ -5760,7 +5761,6 @@ def bonus_game_falling_fish():
                         log_message("Player continued after game over")
 
 
-# TODO implement this, make it fun
 def bonus_game_cat_pong():
     """
     Runs the "Cat Pong" bonus game.
@@ -5801,20 +5801,21 @@ def bonus_game_cat_pong():
 
     BOMB_SPEED_X = 8 * scale_factor  # Initial horizontal speed of the bomb
     BOMB_SPEED_Y = 7 * scale_factor  # Initial vertical speed of the bomb
-    PLAYER_SPEED = 6 * scale_factor  # Slightly slower than the bomb’s initial speed
-    AI_SPEED = 6 * scale_factor  # AI speed matches player speed
+    # PLAYER_SPEED = 6 * scale_factor  # Slightly slower than the bomb’s initial speed
+    AI_SPEED = 7 * scale_factor  # AI speed matches player speed
+    PLAYER_SPEED = AI_SPEED * 1.2
     
     running = True
     game_over = False
     win = False  # Track if the player won or lost
-    start_time = time.time()
+    # start_time = time.time()
 
     # Load images
     background = select_random_background("assets/images/bonus_bkgs")
 
     # Load and double-scale the bomb image
     bomb_img = pygame.image.load('assets/images/sprites/bomb.png')
-    bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * 2 * scale_factor), int(bomb_img.get_height() * 2 * scale_factor)))
+    bomb_img = pygame.transform.scale(bomb_img, (int(bomb_img.get_width() * 1.5 * scale_factor), int(bomb_img.get_height() * 1.5 * scale_factor)))
     bomb_rect = bomb_img.get_rect(center=(WIDTH // 2, HEIGHT // 2))
     bomb_dx, bomb_dy = BOMB_SPEED_X, BOMB_SPEED_Y
 
@@ -5824,8 +5825,9 @@ def bonus_game_cat_pong():
     player_cat_rect = player_cat_img.get_rect(midleft=(int(50 * scale_factor), HEIGHT // 2))
 
     # Load and double-scale AI cat
-    ai_cat_img = pygame.image.load('assets/images/sprites/cat02.png')  # A second cat sprite
+    ai_cat_img = pygame.image.load('assets/images/sprites/cat08.png')  # A second cat sprite
     ai_cat_img = pygame.transform.scale(ai_cat_img, (int(ai_cat_img.get_width() * 2 * scale_factor), int(ai_cat_img.get_height() * 2 * scale_factor)))
+    ai_cat_img = pygame.transform.flip(ai_cat_img, True, False)  # Flip AI cat horizontally
     ai_cat_rect = ai_cat_img.get_rect(midright=(WIDTH - int(50 * scale_factor), HEIGHT // 2))
 
 
@@ -5878,77 +5880,81 @@ def bonus_game_cat_pong():
 
         clock.tick(60)
 
-    # Gameplay Phase
     try:
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-
+    
             # Move the player cat based on input
             keys = pygame.key.get_pressed()
             if keys[pygame.K_w] and player_cat_rect.top > 0:
                 player_cat_rect.y -= PLAYER_SPEED
             if keys[pygame.K_s] and player_cat_rect.bottom < HEIGHT:
                 player_cat_rect.y += PLAYER_SPEED
-
+    
             # AI cat movement logic
             if bomb_rect.centery < ai_cat_rect.centery and ai_cat_rect.top > 0:
                 ai_cat_rect.y -= AI_SPEED
             elif bomb_rect.centery > ai_cat_rect.centery and ai_cat_rect.bottom < HEIGHT:
                 ai_cat_rect.y += AI_SPEED
-
+    
             # Update bomb position
             bomb_rect.x += bomb_dx
             bomb_rect.y += bomb_dy
-
+    
             # Check for collisions with top/bottom screen boundaries
             if bomb_rect.top <= 0 or bomb_rect.bottom >= HEIGHT:
                 bomb_dy = -bomb_dy
-
+    
             # Check for collisions with player cat
             if bomb_rect.colliderect(player_cat_rect) and bomb_dx < 0:
+                # Modify bounce angle based on contact point
+                offset = (bomb_rect.centery - player_cat_rect.centery) / player_cat_rect.height
                 bomb_dx = -bomb_dx  # Reverse direction horizontally
-
+                bomb_dy += offset * 5  # Adjust vertical speed based on collision point
+    
             # Check for collisions with AI cat
             if bomb_rect.colliderect(ai_cat_rect) and bomb_dx > 0:
+                # Modify bounce angle based on contact point
+                offset = (bomb_rect.centery - ai_cat_rect.centery) / ai_cat_rect.height
                 bomb_dx = -bomb_dx  # Reverse direction horizontally
-
+                bomb_dy += offset * 5  # Adjust vertical speed based on collision point
+                
             # Check for win/loss state
             if bomb_rect.left <= 0:  # Player loses if bomb crosses the left edge
                 game_over = True
                 win = False
+                running = False
             elif bomb_rect.right >= WIDTH:  # Player wins if bomb crosses the right edge
                 game_over = True
                 win = True
-
-            # Exit the loop if game_over has been triggered
-            if game_over:
                 running = False
-
+    
             # Draw gameplay background
             if background:
                 draw_background(background)
             else:
                 screen.fill(screen_color)
-
+    
             # Draw the cats and the bomb
             screen.blit(player_cat_img, player_cat_rect.topleft)
             screen.blit(ai_cat_img, ai_cat_rect.topleft)
             screen.blit(bomb_img, bomb_rect.topleft)
-
+    
             pygame.display.flip()
             clock.tick(60)
-
+    
     finally:
         stop_mp3()
+
 
     # Game Over Phase
     if game_over:
         screen.fill(screen_color)
         if win:
-            message = "Victory! The bomb passed the AI cat."
+            message = "Victory!"
         else:
             message = "Game Over! The bomb passed your side."
 
@@ -6186,12 +6192,12 @@ def bonus_game_generic():
     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
     scale_factor = min(scale_factor_x, scale_factor_y)
 
-    GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
+    # GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
 
     # Control display phase setup
     running = True
     controls_displayed = False
-    start_time = time.time()
+    # start_time = time.time()
 
     # Load any background and platform images if needed (placeholder for future customization)
     bonus_mode_background = select_random_background("assets/images/bonus_mode")
