@@ -156,6 +156,29 @@ ALPHA_MULTIPLIER = 2.5  # Control how quickly alpha ramps up for denser clouds
 CLOUD_SPEED = 0.5  # Speed of the cloud movement (pixels per frame)
 x_offset = 0  # Horizontal offset for cloud movement
 
+# Constants for monthly streak SFX
+# Colors: Brown, Red, and Orange with intermediate shades
+LEAF_COLORS = [
+    (139, 69, 19),   # Brown
+    (160, 82, 45),   # Light Brown
+    (205, 92, 92),   # Rosy Brown
+    (255, 69, 0),    # Red
+    (255, 99, 71),   # Tomato
+    (255, 140, 0),   # Dark Orange
+    (255, 165, 0),   # Orange
+    (255, 185, 15),  # Light Orange
+    (218, 165, 32),  # Goldenrod
+    (184, 134, 11)   # Dark Goldenrod
+]
+
+# Colors: Pink shades for sakura petals
+SAKURA_COLORS = [
+    (255, 182, 193),  # Light Pink
+    (255, 192, 203),  # Pink
+    (255, 105, 180),  # Hot Pink
+    (250, 128, 114),  # Salmon Pink
+]
+
 # Global variable to store the last generated problem
 last_problem = None
 
@@ -4371,6 +4394,135 @@ def update_cube():
         hue -= 1.0
 
 
+# Colors: White to light blue
+def random_snow_color():
+    return (
+        random.randint(200, 255),  # Red: High for white/light blue
+        random.randint(200, 255),  # Green: High for white/light blue
+        random.randint(255, 255)   # Blue: Max for light blue
+    )
+
+
+# Snowflake Particle class
+class SnowflakeParticle:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_snow_color()
+        self.size = random.randint(5, 15)
+        self.speed = random.uniform(1, 2)  # Vertical speed
+        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if snowflake hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        for i in range(6):  # Six lines radiating from center
+            angle = i * math.pi / 3  # 60 degrees between each line
+            end_x = self.x + math.cos(angle) * self.size
+            end_y = self.y + math.sin(angle) * self.size
+            pygame.draw.line(surface, self.color, (self.x, self.y), (end_x, end_y), 1)
+
+
+# Random color generator for sakura petals
+def random_sakura_color():
+    return random.choice(SAKURA_COLORS)
+
+
+# Sakura Blossom Particle class
+class SakuraBlossom:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_sakura_color()
+        self.size = random.randint(10, 20)  # Blossom size
+        self.speed = random.uniform(0.5, 1.5)  # Vertical speed
+        self.sway = random.uniform(0.3, 1.0)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 1000) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if blossom hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        center_x, center_y = self.x, self.y
+        petal_distance = self.size * 0.4  # Distance of petals from center (closer to center)
+        petal_width = self.size * 0.7
+        petal_height = self.size * 0.4
+
+        for i in range(5):  # Draw five petals
+            angle = i * (2 * math.pi / 5)  # Divide circle into 5 angles
+            petal_x = center_x + math.cos(angle) * petal_distance
+            petal_y = center_y + math.sin(angle) * petal_distance
+            pygame.draw.ellipse(surface, self.color, (petal_x, petal_y, petal_width, petal_height))
+
+
+# Random color generator for leaves
+def random_leaf_color():
+    return random.choice(LEAF_COLORS)
+
+
+# Leaf Particle class
+class LeafParticle:
+    def __init__(self):
+        self.x = random.randint(0, WIDTH - 1)
+        self.y = random.randint(-200, -10)  # Start above the screen
+        self.color = random_leaf_color()
+        self.width = random.randint(10, 20)  # Width of the oval
+        self.height = random.randint(5, 10)  # Height of the oval
+        self.speed = random.uniform(1, 2)  # Vertical speed
+        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
+        self.sway_direction = random.choice([-1, 1])  # Left or right
+        self.settled = False
+
+    def update(self):
+        if not self.settled:
+            # Vertical falling
+            self.y += self.speed
+            # Horizontal swaying
+            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
+            self.x += sway_offset * self.sway_direction
+
+            # Keep within screen bounds
+            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
+
+            # Check if leaf hits the ground
+            if self.y >= HEIGHT - 1:
+                self.y = HEIGHT - 1  # Snap to the ground
+                self.settled = True  # Mark as settled
+
+    def draw(self, surface):
+        pygame.draw.ellipse(surface, self.color, (self.x, self.y, self.width, self.height))
+        
+        
 ################################    
 ### Display and UI Functions ###
 ################################    
@@ -9727,7 +9879,6 @@ def basic_shapes_quiz_intro(session_id):
     return "continue"
 
 
-
 def draw_shapes_for_quiz(correct_shape):
     """Draw multiple shapes on the screen for the student to choose from. Ensure the correct shape is drawn."""
     shapes = ["circle", "oval", "square", "rectangle", "triangle", "pentagon", "hexagon", "parallelogram", "rhombus", "trapezoid", "star"]
@@ -10619,9 +10770,6 @@ def student_select_menu():
         clock.tick(60)
 
 
-
-
-
 def learniverse_explanation():
     # Define the folder path for the background images
     folder_path = "assets/images/explanation"
@@ -11232,94 +11380,6 @@ def session_manager():
     return "main_menu"
 
 
-# def greet_student():
-#     global current_student  # Access global current_student
-#     global text_color, shadow_color, screen_color  # Access the theme-related globals
-    
-#     stop_mp3()
-
-#     # Get the current time
-#     current_time = datetime.now().time()
-
-#     # Determine the appropriate greeting based on the time of day
-#     if current_time >= datetime.strptime("00:01", "%H:%M").time() and current_time < datetime.strptime("12:00", "%H:%M").time():
-#         # Morning greeting
-#         greeting_message_eng = f"Good morning, {current_student}! Welcome to your lesson."
-#         greeting_message_jp = "おはようございます。"  # Good morning in Japanese
-#     elif current_time >= datetime.strptime("12:00", "%H:%M").time() and current_time < datetime.strptime("17:00", "%H:%M").time():
-#         # Afternoon greeting
-#         greeting_message_eng = f"Hello, {current_student}! Welcome to your lesson."
-#         greeting_message_jp = "こんにちは。"  # Hello in Japanese
-#     else:
-#         # Evening greeting
-#         greeting_message_eng = f"Good evening, {current_student}! Welcome to your lesson."
-#         greeting_message_jp = "こんばんは。"  # Good evening in Japanese
-
-#     # Set a static sky blue background with Perlin clouds
-#     SKY_BLUE = (135, 206, 235)
-#     screen.fill(SKY_BLUE)  # Fill the screen with sky blue
-
-#     # Generate and blit Perlin clouds
-#     cloud_surface = generate_perlin_cloud(0)  # Use zero offset for static clouds
-#     screen.blit(cloud_surface, (0, 0))
-    
-#     # Start growing tree from the exact bottom center
-#     grow_tree(screen, WIDTH * 0.25, HEIGHT, max_depth=10, max_branches=3)
-#     grow_tree(screen, WIDTH * 0.75, HEIGHT, max_depth=11, max_branches=3)
-
-#     # Draw the English greeting message
-#     draw_text(
-#         greeting_message_eng, 
-#         font, 
-#         text_color,  
-#         x=0, 
-#         y=HEIGHT * 0.20, 
-#         max_width=WIDTH * 0.95, 
-#         center=True,  
-#         enable_shadow=True,  
-#         shadow_color=shadow_color  
-#     )
-
-#     # Draw the Japanese greeting message and return its rect for click detection
-#     japanese_text_rect = draw_text(
-#         greeting_message_jp, 
-#         j_font,  
-#         text_color, 
-#         x=0, 
-#         y=HEIGHT * 0.60,  
-#         max_width=WIDTH * 0.95, 
-#         center=True,  
-#         enable_shadow=True,  
-#         shadow_color=shadow_color,
-#         return_rect=True  # Return the rect so we can detect clicks
-#     )
-    
-#     # Draw the "Continue..." button wihtout draw_and_wait_continue_button()
-#     # As we do special stuff while waiting
-#     continue_rect = draw_continue_button()
-
-#     pygame.display.flip()  # Update the display
-
-#     # Use the reusable TTS function to speak the Japanese greeting aloud
-#     speak_japanese(greeting_message_jp)
-
-#     # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
-#     waiting = True
-#     while waiting:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()  # Correctly exit the program
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 mouse_pos = pygame.mouse.get_pos()
-
-#                 # Check if the Japanese text is clicked
-#                 if japanese_text_rect.collidepoint(mouse_pos):
-#                     speak_japanese(greeting_message_jp)  # Replay the Japanese greeting
-
-#                 # Check if the "Continue..." button is clicked
-#                 if check_continue_click(mouse_pos, continue_rect):
-#                     waiting = False  # Exit the loop when "Continue..." is clicked
 def greet_student():
     global current_student
     global text_color, shadow_color, screen_color
@@ -11445,179 +11505,12 @@ def greet_student():
         clock.tick(60)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Colors: White to light blue
-def random_snow_color():
-    return (
-        random.randint(200, 255),  # Red: High for white/light blue
-        random.randint(200, 255),  # Green: High for white/light blue
-        random.randint(255, 255)   # Blue: Max for light blue
-    )
-
-# Snowflake Particle class
-class SnowflakeParticle:
-    def __init__(self):
-        self.x = random.randint(0, WIDTH - 1)
-        self.y = random.randint(-200, -10)  # Start above the screen
-        self.color = random_snow_color()
-        self.size = random.randint(5, 15)
-        self.speed = random.uniform(1, 2)  # Vertical speed
-        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
-        self.sway_direction = random.choice([-1, 1])  # Left or right
-        self.settled = False
-
-    def update(self):
-        if not self.settled:
-            # Vertical falling
-            self.y += self.speed
-            # Horizontal swaying
-            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
-            self.x += sway_offset * self.sway_direction
-
-            # Keep within screen bounds
-            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
-
-            # Check if snowflake hits the ground
-            if self.y >= HEIGHT - 1:
-                self.y = HEIGHT - 1  # Snap to the ground
-                self.settled = True  # Mark as settled
-
-    def draw(self, surface):
-        for i in range(6):  # Six lines radiating from center
-            angle = i * math.pi / 3  # 60 degrees between each line
-            end_x = self.x + math.cos(angle) * self.size
-            end_y = self.y + math.sin(angle) * self.size
-            pygame.draw.line(surface, self.color, (self.x, self.y), (end_x, end_y), 1)
-
-
-# Colors: Brown, Red, and Orange with intermediate shades
-LEAF_COLORS = [
-    (139, 69, 19),   # Brown
-    (160, 82, 45),   # Light Brown
-    (205, 92, 92),   # Rosy Brown
-    (255, 69, 0),    # Red
-    (255, 99, 71),   # Tomato
-    (255, 140, 0),   # Dark Orange
-    (255, 165, 0),   # Orange
-    (255, 185, 15),  # Light Orange
-    (218, 165, 32),  # Goldenrod
-    (184, 134, 11)   # Dark Goldenrod
-]
-
-# Random color generator for leaves
-def random_leaf_color():
-    return random.choice(LEAF_COLORS)
-
-# Leaf Particle class
-class LeafParticle:
-    def __init__(self):
-        self.x = random.randint(0, WIDTH - 1)
-        self.y = random.randint(-200, -10)  # Start above the screen
-        self.color = random_leaf_color()
-        self.width = random.randint(10, 20)  # Width of the oval
-        self.height = random.randint(5, 10)  # Height of the oval
-        self.speed = random.uniform(1, 2)  # Vertical speed
-        self.sway = random.uniform(0.5, 1.5)  # Horizontal sway
-        self.sway_direction = random.choice([-1, 1])  # Left or right
-        self.settled = False
-
-    def update(self):
-        if not self.settled:
-            # Vertical falling
-            self.y += self.speed
-            # Horizontal swaying
-            sway_offset = math.sin(pygame.time.get_ticks() / 500) * self.sway
-            self.x += sway_offset * self.sway_direction
-
-            # Keep within screen bounds
-            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
-
-            # Check if leaf hits the ground
-            if self.y >= HEIGHT - 1:
-                self.y = HEIGHT - 1  # Snap to the ground
-                self.settled = True  # Mark as settled
-
-    def draw(self, surface):
-        pygame.draw.ellipse(surface, self.color, (self.x, self.y, self.width, self.height))
-
-
-# Colors: Pink shades for sakura petals
-SAKURA_COLORS = [
-    (255, 182, 193),  # Light Pink
-    (255, 192, 203),  # Pink
-    (255, 105, 180),  # Hot Pink
-    (250, 128, 114),  # Salmon Pink
-]
-
-# Random color generator for sakura petals
-def random_sakura_color():
-    return random.choice(SAKURA_COLORS)
-
-# Sakura Blossom Particle class
-class SakuraBlossom:
-    def __init__(self):
-        self.x = random.randint(0, WIDTH - 1)
-        self.y = random.randint(-200, -10)  # Start above the screen
-        self.color = random_sakura_color()
-        self.size = random.randint(10, 20)  # Blossom size
-        self.speed = random.uniform(0.5, 1.5)  # Vertical speed
-        self.sway = random.uniform(0.3, 1.0)  # Horizontal sway
-        self.sway_direction = random.choice([-1, 1])  # Left or right
-        self.settled = False
-
-    def update(self):
-        if not self.settled:
-            # Vertical falling
-            self.y += self.speed
-            # Horizontal swaying
-            sway_offset = math.sin(pygame.time.get_ticks() / 1000) * self.sway
-            self.x += sway_offset * self.sway_direction
-
-            # Keep within screen bounds
-            self.x = max(0, min(WIDTH - 1, self.x))  # Clamp x to screen bounds
-
-            # Check if blossom hits the ground
-            if self.y >= HEIGHT - 1:
-                self.y = HEIGHT - 1  # Snap to the ground
-                self.settled = True  # Mark as settled
-
-    def draw(self, surface):
-        center_x, center_y = self.x, self.y
-        petal_distance = self.size * 0.4  # Distance of petals from center (closer to center)
-        petal_width = self.size * 0.7
-        petal_height = self.size * 0.4
-
-        for i in range(5):  # Draw five petals
-            angle = i * (2 * math.pi / 5)  # Divide circle into 5 angles
-            petal_x = center_x + math.cos(angle) * petal_distance
-            petal_y = center_y + math.sin(angle) * petal_distance
-            pygame.draw.ellipse(surface, self.color, (petal_x, petal_y, petal_width, petal_height))
-
-
 def streak_check():
     global angle_x, angle_y, angle_z, hue  # Declare global for cube rotation and color
     global text_color, shadow_color, screen_color, current_font_name_or_path  # Access the theme-related globals
 
-    # Initialize particles for snowflakes, leaves, or sakura blossoms
-    particles = []
+    # Initialize hover particles for "Continue..." button
+    hover_particles = []
 
     # Query the student's streak
     streak_days = student_streak_query()
@@ -11634,7 +11527,7 @@ def streak_check():
         show_cube = False
 
     # Check the current month
-    current_month = datetime.now().month  # Using datetime to get the current month
+    current_month = datetime.now().month
     is_december = current_month == 12
     is_november = current_month == 11
     is_april = current_month == 4
@@ -11642,16 +11535,16 @@ def streak_check():
     # Set the background color and particle type based on the month
     if is_december:
         background_color = (10, 10, 40)  # DARK_BLUE for December
-        particle_class = SnowflakeParticle
+        monthly_particle_class = SnowflakeParticle
     elif is_november:
         background_color = (30, 15, 10)  # Dark earthy background for November
-        particle_class = LeafParticle
+        monthly_particle_class = LeafParticle
     elif is_april:
         background_color = (220, 220, 255)  # Light blue spring sky for April
-        particle_class = SakuraBlossom
+        monthly_particle_class = SakuraBlossom
     else:
         background_color = screen_color  # Default screen color
-        particle_class = None  # No particles in other months
+        monthly_particle_class = None  # No monthly particles in other months
 
     # Prepare the "Continue..." button
     continue_font_size = int(get_dynamic_font_size() * 0.8)
@@ -11663,7 +11556,7 @@ def streak_check():
     button_text = "Continue..."
     button_color = text_color
 
-    # Get the rect for the button for click detection
+    # Get the rect for the button for hover and click detection
     button_rect = draw_text(
         button_text,
         button_font,
@@ -11674,6 +11567,9 @@ def streak_check():
         shadow_color=shadow_color,
         return_rect=True
     )
+
+    # Initialize monthly particles list
+    monthly_particles = []
 
     waiting = True
     while waiting:
@@ -11693,6 +11589,42 @@ def streak_check():
             shadow_color=shadow_color
         )
 
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Check for hover over the "Continue..." button
+        if button_rect.collidepoint(mouse_pos):
+            button_color = shadow_color
+            # Generate hover particles
+            for _ in range(3):  # Adjust particle count as needed
+                particle_color = random.choice([shadow_color, text_color, background_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particle.lifetime = 30  # Adjust lifetime if needed
+                hover_particles.append(particle)
+        else:
+            button_color = text_color
+
+        # Generate new monthly particles if applicable
+        if monthly_particle_class:
+            monthly_particles.append(monthly_particle_class())
+
+        # Update and draw hover particles
+        for particle in hover_particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                hover_particles.remove(particle)
+
+        # Update and draw monthly particles
+        if monthly_particle_class:
+            for particle in monthly_particles:
+                particle.update()
+                particle.draw(screen)
+
         # Draw the "Continue..." button
         draw_text(
             button_text,
@@ -11704,24 +11636,13 @@ def streak_check():
             shadow_color=shadow_color
         )
 
-        # Generate new particles if the month is November, December, or April
-        if particle_class and len(particles) < 1000:  # Cap the total particles
-            particles.append(particle_class())
-
-        # Update and draw particles
-        if particle_class:
-            for particle in particles:
-                particle.update()
-                particle.draw(screen)
-
         # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-                if button_rect.collidepoint(mouse_pos):
+                if button_rect.collidepoint(event.pos):
                     waiting = False  # Exit the loop when the button is clicked
 
         # Draw the rotating cube if streak > 0
@@ -11739,29 +11660,6 @@ def streak_check():
         clock.tick(60)
 
     return
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ############################
