@@ -6428,6 +6428,9 @@ def generate_rainbow_number_problem():
 
 def rainbow_numbers(session_id):
     global current_student
+    
+    # Initialize the clock for controlling frame rate
+    clock = pygame.time.Clock()
 
     # Connect to the database and retrieve lesson_id for "Rainbow Numbers"
     connection = sqlite3.connect('learniverse.db')
@@ -6444,10 +6447,10 @@ def rainbow_numbers(session_id):
         return -1
     cursor.close()
     connection.close()
-    
+
     # Check if the student got a perfect score on this lesson yesterday
     perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Rainbow Numbers')
-    
+
     # Log the result of the perfect score check
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
@@ -6457,53 +6460,121 @@ def rainbow_numbers(session_id):
     )
     log_message(log_entry)
 
+    # Particle effect settings
+    particle_count = 3
+    particle_lifetime = 30
+    particles = []
+
     # Display the introductory message
-    screen.fill(screen_color)
-    draw_text(
-        "Let's work on Rainbow Numbers!",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.4,
-        max_width=WIDTH * 0.95,
-        center=True,
-        enable_shadow=True
-    )
-
-    # Draw the "Continue..." and, if applicable, "Skip..." buttons
-    continue_rect = draw_continue_button()
-    skip_rect = None
-    if perfect_score_yesterday:
-        skip_rect = draw_skip_button()
-    pygame.display.flip()
-
-    # Event loop to wait for the "Continue..." or "Skip..." button click
     waiting = True
     skip_clicked = False
+
     while waiting:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+
+        # Draw the lesson intro text
+        draw_text(
+            "Let's work on Rainbow Numbers!",
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.4,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True
+        )
+
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+
+        # Draw the "Skip..." button if applicable
+        skip_rect = None
+        if perfect_score_yesterday:
+            skip_rect = draw_skip_button()
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover color for "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Determine hover color for "Skip..." button
+        if skip_rect:
+            skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
+
+            # Redraw the "Skip..." button with hover effect
+            draw_text(
+                "Skip...",
+                pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+                skip_color,
+                x=WIDTH * 0.3,
+                y=HEIGHT * 0.9,
+                enable_shadow=True,
+                shadow_color=shadow_color
+            )
+
+        # Generate particles if hovering over "Continue..." or "Skip..."
+        if continue_rect.collidepoint(mouse_pos) or (skip_rect and skip_rect.collidepoint(mouse_pos)):
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-                if continue_rect.collidepoint(mouse_pos):
+                # Check if "Continue..." button is clicked
+                if continue_rect.collidepoint(event.pos):
                     waiting = False
-                elif skip_rect and skip_rect.collidepoint(mouse_pos):
+
+                # Check if "Skip..." button is clicked
+                elif skip_rect and skip_rect.collidepoint(event.pos):
                     log_entry = create_log_message("skip clicked")
                     log_message(log_entry)
                     skip_clicked = True
                     waiting = False
+
+        # Cap the frame rate
+        clock.tick(60)
 
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
             connection = sqlite3.connect('learniverse.db')
             cursor = connection.cursor()
-            
+
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
+
             # Insert the session lesson with NULL values for performance metrics
             cursor.execute('''
                 INSERT INTO session_lessons (
@@ -6514,20 +6585,20 @@ def rainbow_numbers(session_id):
                 session_id, rainbow_cats_lesson_id, current_time, current_time,
                 None, None, None, None, None  # NULL values for performance metrics
             ))
-            
+
             connection.commit()
             log_entry = create_log_message("Session recorded as skipped with NULL values.")
             log_message(log_entry)
-    
+
         except sqlite3.Error as e:
             log_entry = create_log_message(f"Error recording skipped session: {e}")
             log_message(log_entry)
             connection.rollback()
-        
+
         finally:
             cursor.close()
             connection.close()
-        
+
         return 0, 0, None  # Return default values if the lesson was skipped
 
     # Start the lesson timer
@@ -6613,35 +6684,100 @@ def rainbow_numbers(session_id):
     except Exception as e:
         log_entry = create_log_message(f"Error recording session lesson: {e}")
         log_message(log_entry)
-        # Handle the exception as needed
 
     # Clear the screen with the background color from the theme/config
-    screen.fill(screen_color)  # Use the configured background color before drawing the final score
-
+    screen.fill(screen_color)
+    
     # Final score message
     final_message = f"Final Score: {correct_answers}/{total_questions}"
     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
-
+    
     # Average time per question message
     if completion_times:
         average_time_message = f"Average Time: {average_time} seconds"
         draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
-
+    
         if correct_answers == total_questions:
             perfect_score_message = "Perfect score!"
             draw_text(perfect_score_message, font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
             if average_time < 3.0:
                 mastery_message = "MASTERY!"
                 draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+    
+    # Particle effect settings
+    particles = []  # To store active particles
+    particle_count = 3  # Number of particles generated per frame
+    particle_lifetime = 30  # Lifetime of each particle
+    
+    # Event loop for handling "Continue..." interactions
+    while True:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+    
+        # Redraw the final score message
+        draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+        if completion_times:
+            draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+            if correct_answers == total_questions:
+                draw_text(perfect_score_message, font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+                if average_time < 3.0:
+                    draw_text(mastery_message, font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+    
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+    
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+    
+        # Determine hover color for "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+    
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+    
+        # Generate particles if hovering over the "Continue..." button
+        if continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):  # Limit particle generation per frame
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+    
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+    
+        pygame.display.flip()  # Update the display
+    
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if continue_rect.collidepoint(event.pos):
+                    if correct_answers == total_questions:
+                        bonus_game_selector()
+                    return total_questions, correct_answers, average_time
+    
+        # Cap the frame rate
+        clock.tick(60)
 
-    # Draw the "Continue..." button after displaying the final score
-    draw_and_wait_continue_button()
-
-    if correct_answers == total_questions:
-        bonus_game_selector()
-
-    # Return the lesson results
-    return total_questions, correct_answers, average_time
 
 
 def generate_math_problem(min_val, max_val, operation="add"):
@@ -10989,7 +11125,7 @@ def session_manager():
                        # "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
-                       "month_of_the_year",                 #JP
+                       # "month_of_the_year",                 #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
@@ -11008,7 +11144,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       # "rainbow_numbers",                   #Math
+                       "rainbow_numbers",                   #Math
                        
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
