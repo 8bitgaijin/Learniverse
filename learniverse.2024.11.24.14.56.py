@@ -11831,6 +11831,116 @@ def greet_student():
         clock.tick(60)
         
         
+# def day_of_the_week():
+#     global text_color, shadow_color, screen_color  # Access the theme-related globals
+
+#     # Get today's day of the week (e.g., Monday, Tuesday, etc.)
+#     today_english = datetime.now().strftime("%A")  # Returns the full weekday name (e.g., "Wednesday")
+
+#     # Mapping English weekdays to Japanese equivalents (with hiragana)
+#     japanese_days = {
+#         "Monday": "月曜日",
+#         "Tuesday": "火曜日",
+#         "Wednesday": "水曜日", 
+#         "Thursday": "木曜日",
+#         "Friday": "金曜日",
+#         "Saturday": "土曜日",
+#         "Sunday": "日曜日"
+#     }
+
+#     today_japanese = japanese_days.get(today_english, today_english)  # Get the Japanese equivalent
+
+#     # Create the messages to display
+#     japanese_message = f"今日は {today_japanese} です。"  # In Japanese: "Today is (day) in Japanese"
+#     english_message = f"Today is {today_english}."  # In English
+
+#     # Display the "Continue..." button
+#     continue_rect = draw_continue_button()
+
+#     # Use the reusable TTS function to speak the Japanese message aloud
+#     speak_japanese(japanese_message)
+
+#     # Particle effect settings
+#     particle_count = 3
+#     particle_lifetime = 30
+#     particles = []
+
+#     # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
+#     waiting = True
+#     while waiting:
+#         # Clear the screen for a new frame
+#         screen.fill(screen_color)
+
+#         # Redraw the Japanese message and capture its rect for click detection
+#         japanese_text_rect = draw_text(
+#             japanese_message, 
+#             j_font,  # Assuming you've set up a separate Japanese font
+#             text_color, 
+#             x=0, 
+#             y=HEIGHT * 0.25, 
+#             max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+#             center=True, 
+#             enable_shadow=True, 
+#             shadow_color=shadow_color,
+#             return_rect=True  # Return the rect for the Japanese text
+#         )
+
+#         # Redraw the English message
+#         draw_text(
+#             english_message, 
+#             font,  # Use the English font for this line
+#             text_color, 
+#             x=0, 
+#             y=HEIGHT * 0.45,  # Display slightly below the Japanese text
+#             max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+#             center=True, 
+#             enable_shadow=True, 
+#             shadow_color=shadow_color
+#         )
+
+#         # Redraw the "Continue..." button
+#         draw_continue_button()
+
+#         # Get current mouse position for hover detection
+#         mouse_pos = pygame.mouse.get_pos()
+
+#         # Check hover for Japanese text and "Continue..." button
+#         if japanese_text_rect.collidepoint(mouse_pos) or continue_rect.collidepoint(mouse_pos):
+#             for _ in range(particle_count):
+#                 particle_color = random.choice([shadow_color, text_color, screen_color])
+#                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+#                 angle = random.uniform(0, 2 * math.pi)
+#                 speed = random.uniform(1, 3)
+#                 particle.dx = math.cos(angle) * speed
+#                 particle.dy = math.sin(angle) * speed
+#                 particle.lifetime = particle_lifetime
+#                 particles.append(particle)
+
+#         # Update and draw particles
+#         for particle in particles[:]:
+#             particle.update()
+#             particle.draw(screen)
+#             if particle.lifetime <= 0:
+#                 particles.remove(particle)
+
+#         pygame.display.flip()  # Update the display
+
+#         # Handle events
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()  
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 # Check if the Japanese text is clicked
+#                 if japanese_text_rect.collidepoint(event.pos):
+#                     speak_japanese(japanese_message)  # Replay the Japanese message
+
+#                 # Check if the "Continue..." button is clicked
+#                 if check_continue_click(event.pos, continue_rect):
+#                     waiting = False  # Exit the loop when "Continue..." is clicked
+
+#         # Cap frame rate
+#         clock.tick(60)
 def day_of_the_week():
     global text_color, shadow_color, screen_color  # Access the theme-related globals
 
@@ -11854,10 +11964,24 @@ def day_of_the_week():
     japanese_message = f"今日は {today_japanese} です。"  # In Japanese: "Today is (day) in Japanese"
     english_message = f"Today is {today_english}."  # In English
 
-    # Display the "Continue..." button
+    # Draw the initial "Continue..." button and get its rect
     continue_rect = draw_continue_button()
 
-    # Use the reusable TTS function to speak the Japanese message aloud
+    # Display the Japanese message and get its rect
+    japanese_text_rect = draw_text(
+        japanese_message,
+        j_font,  # Assuming you've set up a separate Japanese font
+        text_color,
+        x=0,
+        y=HEIGHT * 0.25,
+        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True
+    )
+
+    # Speak the Japanese message aloud using the reusable TTS function
     speak_japanese(japanese_message)
 
     # Particle effect settings
@@ -11865,55 +11989,67 @@ def day_of_the_week():
     particle_lifetime = 30
     particles = []
 
-    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
+    # Main event loop for dynamic elements
     waiting = True
     while waiting:
-        # Clear the screen for a new frame
+        # Clear the screen each frame
         screen.fill(screen_color)
-
-        # Redraw the Japanese message and capture its rect for click detection
-        japanese_text_rect = draw_text(
-            japanese_message, 
-            j_font,  # Assuming you've set up a separate Japanese font
-            text_color, 
-            x=0, 
-            y=HEIGHT * 0.25, 
-            max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
-            center=True, 
-            enable_shadow=True, 
-            shadow_color=shadow_color,
-            return_rect=True  # Return the rect for the Japanese text
-        )
-
-        # Redraw the English message
-        draw_text(
-            english_message, 
-            font,  # Use the English font for this line
-            text_color, 
-            x=0, 
-            y=HEIGHT * 0.45,  # Display slightly below the Japanese text
-            max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
-            center=True, 
-            enable_shadow=True, 
-            shadow_color=shadow_color
-        )
-
-        # Redraw the "Continue..." button
-        draw_continue_button()
 
         # Get current mouse position for hover detection
         mouse_pos = pygame.mouse.get_pos()
 
-        # Check hover for Japanese text and "Continue..." button
+        # Determine hover colors for the Japanese text and "Continue..." button
+        japanese_text_color = shadow_color if japanese_text_rect.collidepoint(mouse_pos) else text_color
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the Japanese message with hover color
+        japanese_text_rect = draw_text(
+            japanese_message,
+            j_font,
+            japanese_text_color,
+            x=0,
+            y=HEIGHT * 0.25,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            return_rect=True
+        )
+
+        # Redraw the English message (not hoverable)
+        draw_text(
+            english_message,
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.45,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Redraw the "Continue..." button with hover color
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Generate particles if hovering over Japanese text or "Continue..."
         if japanese_text_rect.collidepoint(mouse_pos) or continue_rect.collidepoint(mouse_pos):
             for _ in range(particle_count):
                 particle_color = random.choice([shadow_color, text_color, screen_color])
                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
                 angle = random.uniform(0, 2 * math.pi)
                 speed = random.uniform(1, 3)
                 particle.dx = math.cos(angle) * speed
                 particle.dy = math.sin(angle) * speed
-                particle.lifetime = particle_lifetime
                 particles.append(particle)
 
         # Update and draw particles
@@ -11929,7 +12065,7 @@ def day_of_the_week():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()  
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 # Check if the Japanese text is clicked
                 if japanese_text_rect.collidepoint(event.pos):
@@ -11937,11 +12073,10 @@ def day_of_the_week():
 
                 # Check if the "Continue..." button is clicked
                 if check_continue_click(event.pos, continue_rect):
-                    waiting = False  # Exit the loop when "Continue..." is clicked
+                    waiting = False  # Exit the loop
 
         # Cap frame rate
         clock.tick(60)
-
 
 
 def month_of_the_year():
