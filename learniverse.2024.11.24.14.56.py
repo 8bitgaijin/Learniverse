@@ -6859,16 +6859,224 @@ def display_math_problem(num1, num2, user_input, first_input, operation="add"):
     pygame.display.flip()
 
 
+# def single_digit_addition(session_id):
+#     """Presents a single-digit addition quiz with random numbers and updates the session results."""
+#     global current_student  # Access the global current student
+
+#     # Retrieve the lesson_id for Single Digit Addition
+#     connection = sqlite3.connect('learniverse.db')
+#     cursor = connection.cursor()
+#     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Addition',))
+#     result = cursor.fetchone()
+    
+#     if result:
+#         addition_lesson_id = result[0]
+#     else:
+#         log_entry = create_log_message("Single Digit Addition lesson not found in the database.")
+#         log_message(log_entry)
+#         cursor.close()
+#         connection.close()
+#         return 0, 0, None  # Return default values if lesson ID not found
+
+#     cursor.close()
+#     connection.close()
+
+#     # Check if the student got a perfect score on this lesson yesterday
+#     perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Single Digit Addition')
+    
+#     # Log the result of the perfect score check
+#     today = datetime.now().date()
+#     yesterday = today - timedelta(days=1)
+#     log_entry = create_log_message(
+#         f"Student: {current_student}, Lesson: 'Single Digit Addition', "
+#         f"Date: {yesterday}, 100%: {'Yes' if perfect_score_yesterday else 'No'}"
+#     )
+#     log_message(log_entry)
+
+#     # Display the introductory message
+#     screen.fill(screen_color)
+#     draw_text(
+#         "Let's work on Single-Digit Addition!",
+#         font,
+#         text_color,
+#         x=0,
+#         y=HEIGHT * 0.4,
+#         max_width=WIDTH * 0.95,
+#         center=True,
+#         enable_shadow=True
+#     )
+
+#     # Draw the "Continue..." and, if applicable, "Skip..." buttons
+#     continue_rect = draw_continue_button()
+#     skip_rect = None
+#     if perfect_score_yesterday:
+#         skip_rect = draw_skip_button()
+#     pygame.display.flip()
+
+#     # Event loop to wait for the "Continue..." or "Skip..." button click
+#     waiting = True
+#     skip_clicked = False
+#     while waiting:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = pygame.mouse.get_pos()
+#                 if continue_rect.collidepoint(mouse_pos):
+#                     waiting = False
+#                 elif skip_rect and skip_rect.collidepoint(mouse_pos):
+#                     log_entry = create_log_message("skip clicked")
+#                     log_message(log_entry)
+#                     skip_clicked = True
+#                     waiting = False
+
+#     # If skip was clicked, record session with NULL values for scores and return early
+#     if skip_clicked:
+#         try:
+#             connection = sqlite3.connect('learniverse.db')
+#             cursor = connection.cursor()
+            
+#             # Format the current time to match the desired format without microseconds
+#             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            
+#             # Insert the session lesson with NULL values for performance metrics
+#             cursor.execute('''
+#                 INSERT INTO session_lessons (
+#                     session_id, lesson_id, start_time, end_time,
+#                     total_time, questions_asked, questions_correct, avg_time_per_question, percent_correct
+#                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (
+#                 session_id, addition_lesson_id, current_time, current_time,
+#                 None, None, None, None, None  # NULL values for performance metrics
+#             ))
+            
+#             connection.commit()
+#             log_entry = create_log_message("Session recorded as skipped with NULL values.")
+#             log_message(log_entry)
+
+#         except sqlite3.Error as e:
+#             log_entry = create_log_message(f"Error recording skipped session: {e}")
+#             log_message(log_entry)
+#             connection.rollback()
+        
+#         finally:
+#             cursor.close()
+#             connection.close()
+        
+#         return 0, 0, None  # Return default values if the lesson was skipped
+
+#     # Start the lesson timer
+#     lesson_start_time = time.time()
+
+#     correct_answers = 0
+#     problem_count = 0
+#     total_questions = 5
+#     completion_times = []
+
+#     clock = pygame.time.Clock()
+
+#     while problem_count < total_questions:
+#         num1, num2, answer = generate_math_problem(1, 9)
+#         user_input = ""
+#         first_input = True
+#         question_complete = False
+
+#         # Start the timer for the question
+#         start_time = time.time()
+
+#         while not question_complete:
+#             screen.fill(screen_color)
+#             display_math_problem(num1, num2, user_input, first_input)
+#             pygame.display.flip()
+
+#             for event in pygame.event.get():
+#                 if event.type == pygame.QUIT:
+#                     pygame.quit()
+#                     sys.exit()
+#                 elif event.type == pygame.KEYDOWN:
+#                     if (event.key == pygame.K_RETURN or event.key == pygame.K_KP_ENTER) and user_input.isdigit():
+#                         end_time = time.time()
+#                         time_taken = round(end_time - start_time, 1)
+#                         completion_times.append(time_taken)
+
+#                         if int(user_input) == answer:
+#                             correct_answers += 1
+
+#                             if time_taken < 3:
+#                                 display_result("CORRECT!", "assets/images/fast_cats", use_lightning=True)
+#                             else:
+#                                 display_result("CORRECT!", "assets/images/cats", use_lightning=False)
+#                         else:
+#                             display_result(f"Sorry, the answer is {answer}")
+
+#                         pygame.event.clear()
+#                         problem_count += 1
+#                         question_complete = True
+#                     elif event.key == pygame.K_BACKSPACE:
+#                         user_input = user_input[:-1]
+#                     elif event.unicode.isdigit() and len(user_input) < 2:
+#                         user_input += event.unicode
+#                         first_input = False
+
+#             clock.tick(60)
+
+#     # End of lesson timer
+#     lesson_end_time = time.time()
+
+#     if completion_times:
+#         average_time = round(sum(completion_times) / len(completion_times), 1)
+#     else:
+#         average_time = 0
+
+#     try:
+#         add_session_lesson(
+#             session_id,
+#             addition_lesson_id,
+#             lesson_start_time,
+#             lesson_end_time,
+#             total_questions,
+#             correct_answers
+#         )
+#     except Exception as e:
+#         log_entry = create_log_message(f"Error recording session lesson: {e}")
+#         log_message(log_entry)
+#         return total_questions, correct_answers, average_time
+
+#     screen.fill(screen_color)
+
+#     final_message = f"Final Score: {correct_answers}/{total_questions}"
+#     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+
+#     if completion_times:
+#         average_time_message = f"Average Time: {average_time} seconds"
+#         draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+
+#     if correct_answers == total_questions:
+#         draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+        
+#         if average_time < 3.0:
+#             draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+#     draw_and_wait_continue_button()
+    
+#     if correct_answers == total_questions:
+#         bonus_game_selector()
+
+#     return total_questions, correct_answers, average_time
 def single_digit_addition(session_id):
     """Presents a single-digit addition quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
+    
+    # Initialize the clock for frame rate control
+    clock = pygame.time.Clock()
 
     # Retrieve the lesson_id for Single Digit Addition
     connection = sqlite3.connect('learniverse.db')
     cursor = connection.cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Addition',))
     result = cursor.fetchone()
-    
+
     if result:
         addition_lesson_id = result[0]
     else:
@@ -6883,7 +7091,7 @@ def single_digit_addition(session_id):
 
     # Check if the student got a perfect score on this lesson yesterday
     perfect_score_yesterday = perfect_score_lesson_skip(current_student, 'Single Digit Addition')
-    
+
     # Log the result of the perfect score check
     today = datetime.now().date()
     yesterday = today - timedelta(days=1)
@@ -6893,53 +7101,120 @@ def single_digit_addition(session_id):
     )
     log_message(log_entry)
 
+    # Particle effect settings
+    particles = []
+    particle_count = 3
+    particle_lifetime = 30
+
     # Display the introductory message
-    screen.fill(screen_color)
-    draw_text(
-        "Let's work on Single-Digit Addition!",
-        font,
-        text_color,
-        x=0,
-        y=HEIGHT * 0.4,
-        max_width=WIDTH * 0.95,
-        center=True,
-        enable_shadow=True
-    )
-
-    # Draw the "Continue..." and, if applicable, "Skip..." buttons
-    continue_rect = draw_continue_button()
-    skip_rect = None
-    if perfect_score_yesterday:
-        skip_rect = draw_skip_button()
-    pygame.display.flip()
-
-    # Event loop to wait for the "Continue..." or "Skip..." button click
     waiting = True
     skip_clicked = False
+
     while waiting:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+
+        # Draw the introductory text
+        draw_text(
+            "Let's work on Single-Digit Addition!",
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.4,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True
+        )
+
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+
+        # Draw the "Skip..." button if applicable
+        skip_rect = None
+        if perfect_score_yesterday:
+            skip_rect = draw_skip_button()
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover color for "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Determine hover color for "Skip..." button
+        if skip_rect:
+            skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
+
+            # Redraw the "Skip..." button with hover effect
+            draw_text(
+                "Skip...",
+                pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+                skip_color,
+                x=WIDTH * 0.3,
+                y=HEIGHT * 0.9,
+                enable_shadow=True,
+                shadow_color=shadow_color
+            )
+
+        # Generate particles if hovering over "Continue..." or "Skip..."
+        if continue_rect.collidepoint(mouse_pos) or (skip_rect and skip_rect.collidepoint(mouse_pos)):
+            for _ in range(particle_count):  # Limit particle generation per frame
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-                if continue_rect.collidepoint(mouse_pos):
+                # Check if "Continue..." button is clicked
+                if continue_rect.collidepoint(event.pos):
                     waiting = False
-                elif skip_rect and skip_rect.collidepoint(mouse_pos):
+                # Check if "Skip..." button is clicked
+                elif skip_rect and skip_rect.collidepoint(event.pos):
                     log_entry = create_log_message("skip clicked")
                     log_message(log_entry)
                     skip_clicked = True
                     waiting = False
+
+        # Cap the frame rate
+        clock.tick(60)
 
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
             connection = sqlite3.connect('learniverse.db')
             cursor = connection.cursor()
-            
+
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
+
             # Insert the session lesson with NULL values for performance metrics
             cursor.execute('''
                 INSERT INTO session_lessons (
@@ -6950,7 +7225,7 @@ def single_digit_addition(session_id):
                 session_id, addition_lesson_id, current_time, current_time,
                 None, None, None, None, None  # NULL values for performance metrics
             ))
-            
+
             connection.commit()
             log_entry = create_log_message("Session recorded as skipped with NULL values.")
             log_message(log_entry)
@@ -6959,11 +7234,11 @@ def single_digit_addition(session_id):
             log_entry = create_log_message(f"Error recording skipped session: {e}")
             log_message(log_entry)
             connection.rollback()
-        
+
         finally:
             cursor.close()
             connection.close()
-        
+
         return 0, 0, None  # Return default values if the lesson was skipped
 
     # Start the lesson timer
@@ -7043,8 +7318,8 @@ def single_digit_addition(session_id):
         log_message(log_entry)
         return total_questions, correct_answers, average_time
 
+    # Display the final score
     screen.fill(screen_color)
-
     final_message = f"Final Score: {correct_answers}/{total_questions}"
     draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
 
@@ -7054,16 +7329,78 @@ def single_digit_addition(session_id):
 
     if correct_answers == total_questions:
         draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
-        
         if average_time < 3.0:
             draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
 
-    draw_and_wait_continue_button()
-    
-    if correct_answers == total_questions:
-        bonus_game_selector()
+    # Add hover effect and particles for the final "Continue..." button
+    while True:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
 
-    return total_questions, correct_answers, average_time
+        # Redraw final score and messages
+        draw_text(final_message, font, text_color, WIDTH // 2, HEIGHT * 0.25, center=True, enable_shadow=True)
+        if completion_times:
+            draw_text(average_time_message, font, text_color, WIDTH // 2, HEIGHT * 0.6, center=True, enable_shadow=True, max_width=WIDTH)
+        if correct_answers == total_questions:
+            draw_text("Perfect score!", font, text_color, WIDTH // 2, HEIGHT * 0.35, center=True, enable_shadow=True)
+            if average_time < 3.0:
+                draw_text("MASTERY!", font, text_color, WIDTH // 2, HEIGHT * 0.80, center=True, enable_shadow=True)
+
+        # Draw the "Continue..." button
+        continue_rect = draw_continue_button()
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover color for "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Generate particles if hovering over the "Continue..." button
+        if continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):  # Limit particle generation per frame
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if continue_rect.collidepoint(event.pos):
+                    if correct_answers == total_questions:
+                        bonus_game_selector()
+                    return total_questions, correct_answers, average_time
+
+        # Cap the frame rate
+        clock.tick(60)
+
 
 
 def double_digit_addition(session_id):
@@ -11106,7 +11443,7 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       # "single_digit_addition",             #Math
+                       "single_digit_addition",             #Math
                        # "double_digit_addition",             #Math
                        # "single_digit_subtraction",          #Math
                        # "double_digit_subtraction",          #Math
@@ -11119,7 +11456,7 @@ def session_manager():
                        
                        # "hiragana_teach",                    #JP
                        # "hiragana_quiz",                     #JP    
-                       "katakana_teach",                    #JP
+                       # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
                        # "japanese_animals_quiz",             #JP
