@@ -10989,6 +10989,7 @@ def session_manager():
                        # "japanese_animals_quiz",             #JP
                        # "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
+                       "month_of_the_year",                 #JP
                        # "psalm_23",                          #ENG
                        # "numbers_6_24_26",                   #ENG
                        
@@ -11952,9 +11953,6 @@ def display_bible_verse(greeting_message,
         clock.tick(60)
 
 
-
-
-
 def john_3_16():
     """Greets the student and introduces the Bible verse John 3:16 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
@@ -12320,61 +12318,156 @@ def month_of_the_year():
     japanese_message = f"今月は {current_month_japanese} です。"  # In Japanese: "This month is (month) in Japanese"
     english_message = f"This month is {current_month_english}."  # In English
 
-    # Fill the screen with the background color from the applied theme
+    # Initialize the text rectangles
+    japanese_text_rect = pygame.Rect(0, 0, 0, 0)  # Placeholder for Japanese text rect
+    continue_rect = pygame.Rect(0, 0, 0, 0)       # Placeholder for "Continue..." button rect
+
+    # Particle effect settings
+    particle_count = 3
+    particle_lifetime = 30
+    particles = []
+
+    # Render the first frame to display the text and button, then auto-play the audio
     screen.fill(screen_color)
 
-    # Display the Japanese message and capture its rect for click detection
+    # Draw the Japanese message and get its rect
     japanese_text_rect = draw_text(
-        japanese_message, 
-        j_font,  # Assuming you've set up a separate Japanese font
-        text_color, 
-        x=0, 
-        y=HEIGHT * 0.25, 
-        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
-        center=True, 
-        enable_shadow=True, 
+        japanese_message,
+        j_font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.25,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
         shadow_color=shadow_color,
-        return_rect=True  # Return the rect for the Japanese text
+        return_rect=True
     )
 
-    # Display the English message right below the Japanese message
+    # Draw the English message (non-hoverable)
     draw_text(
-        english_message, 
-        font,  # Use the English font for this line
-        text_color, 
-        x=0, 
-        y=HEIGHT * 0.45,  # Display slightly below the Japanese text
-        max_width=WIDTH * 0.95,  # Wrap text within 95% of the screen width
-        center=True, 
-        enable_shadow=True, 
+        english_message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.45,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
         shadow_color=shadow_color
     )
 
-    # Draw the "Continue..." button
-    continue_rect = draw_continue_button()
+    # Draw the "Continue..." button and get its rect
+    continue_rect = draw_text(
+        "Continue...",
+        pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+        text_color,
+        x=WIDTH * 0.55,
+        y=HEIGHT * 0.9,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        return_rect=True
+    )
 
-    pygame.display.flip()  # Update the display
+    # Update the display with the first frame
+    pygame.display.flip()
 
-    # Use the reusable TTS function to speak the Japanese message aloud
+    # Auto-play the Japanese message
     speak_japanese(japanese_message)
 
-    # Wait for the "Continue..." click or a click on the Japanese text to repeat TTS
+    # Main loop for interaction
     waiting = True
     while waiting:
+        # Clear the screen for a new frame
+        screen.fill(screen_color)
+
+        # Get the current mouse position
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Determine hover state for Japanese text
+        japanese_text_color = shadow_color if japanese_text_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the Japanese message with hover effect
+        japanese_text_rect = draw_text(
+            japanese_message,
+            j_font,
+            japanese_text_color,
+            x=0,
+            y=HEIGHT * 0.25,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            return_rect=True
+        )
+
+        # Redraw the English message (non-hoverable)
+        draw_text(
+            english_message,
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.45,
+            max_width=WIDTH * 0.95,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Determine hover state for the "Continue..." button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw the "Continue..." button with hover effect
+        continue_rect = draw_text(
+            "Continue...",
+            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+            continue_color,
+            x=WIDTH * 0.55,
+            y=HEIGHT * 0.9,
+            enable_shadow=True,
+            shadow_color=shadow_color,
+            return_rect=True
+        )
+
+        # Generate particles if hovering over Japanese text or "Continue..."
+        if japanese_text_rect.collidepoint(mouse_pos) or continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()  # Update the display
+
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                sys.exit()  
+                sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-
                 # Check if the Japanese text is clicked
-                if japanese_text_rect.collidepoint(mouse_pos):
+                if japanese_text_rect.collidepoint(event.pos):
                     speak_japanese(japanese_message)  # Replay the Japanese message
 
                 # Check if the "Continue..." button is clicked
-                if check_continue_click(mouse_pos, continue_rect):
-                    waiting = False  # Exit the loop when "Continue..." is clicked
+                if continue_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
+
+        # Cap frame rate
+        clock.tick(60)
+
+
 
 
 def skip_counting_japanese(COUNT_TO=30):
