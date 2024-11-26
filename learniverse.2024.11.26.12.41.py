@@ -3007,6 +3007,7 @@ def list_images_in_folder(folder_path):
         log_message(log_entry)
         return []
 
+
 def select_random_image_from_list(image_list):
     """
     Select a random image from a provided list of image files.
@@ -3023,6 +3024,7 @@ def select_random_image_from_list(image_list):
         return None
 
     return random.choice(image_list)
+
 
 def select_random_background(folder_path):
     """
@@ -3051,6 +3053,7 @@ def select_random_background(folder_path):
         log_entry = create_log_message(f"No image files found in folder: {folder_path}")
         log_message(log_entry)
         return None
+
 
 def calculate_center_position(screen_width, screen_height, window_width, window_height):
     """Calculate the center position of a window given screen and window dimensions."""
@@ -3092,14 +3095,6 @@ def center_window(width, height):
         log_message(log_entry)
 
         
-# def bring_window_to_front():
-#     """Bring the Pygame window to the front of all other windows."""
-#     # Get the Pygame window handle
-#     hwnd = pygame.display.get_wm_info()['window']
-    
-#     # Use ctypes to bring the window to the front
-#     ctypes.windll.user32.SetForegroundWindow(hwnd)
-#     ctypes.windll.user32.SetFocus(hwnd)
 def bring_window_to_front():
     """Bring the Pygame window to the front of all other windows.
     
@@ -3130,14 +3125,6 @@ def bring_window_to_front():
         log_entry = create_log_message(f"Failed to bring window to front: {e}")
         log_message(log_entry)
 
-def move_mouse_to_window_center():
-    """Move the mouse cursor to the center of the Pygame window using system-level positioning."""
-    screen_center_x = pygame.display.get_surface().get_width() // 2
-    screen_center_y = pygame.display.get_surface().get_height() // 2
-
-    # Convert to screen coordinates using ctypes and set the mouse position
-    ctypes.windll.user32.SetCursorPos(screen_center_x, screen_center_y)
-    
     
 ##############################################
 ### Pygame Initialization and Window Setup ###
@@ -3203,9 +3190,6 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
 # Now that we hava  screen, bring it to the user's attention
 bring_window_to_front()
-
-# Grab mouse 
-# move_mouse_to_window_center()
 
 # Create a clock object to manage the frame rate of the game
 clock = pygame.time.Clock()
