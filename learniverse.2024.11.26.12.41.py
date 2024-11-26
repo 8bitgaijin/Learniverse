@@ -2956,30 +2956,6 @@ def create_log_message(message):
     return f"[{timestamp}] {message}"
 
 
-# def log_message(log_entry):
-#     """
-#     Log a message to both the console and the error_log.txt file.
-
-#     This function handles logging by printing the log entry to the console and 
-#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
-#     gracefully by logging the failure to the console.
-
-#     Parameters:
-#         log_entry (str): The log message to be printed and saved.
-
-#     Raises:
-#         Exception: If an error occurs while writing to the log file, an 
-#         exception is caught, and an error message is printed to the console.
-#     """
-#     try:
-#         # Print the log entry to the console
-#         print(log_entry)
-#         # Attempt to open the log file and write the log entry
-#         with open("error_log.txt", "a") as error_file:
-#             error_file.write(log_entry + "\n")
-#     except Exception as e:
-#         # If an error occurs, print an error message to the console
-#         print(f"Failed to log message: {e}")
 def log_message(log_entry):
     """
     Log a message to both the console and the error_log.txt file.
@@ -3003,13 +2979,57 @@ def log_message(log_entry):
         # If an error occurs, print an error message to the console
         print(f"Failed to log message to file '{log_file_path}': {e}")
 
+
+def list_images_in_folder(folder_path):
+    """
+    List all image files in the specified folder.
+
+    This function scans the provided folder for image files with common image 
+    extensions (such as .png, .jpg, .jpeg, and .bmp) and returns a list of 
+    matching file names.
+
+    Parameters:
+        folder_path (str): The path to the folder containing images.
+
+    Returns:
+        list: A list of image file names in the specified folder. Returns an 
+        empty list if no image files are found.
+    """
+    try:
+        # List all image files in the folder
+        image_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
+        image_files = [f for f in os.listdir(folder_path) 
+                       if f.lower().endswith(image_extensions)]
+        return image_files
+    except OSError as e:
+        # Log an error if there is an issue accessing the folder
+        log_entry = create_log_message(f"File operation error while listing images: {e}")
+        log_message(log_entry)
+        return []
+
+def select_random_image_from_list(image_list):
+    """
+    Select a random image from a provided list of image files.
+
+    This function takes a list of image file names and selects one at random.
+
+    Parameters:
+        image_list (list): A list of image file names to select from.
+
+    Returns:
+        str: The randomly selected image file name, or None if the list is empty.
+    """
+    if not image_list:
+        return None
+
+    return random.choice(image_list)
+
 def select_random_background(folder_path):
     """
     Select a random background image from the specified folder.
 
-    This function scans the provided folder for image files with common image 
-    extensions (such as .png, .jpg, .jpeg, and .bmp), selects one at random, 
-    and returns the file path.
+    This function lists the image files in the specified folder and selects 
+    one at random. If no image files are found, it returns None.
 
     Parameters:
         folder_path (str): The path to the folder containing background images.
@@ -3017,59 +3037,21 @@ def select_random_background(folder_path):
     Returns:
         str: The file path of the randomly selected image, or None if no image 
         files are found or an error occurs during the selection process.
-
-    Raises:
-        FileNotFoundError: If no image files are found in the specified folder,
-        a log message is generated, and the function returns None.
-        
-        Exception: For any other unexpected errors, a log message is generated, 
-        and the function returns None.
     """
-    try:
-        # List all image files in the folder
-        image_files = [f for f in os.listdir(folder_path) 
-                       if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
+    # Get a list of all images in the folder
+    image_files = list_images_in_folder(folder_path)
 
-        # If no image files are found, raise an exception
-        if not image_files:
-            raise FileNotFoundError(f"No image files found in folder: {folder_path}")
+    # Select a random image from the list
+    selected_image = select_random_image_from_list(image_files)
 
-        # Randomly select an image file
-        selected_image = random.choice(image_files)
-        image_path = os.path.join(folder_path, selected_image)
-        
-        return image_path
-    except FileNotFoundError as e:
-        log_entry = create_log_message(f"Error selecting background image: {e}")
-        log_message(log_entry)
-        return None
-    except Exception as e:
-        log_entry = create_log_message(f"Unexpected error selecting background image: {e}")
+    if selected_image:
+        return os.path.join(folder_path, selected_image)
+    else:
+        # Log an error if no image files were found
+        log_entry = create_log_message(f"No image files found in folder: {folder_path}")
         log_message(log_entry)
         return None
 
-
-# def center_window(width, height):
-#     """Center the Pygame window on the screen."""
-#     try:
-#         # Reset the environment variable to ensure it's not "sticking"
-#         if 'SDL_VIDEO_WINDOW_POS' in os.environ:
-#             del os.environ['SDL_VIDEO_WINDOW_POS']
-    
-#         # Get screen size
-#         user32 = ctypes.windll.user32
-#         screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-    
-#         # Calculate the centered position
-#         window_x = (screen_width - width) // 2
-#         window_y = (screen_height - height) // 2
-        
-#         # Set window position before creating the window
-#         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
-
-#     except Exception as e:
-#         log_entry = create_log_message(f"Failed to center window: {e}")
-#         log_message(log_entry)
 def calculate_center_position(screen_width, screen_height, window_width, window_height):
     """Calculate the center position of a window given screen and window dimensions."""
     window_x = (screen_width - window_width) // 2
@@ -3110,15 +3092,43 @@ def center_window(width, height):
         log_message(log_entry)
 
         
-def bring_window_to_front():
-    """Bring the Pygame window to the front of all other windows."""
-    # Get the Pygame window handle
-    hwnd = pygame.display.get_wm_info()['window']
+# def bring_window_to_front():
+#     """Bring the Pygame window to the front of all other windows."""
+#     # Get the Pygame window handle
+#     hwnd = pygame.display.get_wm_info()['window']
     
-    # Use ctypes to bring the window to the front
-    ctypes.windll.user32.SetForegroundWindow(hwnd)
-    ctypes.windll.user32.SetFocus(hwnd)
+#     # Use ctypes to bring the window to the front
+#     ctypes.windll.user32.SetForegroundWindow(hwnd)
+#     ctypes.windll.user32.SetFocus(hwnd)
+def bring_window_to_front():
+    """Bring the Pygame window to the front of all other windows.
+    
+    This function works only on Windows platforms. It uses ctypes to interact
+    with the Windows API to bring the Pygame window to the foreground and set focus.
+    """
+    # Platform check for Windows-specific functionality
+    if sys.platform != "win32":
+        log_entry = create_log_message("Bring to front is only supported on Windows.")
+        log_message(log_entry)
+        return
 
+    try:
+        # Get the Pygame window handle
+        hwnd = pygame.display.get_wm_info().get('window')
+
+        if hwnd is None:
+            raise ValueError("Unable to get the window handle.")
+
+        # Use ctypes to bring the window to the front
+        ctypes.windll.user32.SetForegroundWindow(hwnd)
+        ctypes.windll.user32.SetFocus(hwnd)
+
+    except (AttributeError, ValueError, ctypes.WinError) as e:
+        # Handle AttributeError if 'window' info is missing
+        # Handle ValueError if hwnd is None
+        # Handle ctypes.WinError if ctypes call fails
+        log_entry = create_log_message(f"Failed to bring window to front: {e}")
+        log_message(log_entry)
 
 def move_mouse_to_window_center():
     """Move the mouse cursor to the center of the Pygame window using system-level positioning."""
@@ -4960,8 +4970,8 @@ def speak_japanese(text):
         if os.path.isfile(wav_file_path):
             sound = pygame.mixer.Sound(wav_file_path)
             sound.play()  # Play without specifying a channel, allowing automatic assignment
-            log_entry = create_log_message(f"Played audio file: {wav_file_path}")
-            log_message(log_entry)
+            # log_entry = create_log_message(f"Played audio file: {wav_file_path}")
+            # log_message(log_entry)
         else:
             raise FileNotFoundError(f"No audio file found for '{text}' at '{wav_file_path}'")
     
