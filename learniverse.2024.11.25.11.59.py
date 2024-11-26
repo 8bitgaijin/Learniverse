@@ -5979,6 +5979,204 @@ def bonus_game_cat_pong():
 
 
 # TODO implement this, make it fun, this was William's idea        
+# def bonus_game_tuna_tower():
+#     # Check if the assets/images directory exists
+#     if not os.path.exists('assets/images'):
+#         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
+#         log_message(log_entry)
+#         return "main_menu"
+    
+#     # Calculate scaling factors based on the current resolution
+#     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
+#     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
+#     scale_factor = min(scale_factor_x, scale_factor_y)
+
+#     GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
+
+#     # Control display phase setup
+#     running = True
+#     controls_displayed = False
+
+#     # Load tower tile image and scale it
+#     tower_tile_img = pygame.image.load('assets/images/sprites/towertile01.png')
+#     tower_tile_img = pygame.transform.scale(tower_tile_img, (int(64 * scale_factor), int(64 * scale_factor)))
+    
+#     # Load platform image and scale it
+#     platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
+#     platform_img = pygame.transform.scale(platform_img, (int(200 * scale_factor), int(50 * scale_factor)))
+    
+#     # Load cat image and scale to double its original size
+#     cat_img = pygame.image.load('assets/images/sprites/cat08.png')
+#     cat_img = pygame.transform.scale(cat_img, (int(cat_img.get_width() * 2 * scale_factor), int(cat_img.get_height() * 2 * scale_factor)))
+    
+#     # Cat position and movement variables
+#     cat_x = WIDTH // 2 - cat_img.get_width() // 2
+#     cat_y = int(GROUND_LEVEL) - cat_img.get_height() - 100
+#     cat_speed = 25 * scale_factor  # Speed for horizontal movement
+#     cat_facing_right = True       # Track direction to manage flipping
+#     is_falling = False            # Falling state to trigger upward scroll when off-platform
+    
+#     # Platform position and collision rect
+#     platform_x = WIDTH // 2 - platform_img.get_width() // 2
+#     platform_y = int(GROUND_LEVEL)
+#     platform_rect = pygame.Rect(platform_x, platform_y, platform_img.get_width(), platform_img.get_height())
+
+#     # Background scroll offset
+#     scroll_offset = 0
+#     base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
+
+#     # Jumping state variables
+#     is_jumping = False
+#     jump_start_time = 0
+#     jump_duration = 1  # Duration of jump up phase (in seconds)
+
+#     # Initialize bouncing text position and movement
+#     text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
+#     text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
+#     text_dx *= scale_factor
+#     text_dy *= scale_factor
+
+#     # Display control instructions
+#     while not controls_displayed:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+
+#         screen.fill(screen_color)
+
+#         # Render the controls text
+#         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
+#         draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
+#         draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
+#         draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
+
+#         # Render the bouncing "Bonus Stage!" text
+#         text_surface = font.render("Bonus Stage!", True, text_color)
+#         text_width, text_height = text_surface.get_size()
+
+#         # Update text position
+#         text_x += text_dx
+#         text_y += text_dy
+
+#         # Check for collisions with the screen edges and reverse direction if needed
+#         if text_x <= 0 or text_x >= WIDTH - text_width:
+#             text_dx = -text_dx
+#         if text_y <= 0 or text_y >= HEIGHT - text_height:
+#             text_dy = -text_dy
+
+#         # Draw the bouncing text at the updated position
+#         screen.blit(text_surface, (text_x, text_y))
+
+#         # Draw the "Continue..." button
+#         continue_rect = draw_continue_button()
+#         pygame.display.flip()
+
+#         # Check for "Continue..." button click
+#         for event in pygame.event.get():
+#             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = pygame.mouse.get_pos()
+#                 if check_continue_click(mouse_pos, continue_rect):
+#                     controls_displayed = True  # Exit the loop and move to gameplay
+
+#         clock.tick(60)
+
+#     # Gameplay Phase: Implement controls, jumping effect with easing, and scrolling background
+#     try:
+#         while running:
+#             current_time = time.time()
+
+#             for event in pygame.event.get():
+#                 if event.type == pygame.QUIT:
+#                     running = False
+#                     pygame.quit()
+#                     sys.exit()
+
+#             keys = pygame.key.get_pressed()
+
+#             # Handle left movement with "A" key
+#             if keys[pygame.K_a]:
+#                 cat_x -= cat_speed
+#                 if cat_facing_right:
+#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face left
+#                     cat_facing_right = False
+
+#             # Handle right movement with "D" key
+#             if keys[pygame.K_d]:
+#                 cat_x += cat_speed
+#                 if not cat_facing_right:
+#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face right
+#                     cat_facing_right = True
+
+#             # Initiate jump when "W" is pressed and cat is not already jumping
+#             if keys[pygame.K_w] and not is_jumping and not is_falling:
+#                 is_jumping = True
+#                 jump_start_time = current_time
+
+#             # Update cat's rect for collision detection
+#             cat_rect = pygame.Rect(cat_x, cat_y, cat_img.get_width(), cat_img.get_height())
+
+#             # Check if the cat is standing on the platform or falling
+#             if not platform_rect.colliderect(cat_rect):
+#                 is_falling = True
+#             else:
+#                 is_falling = False
+
+#             # Jumping or falling logic with easing effect
+#             if is_jumping:
+#                 time_in_jump = current_time - jump_start_time
+#                 if time_in_jump < jump_duration:
+#                     scroll_speed = base_scroll_speed * (1 - time_in_jump / jump_duration)
+#                     scroll_offset += scroll_speed
+#                 elif time_in_jump < 2 * jump_duration:
+#                     scroll_speed = base_scroll_speed * ((time_in_jump - jump_duration) / jump_duration)
+#                     scroll_offset -= scroll_speed
+#                 else:
+#                     is_jumping = False
+#                     scroll_offset = 0
+#             elif is_falling:
+#                 scroll_offset -= base_scroll_speed  # Scroll upward to simulate falling
+
+#             # Ensure the cat doesn't move off-screen
+#             if cat_x < 0:
+#                 cat_x = 0
+#             elif cat_x > WIDTH - cat_img.get_width():
+#                 cat_x = WIDTH - cat_img.get_width()
+
+#             # Fill the screen by tiling the tower tile image with a scrolling effect
+#             for x in range(0, WIDTH, tower_tile_img.get_width()):
+#                 for y in range(-tower_tile_img.get_height(), HEIGHT, tower_tile_img.get_height()):
+#                     screen.blit(tower_tile_img, (x, y + scroll_offset % tower_tile_img.get_height()))
+                    
+#             # Draw the platform with scrolling effect
+#             screen.blit(platform_img, (platform_x, platform_y + scroll_offset))
+
+#             # Draw the cat at the updated position
+#             screen.blit(cat_img, (cat_x, cat_y))
+
+#             pygame.display.flip()
+#             clock.tick(24)
+
+#     finally:
+#         stop_mp3()  # Ensure any music stops when exiting
+
+#     # End Phase placeholder - can be used for displaying end-of-game messages
+#     screen.fill(screen_color)
+#     draw_text("Game Over!", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True)
+#     continue_rect = draw_continue_button()
+#     pygame.display.flip()
+
+#     # Wait for "Continue..." click after game ends
+#     waiting = True
+#     while waiting:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = pygame.mouse.get_pos()
+#                 if check_continue_click(mouse_pos, continue_rect):
+#                     waiting = False
 def bonus_game_tuna_tower():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -5992,10 +6190,6 @@ def bonus_game_tuna_tower():
     scale_factor = min(scale_factor_x, scale_factor_y)
 
     GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
-
-    # Control display phase setup
-    running = True
-    controls_displayed = False
 
     # Load tower tile image and scale it
     tower_tile_img = pygame.image.load('assets/images/sprites/towertile01.png')
@@ -6011,77 +6205,33 @@ def bonus_game_tuna_tower():
     
     # Cat position and movement variables
     cat_x = WIDTH // 2 - cat_img.get_width() // 2
-    cat_y = int(GROUND_LEVEL) - cat_img.get_height()
+    cat_y = HEIGHT * 0.8 - cat_img.get_height()  # Fixed cat vertical position, slightly above ground level
     cat_speed = 25 * scale_factor  # Speed for horizontal movement
     cat_facing_right = True       # Track direction to manage flipping
-    is_falling = False            # Falling state to trigger upward scroll when off-platform
-    
+    is_falling = True             # Assume the cat starts falling
+    scroll_offset = 0            # Background/platform scrolling offset
+    base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
+    cat_velocity_y = 0           # Vertical movement placeholder for controlling scroll speed
+
     # Platform position and collision rect
     platform_x = WIDTH // 2 - platform_img.get_width() // 2
     platform_y = int(GROUND_LEVEL)
-    platform_rect = pygame.Rect(platform_x, platform_y, platform_img.get_width(), platform_img.get_height())
+    platform_width = platform_img.get_width()
+    platform_height = platform_img.get_height()
 
     # Background scroll offset
     scroll_offset = 0
-    base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
+    gravity = 1 * scale_factor
+    jump_strength = -20 * scale_factor
+    on_platform = False
 
     # Jumping state variables
     is_jumping = False
     jump_start_time = 0
     jump_duration = 1  # Duration of jump up phase (in seconds)
 
-    # Initialize bouncing text position and movement
-    text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
-    text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
-    text_dx *= scale_factor
-    text_dy *= scale_factor
-
-    # Display control instructions
-    while not controls_displayed:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-        screen.fill(screen_color)
-
-        # Render the controls text
-        draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
-        draw_text("W = Jump", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
-        draw_text("A = Move Left", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
-        draw_text("D = Move Right", font, text_color, 0, HEIGHT * 0.8, center=True, enable_shadow=True)
-
-        # Render the bouncing "Bonus Stage!" text
-        text_surface = font.render("Bonus Stage!", True, text_color)
-        text_width, text_height = text_surface.get_size()
-
-        # Update text position
-        text_x += text_dx
-        text_y += text_dy
-
-        # Check for collisions with the screen edges and reverse direction if needed
-        if text_x <= 0 or text_x >= WIDTH - text_width:
-            text_dx = -text_dx
-        if text_y <= 0 or text_y >= HEIGHT - text_height:
-            text_dy = -text_dy
-
-        # Draw the bouncing text at the updated position
-        screen.blit(text_surface, (text_x, text_y))
-
-        # Draw the "Continue..." button
-        continue_rect = draw_continue_button()
-        pygame.display.flip()
-
-        # Check for "Continue..." button click
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
-                if check_continue_click(mouse_pos, continue_rect):
-                    controls_displayed = True  # Exit the loop and move to gameplay
-
-        clock.tick(60)
-
     # Gameplay Phase: Implement controls, jumping effect with easing, and scrolling background
+    running = True
     try:
         while running:
             current_time = time.time()
@@ -6108,48 +6258,49 @@ def bonus_game_tuna_tower():
                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face right
                     cat_facing_right = True
 
-            # Initiate jump when "W" is pressed and cat is not already jumping
-            if keys[pygame.K_w] and not is_jumping and not is_falling:
-                is_jumping = True
-                jump_start_time = current_time
+            # Initiate jump when "W" is pressed and cat is on the platform
+            if keys[pygame.K_w] and on_platform:
+                cat_velocity_y = jump_strength
+                on_platform = False
+
+            # Apply gravity if the cat is falling
+            if not on_platform:
+                cat_velocity_y += gravity
+                scroll_offset -= cat_velocity_y
+
+            # Update platform Y position based on scroll offset
+            platform_y_on_screen = platform_y + scroll_offset
+            platform_rect = pygame.Rect(platform_x, platform_y_on_screen, platform_width, platform_height)
 
             # Update cat's rect for collision detection
             cat_rect = pygame.Rect(cat_x, cat_y, cat_img.get_width(), cat_img.get_height())
 
-            # Check if the cat is standing on the platform or falling
-            if not platform_rect.colliderect(cat_rect):
-                is_falling = True
-            else:
-                is_falling = False
+            # Platform collision logic
+            if cat_rect.colliderect(platform_rect):
+                # Check if cat is falling and lands on top of the platform
+                if cat_velocity_y > 0 and cat_rect.bottom > platform_rect.top and cat_rect.bottom - cat_velocity_y <= platform_rect.top:
+                    # Place cat on top of the platform by stopping the scroll at the right position
+                    scroll_offset = platform_y - (cat_y + cat_img.get_height())
+                    cat_velocity_y = 0
+                    on_platform = True
+                # If the cat walks off the platform, it should start falling
+                elif cat_rect.right < platform_rect.left or cat_rect.left > platform_rect.right:
+                    on_platform = False
 
-            # Jumping or falling logic with easing effect
-            if is_jumping:
-                time_in_jump = current_time - jump_start_time
-                if time_in_jump < jump_duration:
-                    scroll_speed = base_scroll_speed * (1 - time_in_jump / jump_duration)
-                    scroll_offset += scroll_speed
-                elif time_in_jump < 2 * jump_duration:
-                    scroll_speed = base_scroll_speed * ((time_in_jump - jump_duration) / jump_duration)
-                    scroll_offset -= scroll_speed
-                else:
-                    is_jumping = False
-                    scroll_offset = 0
-            elif is_falling:
-                scroll_offset -= base_scroll_speed  # Scroll upward to simulate falling
-
-            # Ensure the cat doesn't move off-screen
+            # Ensure the cat doesn't move off-screen horizontally
             if cat_x < 0:
                 cat_x = 0
             elif cat_x > WIDTH - cat_img.get_width():
                 cat_x = WIDTH - cat_img.get_width()
 
             # Fill the screen by tiling the tower tile image with a scrolling effect
+            screen.fill(screen_color)  # Clear the screen before drawing
             for x in range(0, WIDTH, tower_tile_img.get_width()):
                 for y in range(-tower_tile_img.get_height(), HEIGHT, tower_tile_img.get_height()):
                     screen.blit(tower_tile_img, (x, y + scroll_offset % tower_tile_img.get_height()))
-                    
-            # Draw the platform with scrolling effect
-            screen.blit(platform_img, (platform_x, platform_y + scroll_offset))
+
+            # Draw the platform
+            screen.blit(platform_img, (platform_x, platform_y_on_screen))
 
             # Draw the cat at the updated position
             screen.blit(cat_img, (cat_x, cat_y))
@@ -6177,6 +6328,13 @@ def bonus_game_tuna_tower():
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
+
+
+
+
+
+
+
 
 
 # TODO For later use
@@ -11253,9 +11411,9 @@ def main_menu():
                     return "options_menu"  # Return to indicate transitioning to options menu
                 elif explanation_rect.collidepoint(event.pos):
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    # bonus_game_tuna_tower()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+                    bonus_game_tuna_tower()
                     # bonus_game_cat_pong()
                     # bonus_game_falling_fish()
                     # bonus_game_fat_tuna() # Skip directly to the bonus game for debug
