@@ -26,6 +26,9 @@ import webbrowser
 ### Constants and Configuration ###
 ###################################
 
+# Our database name
+DB_NAME = 'learniverse.db'
+
 # Set the title of the window
 pygame.display.set_caption("Learniverse")
 
@@ -192,6 +195,20 @@ current_student = None  # Global variable to store the currently selected studen
 
 # Icon will be loaded later, initialized as None for now
 icon = None
+
+DEFAULT_RESOLUTION = (800, 800)
+WINDOWED_RESOLUTIONS = [
+    (640, 640), (768, 768), (800, 800), (900, 900), (1000, 1000), (1080, 1080)
+]
+
+
+##################################
+# TODO
+# CAN I REMOVE THESE TWO SOMEHOW?
+REFERENCE_RESOLUTION = (1080, 1080)
+BASE_RESOLUTION = (1080, 1080)
+##################################
+
 
 # Japanese data
 j_colors1 = {
@@ -2928,12 +2945,7 @@ j_song_zou_san2 = {
 }
 
 
-##################################
-# TODO
-# CAN I REMOVE THESE TWO SOMEHOW?
-REFERENCE_RESOLUTION = (1080, 1080)
-BASE_RESOLUTION = (1080, 1080)
-##################################
+
 
 ########################
 ### Helper Functions ###
@@ -3125,78 +3137,123 @@ def bring_window_to_front():
         log_entry = create_log_message(f"Failed to bring window to front: {e}")
         log_message(log_entry)
 
+
+def load_and_set_window_icon(icon_path):
+    """
+    Try to load and set the window icon from the specified file.
+
+    Parameters:
+        icon_path (str): Path to the icon file.
+    """
+    try:
+        # Load the window icon
+        icon = pygame.image.load(icon_path)
+        pygame.display.set_icon(icon)
+    except FileNotFoundError as e:
+        log_entry = create_log_message(f"Icon file not found: {e}")
+        log_message(log_entry)
+    except pygame.error as e:
+        log_entry = create_log_message(f"Failed to load icon: {e}")
+        log_message(log_entry)
+        
     
+def initialize_pygame():
+    """
+    Initialize Pygame and its modules.
+
+    This function initializes Pygame's main modules and handles any errors that occur,
+    logging them and gracefully exiting the program if necessary.
+    """
+    try:
+        pygame.init()
+        pygame.mixer.init()
+    except pygame.error as e:
+        log_entry = create_log_message(f"Error initializing Pygame: {e}")
+        log_message(log_entry)
+        sys.exit(1)
+        
+
+def get_max_display_resolution():
+    """Get the maximum display resolution from the system."""
+    info = pygame.display.Info()
+    return info.current_w, info.current_h
+
+
+def filter_available_resolutions(max_resolution, resolutions):
+    """
+    Filter available resolutions to match the current display.
+
+    Parameters:
+        max_resolution (tuple): Maximum resolution of the user's display.
+        resolutions (list): List of possible resolutions.
+
+    Returns:
+        list: A list of resolutions that fit within the user's display.
+    """
+    return [
+        res for res in resolutions
+        if res[0] <= max_resolution[0] and res[1] <= max_resolution[1]
+    ]
+
+
+def load_resolution_from_options(available_resolutions, default_resolution):
+    """
+    Load the current resolution from the options file if available.
+
+    Parameters:
+        available_resolutions (list): List of available resolutions.
+        default_resolution (tuple): Default resolution to fall back on.
+
+    Returns:
+        tuple: The selected resolution (WIDTH, HEIGHT).
+        int: The index of the selected resolution.
+    """
+    try:
+        with open("options.json", "r") as file:
+            options = json.load(file)
+            current_resolution_index = options.get(
+                "current_resolution_index",
+                available_resolutions.index(default_resolution)
+            )
+            return available_resolutions[current_resolution_index], current_resolution_index
+    except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
+        # Log error and default to the specified resolution
+        log_entry = create_log_message(f"Error loading options.json: {e}")
+        log_message(log_entry)
+        default_index = available_resolutions.index(default_resolution)
+        return default_resolution, default_index
+        
+        
+
+
 ##############################################
 ### Pygame Initialization and Window Setup ###
 ##############################################
 
-# Try to load and set the window icon from a specified file
-try:
-    icon = pygame.image.load('assets/images/Learniverse.ico')
-    pygame.display.set_icon(icon)
-except FileNotFoundError as e:
-    log_entry = create_log_message(f"Icon file not found: {e}")
-    log_message(log_entry)
-except pygame.error as e:
-    log_entry = create_log_message(f"Failed to load icon: {e}")
-    log_message(log_entry)
+load_and_set_window_icon('assets/images/Learniverse.ico')
 
-# Pygame initialization
-# Initialize Pygame's main modules. If there's an issue, log the error and exit.
-try:
-    pygame.init()
-    pygame.mixer.init()
-except pygame.error as e:
-    log_entry = create_log_message(f"Error initializing Pygame: {e}")
-    log_message(log_entry)
-    sys.exit(1)
+initialize_pygame()
 
-# Define available windowed resolutions
-# This list contains the resolutions that can be used by the game in windowed mode.
-WINDOWED_RESOLUTIONS = [
-    (640, 640), (768, 768), (800, 800), (900, 900), (1000, 1000), (1080, 1080)
-]
+# Get the display information and filter available resolutions
+max_display_resolution = get_max_display_resolution()
+AVAILABLE_RESOLUTIONS = filter_available_resolutions(max_display_resolution, WINDOWED_RESOLUTIONS)
 
-# Get the display information from the system
-# MAX_DISPLAY_RESOLUTION will store the width and height of the current display, 
-# allowing the game to adapt to the user's monitor.
-info = pygame.display.Info() 
-MAX_DISPLAY_RESOLUTION = (info.current_w, info.current_h)
-
-# Filter available resolutions to match the current display
-# The AVAILABLE_RESOLUTIONS list only includes resolutions smaller than or 
-# equal to the user's maximum screen size, ensuring compatibility with 
-# different displays.
-AVAILABLE_RESOLUTIONS = [
-    res for res in WINDOWED_RESOLUTIONS if res[0] <= MAX_DISPLAY_RESOLUTION[0] and res[1] <= MAX_DISPLAY_RESOLUTION[1]
-]
-
-# Try to load the current resolution index from options, else default 800x800
-try:
-    with open("options.json", "r") as file:
-        options = json.load(file)
-        current_resolution_index = options.get("current_resolution_index", AVAILABLE_RESOLUTIONS.index((800, 800)))
-        WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
-except (FileNotFoundError, ValueError):
-    # Default to 800x800 resolution if options.json is missing or invalid
-    current_resolution_index = AVAILABLE_RESOLUTIONS.index((800, 800))
-    WIDTH, HEIGHT = AVAILABLE_RESOLUTIONS[current_resolution_index]
+# Load the resolution, defaulting to 800x800 if no valid options are found
+(WIDTH, HEIGHT), current_resolution_index = load_resolution_from_options(AVAILABLE_RESOLUTIONS, DEFAULT_RESOLUTION)
 
 # Center the window before creating the Pygame window
 center_window(WIDTH, HEIGHT)
 
 # Initialize in windowed mode
-screen = pygame.display.set_mode((WIDTH, HEIGHT))  
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
-# Now that we hava  screen, bring it to the user's attention
+# Now that we have a screen, bring it to the user's attention
 bring_window_to_front()
 
 # Create a clock object to manage the frame rate of the game
 clock = pygame.time.Clock()
 
-# Load background images for different menus
-# These images are selected randomly from the specified folders and will be used
-# as backgrounds for the main menu and options menu.
+# Load random background images for menus
 main_menu_background = select_random_background("assets/images/main_menu/")
 options_background = select_random_background("assets/images/options/")
 
@@ -3212,57 +3269,117 @@ pygame.mixer.set_num_channels(16)
 ### Database Functions ###
 ##########################
 
+# def check_database_initialization():
+#     """
+#     Check if the 'learniverse.db' database exists. If not, create it.
+#     Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
+#     Handle errors by logging them.
+#     """
+#     db_name = 'learniverse.db'
+    
+#     try:
+#         # Check if the database file exists in the same directory as the script
+#         if not os.path.isfile(db_name):
+#             log_entry = create_log_message("Database not found, creating 'learniverse.db'...")
+#             log_message(log_entry)
+            
+#             # Create the database and the necessary tables
+#             connection = sqlite3.connect(db_name)
+#             cursor = connection.cursor()
+#             _initialize_tables(cursor, connection)
+#         else:
+#             connection = sqlite3.connect(db_name)
+#             cursor = connection.cursor()
+#             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
+#             result = cursor.fetchone()
+
+#             if result:
+#                 log_entry = create_log_message("'students' table found. Database is ready.")
+#                 log_message(log_entry)
+#             else:
+#                 log_entry = create_log_message("'students' table not found. Initializing tables...")
+#                 log_message(log_entry)
+#                 _initialize_tables(cursor, connection)
+                
+#             # Always check for lessons and insert if missing
+#             insert_lessons(cursor, connection)
+
+#         cursor.close()
+#         connection.close()
+
+#     except sqlite3.Error as e:
+#         log_entry = create_log_message(f"Database error: {e}")
+#         log_message(log_entry)
+#         sys.exit(1)
+    
+#     except Exception as e:
+#         log_entry = create_log_message(f"Unexpected error: {e}")
+#         log_message(log_entry)
+#         sys.exit(1)
+
+
 def check_database_initialization():
     """
     Check if the 'learniverse.db' database exists. If not, create it.
     Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
     Handle errors by logging them.
     """
-    db_name = 'learniverse.db'
-    
     try:
-        # Check if the database file exists in the same directory as the script
-        if not os.path.isfile(db_name):
-            log_entry = create_log_message("Database not found, creating 'learniverse.db'...")
-            log_message(log_entry)
-            
-            # Create the database and the necessary tables
-            connection = sqlite3.connect(db_name)
-            cursor = connection.cursor()
-            _initialize_tables(cursor, connection)
+        # Check if the database file exists; create if it doesn't
+        if not os.path.isfile(DB_NAME):
+            log_message(create_log_message(f"Database '{DB_NAME}' not found. Creating and initializing tables..."))
+            create_database_and_initialize_tables()
         else:
-            # log_entry = create_log_message("'learniverse.db' found, checking accessibility...")
-            # log_message(log_entry)
-            
-            connection = sqlite3.connect(db_name)
-            cursor = connection.cursor()
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
-            result = cursor.fetchone()
+            log_message(create_log_message(f"Database '{DB_NAME}' found. Verifying tables and inserting lessons..."))
+            verify_and_initialize_database()
 
-            if result:
-                log_entry = create_log_message("'students' table found. Database is ready.")
-                log_message(log_entry)
-            else:
-                log_entry = create_log_message("'students' table not found. Initializing tables...")
-                log_message(log_entry)
-                _initialize_tables(cursor, connection)
-                
-            # Always check for lessons and insert if missing
-            insert_lessons(cursor, connection)
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Database error during initialization: {e}"))
+        sys.exit(1)
 
+    except Exception as e:
+        log_message(create_log_message(f"Unexpected error during initialization: {e}"))
+        sys.exit(1)
+
+
+def create_database_and_initialize_tables():
+    """
+    Create the database and initialize tables if it doesn't exist.
+    """
+    try:
+        connection = sqlite3.connect(DB_NAME)
+        cursor = connection.cursor()
+        _initialize_tables(cursor, connection)
+        log_message(create_log_message("Database and tables created successfully."))
+    finally:
         cursor.close()
         connection.close()
 
-    except sqlite3.Error as e:
-        log_entry = create_log_message(f"Database error: {e}")
-        log_message(log_entry)
-        sys.exit(1)
-    
-    except Exception as e:
-        log_entry = create_log_message(f"Unexpected error: {e}")
-        log_message(log_entry)
-        sys.exit(1)
 
+def verify_and_initialize_database():
+    """
+    Verify that the database tables are set up properly, and initialize them if not.
+    Insert lessons if they are missing.
+    """
+    try:
+        connection = sqlite3.connect(DB_NAME)
+        cursor = connection.cursor()
+
+        # Check if 'students' table exists
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
+        if cursor.fetchone():
+            log_message(create_log_message("'students' table found. Database is ready."))
+        else:
+            log_message(create_log_message("'students' table not found. Initializing tables..."))
+            _initialize_tables(cursor, connection)
+
+        # Ensure lessons are present in the 'lessons' table
+        insert_lessons(cursor, connection)
+
+    finally:
+        cursor.close()
+        connection.close()
+        
 
 def _initialize_tables(cursor, connection):
     """Initialize the required tables and insert lessons if they don't exist."""
