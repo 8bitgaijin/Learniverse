@@ -2956,6 +2956,30 @@ def create_log_message(message):
     return f"[{timestamp}] {message}"
 
 
+# def log_message(log_entry):
+#     """
+#     Log a message to both the console and the error_log.txt file.
+
+#     This function handles logging by printing the log entry to the console and 
+#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
+#     gracefully by logging the failure to the console.
+
+#     Parameters:
+#         log_entry (str): The log message to be printed and saved.
+
+#     Raises:
+#         Exception: If an error occurs while writing to the log file, an 
+#         exception is caught, and an error message is printed to the console.
+#     """
+#     try:
+#         # Print the log entry to the console
+#         print(log_entry)
+#         # Attempt to open the log file and write the log entry
+#         with open("error_log.txt", "a") as error_file:
+#             error_file.write(log_entry + "\n")
+#     except Exception as e:
+#         # If an error occurs, print an error message to the console
+#         print(f"Failed to log message: {e}")
 def log_message(log_entry):
     """
     Log a message to both the console and the error_log.txt file.
@@ -2966,21 +2990,18 @@ def log_message(log_entry):
 
     Parameters:
         log_entry (str): The log message to be printed and saved.
-
-    Raises:
-        Exception: If an error occurs while writing to the log file, an 
-        exception is caught, and an error message is printed to the console.
     """
-    try:
-        # Print the log entry to the console
-        print(log_entry)
-        # Attempt to open the log file and write the log entry
-        with open("error_log.txt", "a") as error_file:
-            error_file.write(log_entry + "\n")
-    except Exception as e:
-        # If an error occurs, print an error message to the console
-        print(f"Failed to log message: {e}")
+    # Print the log entry to the console
+    print(log_entry)
 
+    try:
+        # Attempt to open the log file and write the log entry
+        log_file_path = "error_log.txt"
+        with open(log_file_path, "a") as error_file:
+            error_file.write(log_entry + "\n")
+    except (IOError, OSError) as e:
+        # If an error occurs, print an error message to the console
+        print(f"Failed to log message to file '{log_file_path}': {e}")
 
 def select_random_background(folder_path):
     """
@@ -3028,28 +3049,66 @@ def select_random_background(folder_path):
         return None
 
 
+# def center_window(width, height):
+#     """Center the Pygame window on the screen."""
+#     try:
+#         # Reset the environment variable to ensure it's not "sticking"
+#         if 'SDL_VIDEO_WINDOW_POS' in os.environ:
+#             del os.environ['SDL_VIDEO_WINDOW_POS']
+    
+#         # Get screen size
+#         user32 = ctypes.windll.user32
+#         screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
+    
+#         # Calculate the centered position
+#         window_x = (screen_width - width) // 2
+#         window_y = (screen_height - height) // 2
+        
+#         # Set window position before creating the window
+#         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
+
+#     except Exception as e:
+#         log_entry = create_log_message(f"Failed to center window: {e}")
+#         log_message(log_entry)
+def calculate_center_position(screen_width, screen_height, window_width, window_height):
+    """Calculate the center position of a window given screen and window dimensions."""
+    window_x = (screen_width - window_width) // 2
+    window_y = (screen_height - window_height) // 2
+    return window_x, window_y
+
+
 def center_window(width, height):
-    """Center the Pygame window on the screen."""
+    """Centers the Pygame window on the screen.
+
+    Parameters:
+        width (int): The width of the window.
+        height (int): The height of the window.
+
+    This function sets the environment variable `SDL_VIDEO_WINDOW_POS` 
+    to center the Pygame window on the user's screen.
+    """
     try:
-        # Reset the environment variable to ensure it's not "sticking"
+        # Clear existing window position to avoid residual settings
         if 'SDL_VIDEO_WINDOW_POS' in os.environ:
             del os.environ['SDL_VIDEO_WINDOW_POS']
-    
-        # Get screen size
+
+        # Get screen dimensions
         user32 = ctypes.windll.user32
-        screen_width, screen_height = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1)
-    
-        # Calculate the centered position
-        window_x = (screen_width - width) // 2
-        window_y = (screen_height - height) // 2
-        
-        # Set window position before creating the window
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
+
+        # Get calculated center position
+        window_x, window_y = calculate_center_position(
+            screen_width, screen_height, width, height
+        )
+
+        # Set environment variable for window position
         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
 
-    except Exception as e:
-        log_entry = create_log_message(f"Failed to center window: {e}")
+    except AttributeError as err:
+        log_entry = create_log_message(f"Failed to center window: {err}")
         log_message(log_entry)
-        
+
         
 def bring_window_to_front():
     """Bring the Pygame window to the front of all other windows."""
@@ -5027,7 +5086,15 @@ def bonus_game_fat_tuna():
     text_dy *= scale_factor
 
     # Initialize the cat
-    player_img = pygame.image.load('assets/images/sprites/cat01.png')
+    # player_img = pygame.image.load('assets/images/sprites/cat06.png')
+    # Get the current month
+    current_month = datetime.now().month
+    
+    # Conditional image loading
+    player_img = pygame.image.load(
+        'assets/images/sprites/cat06.png' if current_month == 12 
+        else 'assets/images/sprites/cat01.png'
+    )
     player_img = pygame.transform.scale(player_img, (int(player_img.get_width() * scale_factor), int(player_img.get_height() * scale_factor)))
     cat = Cat(player_img, WIDTH // 2, HEIGHT - player_img.get_rect().height, 25 * scale_factor, scale_factor)
 
@@ -6177,6 +6244,157 @@ def bonus_game_cat_pong():
 #                 mouse_pos = pygame.mouse.get_pos()
 #                 if check_continue_click(mouse_pos, continue_rect):
 #                     waiting = False
+# def bonus_game_tuna_tower():
+#     # Check if the assets/images directory exists
+#     if not os.path.exists('assets/images'):
+#         log_entry = create_log_message("Assets folder 'assets/images' is missing. Returning to the main menu.")
+#         log_message(log_entry)
+#         return "main_menu"
+    
+#     # Calculate scaling factors based on the current resolution
+#     scale_factor_x = WIDTH / REFERENCE_RESOLUTION[0]
+#     scale_factor_y = HEIGHT / REFERENCE_RESOLUTION[1]
+#     scale_factor = min(scale_factor_x, scale_factor_y)
+
+#     GROUND_LEVEL = HEIGHT * 0.8  # Set the ground level
+
+#     # Load tower tile image and scale it
+#     tower_tile_img = pygame.image.load('assets/images/sprites/towertile01.png')
+#     tower_tile_img = pygame.transform.scale(tower_tile_img, (int(64 * scale_factor), int(64 * scale_factor)))
+    
+#     # Load platform image and scale it
+#     platform_img = pygame.image.load('assets/images/sprites/platform.jpg')
+#     platform_img = pygame.transform.scale(platform_img, (int(200 * scale_factor), int(50 * scale_factor)))
+    
+#     # Load cat image and scale to double its original size
+#     cat_img = pygame.image.load('assets/images/sprites/cat08.png')
+#     cat_img = pygame.transform.scale(cat_img, (int(cat_img.get_width() * 2 * scale_factor), int(cat_img.get_height() * 2 * scale_factor)))
+    
+#     # Cat position and movement variables
+#     cat_x = WIDTH // 2 - cat_img.get_width() // 2
+#     cat_y = HEIGHT * 0.8 - cat_img.get_height()  # Fixed cat vertical position, slightly above ground level
+#     cat_speed = 25 * scale_factor  # Speed for horizontal movement
+#     cat_facing_right = True       # Track direction to manage flipping
+#     is_falling = True             # Assume the cat starts falling
+#     scroll_offset = 0            # Background/platform scrolling offset
+#     base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
+#     cat_velocity_y = 0           # Vertical movement placeholder for controlling scroll speed
+
+#     # Platform position and collision rect
+#     platform_x = WIDTH // 2 - platform_img.get_width() // 2
+#     platform_y = int(GROUND_LEVEL)
+#     platform_width = platform_img.get_width()
+#     platform_height = platform_img.get_height()
+
+#     # Background scroll offset
+#     scroll_offset = 0
+#     gravity = 1 * scale_factor
+#     jump_strength = -20 * scale_factor
+#     on_platform = False
+
+#     # Jumping state variables
+#     is_jumping = False
+#     jump_start_time = 0
+#     jump_duration = 1  # Duration of jump up phase (in seconds)
+
+#     # Gameplay Phase: Implement controls, jumping effect with easing, and scrolling background
+#     running = True
+#     try:
+#         while running:
+#             current_time = time.time()
+
+#             for event in pygame.event.get():
+#                 if event.type == pygame.QUIT:
+#                     running = False
+#                     pygame.quit()
+#                     sys.exit()
+
+#             keys = pygame.key.get_pressed()
+
+#             # Handle left movement with "A" key
+#             if keys[pygame.K_a]:
+#                 cat_x -= cat_speed
+#                 if cat_facing_right:
+#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face left
+#                     cat_facing_right = False
+
+#             # Handle right movement with "D" key
+#             if keys[pygame.K_d]:
+#                 cat_x += cat_speed
+#                 if not cat_facing_right:
+#                     cat_img = pygame.transform.flip(cat_img, True, False)  # Flip to face right
+#                     cat_facing_right = True
+
+#             # Initiate jump when "W" is pressed and cat is on the platform
+#             if keys[pygame.K_w] and on_platform:
+#                 cat_velocity_y = jump_strength
+#                 on_platform = False
+
+#             # Apply gravity if the cat is falling
+#             if not on_platform:
+#                 cat_velocity_y += gravity
+#                 scroll_offset -= cat_velocity_y
+
+#             # Update platform Y position based on scroll offset
+#             platform_y_on_screen = platform_y + scroll_offset
+#             platform_rect = pygame.Rect(platform_x, platform_y_on_screen, platform_width, platform_height)
+
+#             # Update cat's rect for collision detection
+#             cat_rect = pygame.Rect(cat_x, cat_y, cat_img.get_width(), cat_img.get_height())
+
+#             # Platform collision logic
+#             if cat_rect.colliderect(platform_rect):
+#                 # Check if cat is falling and lands on top of the platform
+#                 if cat_velocity_y > 0 and cat_rect.bottom > platform_rect.top and cat_rect.bottom - cat_velocity_y <= platform_rect.top:
+#                     # Place cat on top of the platform by stopping the scroll at the right position
+#                     scroll_offset = platform_y - (cat_y + cat_img.get_height())
+#                     cat_velocity_y = 0
+#                     on_platform = True
+#                 # If the cat walks off the platform, it should start falling
+#                 elif cat_rect.right < platform_rect.left or cat_rect.left > platform_rect.right:
+#                     on_platform = False
+
+#             # Ensure the cat doesn't move off-screen horizontally
+#             if cat_x < 0:
+#                 cat_x = 0
+#             elif cat_x > WIDTH - cat_img.get_width():
+#                 cat_x = WIDTH - cat_img.get_width()
+
+#             # Fill the screen by tiling the tower tile image with a scrolling effect
+#             screen.fill(screen_color)  # Clear the screen before drawing
+#             for x in range(0, WIDTH, tower_tile_img.get_width()):
+#                 for y in range(-tower_tile_img.get_height(), HEIGHT, tower_tile_img.get_height()):
+#                     screen.blit(tower_tile_img, (x, y + scroll_offset % tower_tile_img.get_height()))
+
+#             # Draw the platform
+#             screen.blit(platform_img, (platform_x, platform_y_on_screen))
+
+#             # Draw the cat at the updated position
+#             screen.blit(cat_img, (cat_x, cat_y))
+
+#             pygame.display.flip()
+#             clock.tick(24)
+
+#     finally:
+#         stop_mp3()  # Ensure any music stops when exiting
+
+#     # End Phase placeholder - can be used for displaying end-of-game messages
+#     screen.fill(screen_color)
+#     draw_text("Game Over!", font, text_color, WIDTH // 2, HEIGHT // 3, center=True, enable_shadow=True)
+#     continue_rect = draw_continue_button()
+#     pygame.display.flip()
+
+#     # Wait for "Continue..." click after game ends
+#     waiting = True
+#     while waiting:
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 mouse_pos = pygame.mouse.get_pos()
+#                 if check_continue_click(mouse_pos, continue_rect):
+#                     waiting = False
 def bonus_game_tuna_tower():
     # Check if the assets/images directory exists
     if not os.path.exists('assets/images'):
@@ -6200,7 +6418,7 @@ def bonus_game_tuna_tower():
     platform_img = pygame.transform.scale(platform_img, (int(200 * scale_factor), int(50 * scale_factor)))
     
     # Load cat image and scale to double its original size
-    cat_img = pygame.image.load('assets/images/sprites/cat08.png')
+    cat_img = pygame.image.load('assets/images/sprites/cat05.png')
     cat_img = pygame.transform.scale(cat_img, (int(cat_img.get_width() * 2 * scale_factor), int(cat_img.get_height() * 2 * scale_factor)))
     
     # Cat position and movement variables
@@ -6208,27 +6426,19 @@ def bonus_game_tuna_tower():
     cat_y = HEIGHT * 0.8 - cat_img.get_height()  # Fixed cat vertical position, slightly above ground level
     cat_speed = 25 * scale_factor  # Speed for horizontal movement
     cat_facing_right = True       # Track direction to manage flipping
-    is_falling = True             # Assume the cat starts falling
     scroll_offset = 0            # Background/platform scrolling offset
-    base_scroll_speed = 20 * scale_factor  # Base speed for scrolling effect
     cat_velocity_y = 0           # Vertical movement placeholder for controlling scroll speed
 
-    # Platform position and collision rect
-    platform_x = WIDTH // 2 - platform_img.get_width() // 2
-    platform_y = int(GROUND_LEVEL)
-    platform_width = platform_img.get_width()
-    platform_height = platform_img.get_height()
-
-    # Background scroll offset
-    scroll_offset = 0
+    # Gravity and jumping variables
     gravity = 1 * scale_factor
     jump_strength = -20 * scale_factor
     on_platform = False
 
-    # Jumping state variables
-    is_jumping = False
-    jump_start_time = 0
-    jump_duration = 1  # Duration of jump up phase (in seconds)
+    # Platform positions and properties
+    platforms = [
+        {"x": WIDTH // 2 - platform_img.get_width() // 2, "y": int(GROUND_LEVEL)},
+        {"x": WIDTH // 2 + 150, "y": int(GROUND_LEVEL) - 150},  # New platform above and to the right
+    ]
 
     # Gameplay Phase: Implement controls, jumping effect with easing, and scrolling background
     running = True
@@ -6268,24 +6478,30 @@ def bonus_game_tuna_tower():
                 cat_velocity_y += gravity
                 scroll_offset -= cat_velocity_y
 
-            # Update platform Y position based on scroll offset
-            platform_y_on_screen = platform_y + scroll_offset
-            platform_rect = pygame.Rect(platform_x, platform_y_on_screen, platform_width, platform_height)
-
             # Update cat's rect for collision detection
             cat_rect = pygame.Rect(cat_x, cat_y, cat_img.get_width(), cat_img.get_height())
 
-            # Platform collision logic
-            if cat_rect.colliderect(platform_rect):
-                # Check if cat is falling and lands on top of the platform
-                if cat_velocity_y > 0 and cat_rect.bottom > platform_rect.top and cat_rect.bottom - cat_velocity_y <= platform_rect.top:
-                    # Place cat on top of the platform by stopping the scroll at the right position
-                    scroll_offset = platform_y - (cat_y + cat_img.get_height())
-                    cat_velocity_y = 0
-                    on_platform = True
-                # If the cat walks off the platform, it should start falling
-                elif cat_rect.right < platform_rect.left or cat_rect.left > platform_rect.right:
-                    on_platform = False
+            # Platform collision detection phase
+            platform_to_land_on = None
+            for platform in platforms:
+                platform_x = platform["x"]
+                platform_y_on_screen = platform["y"] + scroll_offset
+                platform_rect = pygame.Rect(platform_x, platform_y_on_screen, platform_img.get_width(), platform_img.get_height())
+
+                # Check if the cat is falling and collides with a platform
+                if cat_velocity_y > 0 and cat_rect.colliderect(platform_rect):
+                    if cat_rect.bottom > platform_rect.top and cat_rect.bottom - cat_velocity_y <= platform_rect.top:
+                        if platform_to_land_on is None or platform_y_on_screen < platform_to_land_on["y"]:
+                            platform_to_land_on = {"x": platform_x, "y": platform_y_on_screen}
+
+            # Landing phase (apply landing response)
+            if platform_to_land_on:
+                # Align the cat's bottom to the top of the platform smoothly
+                scroll_offset = platform_to_land_on["y"] - (cat_y + cat_img.get_height())
+                cat_velocity_y = 0
+                on_platform = True
+            else:
+                on_platform = False
 
             # Ensure the cat doesn't move off-screen horizontally
             if cat_x < 0:
@@ -6299,8 +6515,11 @@ def bonus_game_tuna_tower():
                 for y in range(-tower_tile_img.get_height(), HEIGHT, tower_tile_img.get_height()):
                     screen.blit(tower_tile_img, (x, y + scroll_offset % tower_tile_img.get_height()))
 
-            # Draw the platform
-            screen.blit(platform_img, (platform_x, platform_y_on_screen))
+            # Draw all platforms
+            for platform in platforms:
+                platform_x = platform["x"]
+                platform_y_on_screen = platform["y"] + scroll_offset
+                screen.blit(platform_img, (platform_x, platform_y_on_screen))
 
             # Draw the cat at the updated position
             screen.blit(cat_img, (cat_x, cat_y))
@@ -6328,6 +6547,14 @@ def bonus_game_tuna_tower():
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     waiting = False
+
+
+
+
+
+
+
+
 
 
 
@@ -11413,10 +11640,10 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
-                    bonus_game_tuna_tower()
+                    # bonus_game_tuna_tower()
                     # bonus_game_cat_pong()
                     # bonus_game_falling_fish()
-                    # bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
 
         # Control the frame rate
         clock.tick(120)
