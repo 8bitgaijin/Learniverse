@@ -18,6 +18,7 @@ import random
 import sqlite3
 import sys
 import time
+from typing import Optional
 from unidecode import unidecode
 import webbrowser
 
@@ -3269,55 +3270,6 @@ pygame.mixer.set_num_channels(16)
 ### Database Functions ###
 ##########################
 
-# def check_database_initialization():
-#     """
-#     Check if the 'learniverse.db' database exists. If not, create it.
-#     Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
-#     Handle errors by logging them.
-#     """
-#     db_name = 'learniverse.db'
-    
-#     try:
-#         # Check if the database file exists in the same directory as the script
-#         if not os.path.isfile(db_name):
-#             log_entry = create_log_message("Database not found, creating 'learniverse.db'...")
-#             log_message(log_entry)
-            
-#             # Create the database and the necessary tables
-#             connection = sqlite3.connect(db_name)
-#             cursor = connection.cursor()
-#             _initialize_tables(cursor, connection)
-#         else:
-#             connection = sqlite3.connect(db_name)
-#             cursor = connection.cursor()
-#             cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
-#             result = cursor.fetchone()
-
-#             if result:
-#                 log_entry = create_log_message("'students' table found. Database is ready.")
-#                 log_message(log_entry)
-#             else:
-#                 log_entry = create_log_message("'students' table not found. Initializing tables...")
-#                 log_message(log_entry)
-#                 _initialize_tables(cursor, connection)
-                
-#             # Always check for lessons and insert if missing
-#             insert_lessons(cursor, connection)
-
-#         cursor.close()
-#         connection.close()
-
-#     except sqlite3.Error as e:
-#         log_entry = create_log_message(f"Database error: {e}")
-#         log_message(log_entry)
-#         sys.exit(1)
-    
-#     except Exception as e:
-#         log_entry = create_log_message(f"Unexpected error: {e}")
-#         log_message(log_entry)
-#         sys.exit(1)
-
-
 def check_database_initialization():
     """
     Check if the 'learniverse.db' database exists. If not, create it.
@@ -3350,7 +3302,6 @@ def create_database_and_initialize_tables():
         connection = sqlite3.connect(DB_NAME)
         cursor = connection.cursor()
         _initialize_tables(cursor, connection)
-        log_message(create_log_message("Database and tables created successfully."))
     finally:
         cursor.close()
         connection.close()
@@ -3450,8 +3401,7 @@ def _initialize_tables(cursor, connection):
 
         # Commit the changes
         connection.commit()
-        log_entry = create_log_message("Database tables initialized and lessons updated successfully.")
-        log_message(log_entry)
+        
     except sqlite3.Error as e:
         log_entry = create_log_message(f"Error initializing tables: {e}")
         log_message(log_entry)
@@ -3497,21 +3447,12 @@ def insert_lessons(cursor, connection):
     ]
 
     try:
-        # log_entry = create_log_message(f"Lessons to process: {lessons}")
-        # log_message(log_entry)
-
         for title, description in lessons:
-            # log_entry = create_log_message(f"Checking if lesson exists: {title}")
-            # log_message(log_entry)
-
             # Check if the lesson already exists, case-insensitive check
             cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
             result = cursor.fetchone()
 
             if not result:  # If no result, insert the lesson
-                log_entry = create_log_message(f"Inserting lesson: {title}")
-                log_message(log_entry)
-
                 cursor.execute('''
                     INSERT INTO lessons (title, description)
                     VALUES (?, ?)
@@ -3520,40 +3461,55 @@ def insert_lessons(cursor, connection):
                 # Commit after every insert to ensure changes are saved
                 connection.commit()
 
-            #     log_entry = create_log_message(f"Lesson added: {title}.")
-            # else:
-            #     log_entry = create_log_message(f"Lesson already exists: {title}.")
-            
-            # log_message(log_entry)
-
-        log_entry = create_log_message("Lesson insertion process completed.")
-        log_message(log_entry)
-
     except sqlite3.Error as e:
         log_entry = create_log_message(f"Error inserting lessons: {e}")
         log_message(log_entry)
 
 
-def add_student(name, age=None, email=None):
-    """Add a new student to the database and return their ID."""
+# def add_student(name, age=None, email=None):
+#     """Add a new student to the database and return their ID."""
+#     try:
+#         connection = sqlite3.connect('learniverse.db')
+#         cursor = connection.cursor()
+#         cursor.execute('''
+#             INSERT INTO students (name, age, email)
+#             VALUES (?, ?, ?)
+#         ''', (name, age, email))
+#         connection.commit()
+#         student_id = cursor.lastrowid
+#         log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
+#         log_message(log_entry)
+#         cursor.close()
+#         connection.close()
+#         return student_id
+#     except sqlite3.Error as e:
+#         log_entry = create_log_message(f"Error adding student '{name}': {e}")
+#         log_message(log_entry)
+#         return -1
+def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
+    """Add a new student to the database and return their ID, or None if an error occurs."""
+    log_message(create_log_message(f"Attempting to add student '{name}'..."))
+    
     try:
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
-        cursor.execute('''
-            INSERT INTO students (name, age, email)
-            VALUES (?, ?, ?)
-        ''', (name, age, email))
-        connection.commit()
-        student_id = cursor.lastrowid
-        log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
-        log_message(log_entry)
-        cursor.close()
-        connection.close()
-        return student_id
+        with sqlite3.connect('learniverse.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                INSERT INTO students (name, age, email)
+                VALUES (?, ?, ?)
+            ''', (name, age, email))
+
+            student_id = cursor.lastrowid
+            connection.commit()
+
+            log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
+            log_message(log_entry)
+
+            return student_id
+
     except sqlite3.Error as e:
         log_entry = create_log_message(f"Error adding student '{name}': {e}")
         log_message(log_entry)
-        return -1
+        return None
 
 
 def get_students():
