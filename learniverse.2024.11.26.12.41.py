@@ -3862,68 +3862,103 @@ def student_streak_query() -> int:
 
     return streak
 
-def get_student_progress(session_id, lesson_title):
-    """Retrieves the student's current level for a specific lesson based on the session_id and lesson_title.
-    If no entry exists for the lesson, it initializes progress with level 1 and returns 1."""
-    try:
-        # Connect to the database
-        connection, cursor = get_database_cursor()
 
-        # Fetch student_id from the sessions table
+def get_student_id_by_session(session_id: int) -> Optional[int]:
+    """Retrieve the student ID from the session ID."""
+    try:
+        connection, cursor = get_database_cursor()
         cursor.execute('''
             SELECT student_id
             FROM sessions
             WHERE session_id = ?
         ''', (session_id,))
-        session_result = cursor.fetchone()
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
-        if not session_result:
-            raise ValueError(f"No session data found for session_id: {session_id}")
+        return result[0] if result else None
 
-        student_id = session_result[0]
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Error retrieving student ID for session_id {session_id}: {e}"))
+        return None
 
-        # Fetch lesson_id from the lessons table based on the provided lesson title (e.g., 'Hiragana', 'Katakana')
+
+def get_lesson_id_by_title(lesson_title: str) -> Optional[int]:
+    """Retrieve the lesson ID from the lesson title."""
+    try:
+        connection, cursor = get_database_cursor()
         cursor.execute('''
             SELECT lesson_id
             FROM lessons
             WHERE title = ?
         ''', (lesson_title,))
-        lesson_result = cursor.fetchone()
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
-        if not lesson_result:
-            raise ValueError(f"No lesson data found for {lesson_title} in the lessons table")
+        return result[0] if result else None
 
-        lesson_id = lesson_result[0]
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Error retrieving lesson ID for title '{lesson_title}': {e}"))
+        return None
 
-        # Query the student progress for the specific lesson
+
+def get_student_progress(session_id: int, lesson_title: str) -> int:
+    """
+    Retrieve or initialize the student's progress for a specific lesson.
+
+    Parameters:
+        session_id (int): ID of the session.
+        lesson_title (str): Title of the lesson.
+
+    Returns:
+        int: The student's current level for the lesson.
+    """
+    student_id = get_student_id_by_session(session_id)
+    if student_id is None:
+        raise ValueError(f"No session data found for session_id: {session_id}")
+
+    lesson_id = get_lesson_id_by_title(lesson_title)
+    if lesson_id is None:
+        raise ValueError(f"No lesson data found for lesson_title: '{lesson_title}'")
+
+    try:
+        connection, cursor = get_database_cursor()
         cursor.execute('''
             SELECT student_level
             FROM student_lesson_progress
             WHERE student_id = ? AND lesson_id = ?
         ''', (student_id, lesson_id))
-        progress_result = cursor.fetchone()
+        result = cursor.fetchone()
 
-        if progress_result:
-            # If progress exists, retrieve the current level
-            student_level = progress_result[0]
+        if result:
+            student_level = result[0]
         else:
-            # If no progress exists for this lesson, insert a new entry with level 1
             cursor.execute('''
                 INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
                 VALUES (?, ?, 1)
             ''', (student_id, lesson_id))
             connection.commit()
-            student_level = 1  # Default to level 1
+            student_level = 1
 
-        log_message(f"Fetched student progress: student_id={student_id}, lesson_id={lesson_id}, level={student_level}")
+        cursor.close()
+        connection.close()
+
+        log_message(create_log_message(f"Fetched student progress: student_id={student_id}, lesson_id={lesson_id}, level={student_level}"))
         return student_level
 
     except sqlite3.Error as e:
-        log_message(f"Error retrieving student progress: {e}")
+        log_message(create_log_message(f"Error retrieving or initializing progress for student_id={student_id}, lesson_id={lesson_id}: {e}"))
         raise  # Raise the error for proper handling upstream
-    finally:
-        cursor.close()
-        connection.close()
+
+
+
+
+
+
+
+
+
 
 
 def set_student_progress(session_id, lesson_title):
