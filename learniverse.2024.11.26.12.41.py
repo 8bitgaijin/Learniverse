@@ -3952,22 +3952,20 @@ def get_student_progress(session_id: int, lesson_title: str) -> int:
         raise  # Raise the error for proper handling upstream
 
 
+def get_session_data(session_id: int, lesson_title: str) -> Optional[tuple]:
+    """
+    Retrieve the session data for a given session ID and lesson title.
 
+    Parameters:
+        session_id (int): The ID of the session.
+        lesson_title (str): The title of the lesson.
 
-
-
-
-
-
-
-
-def set_student_progress(session_id, lesson_title):
-    """Updates the student_lesson_progress table for the given student and lesson based on session results."""
+    Returns:
+        Optional[tuple]: A tuple of (student_id, lesson_id, questions_correct, questions_asked)
+                         if data is found, otherwise None.
+    """
     try:
-        # Connect to the database
         connection, cursor = get_database_cursor()
-
-        # Fetch student_id, lesson_id, questions_correct, and questions_asked from the session and session_lessons tables
         cursor.execute('''
             SELECT s.student_id, sl.lesson_id, sl.questions_correct, sl.questions_asked
             FROM session_lessons sl
@@ -3976,63 +3974,62 @@ def set_student_progress(session_id, lesson_title):
             WHERE sl.session_id = ? AND l.title = ?
         ''', (session_id, lesson_title))
         result = cursor.fetchone()
+        cursor.close()
+        connection.close()
 
-        if not result:
-            log_message(f"No session data found for session_id: {session_id}")
-            return
+        return result if result else None
 
-        student_id, lesson_id, questions_correct, questions_asked = result
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Error retrieving session data for session_id {session_id}: {e}"))
+        return None
 
-        # Calculate the student's current percentage correct
-        percent_correct = (questions_correct / questions_asked) * 100 if questions_asked > 0 else 0
-        log_message(f"Student {student_id} got {percent_correct}% in lesson {lesson_id} ({lesson_title}).")
 
-        # Fetch or initialize the student's current level for the lesson
-        cursor.execute('''
-            SELECT student_level
-            FROM student_lesson_progress
-            WHERE student_id = ? AND lesson_id = ?
-        ''', (student_id, lesson_id))
-        progress_result = cursor.fetchone()
+def set_student_progress(session_id: int, lesson_title: str):
+    """
+    Updates the student_lesson_progress table for the given student and lesson based on session results.
 
-        if progress_result:
-            current_level = progress_result[0]
-        else:
-            # Insert a new record for this student's progress at level 1 if no record exists
-            cursor.execute('''
-                INSERT INTO student_lesson_progress (student_id, lesson_id, student_level)
-                VALUES (?, ?, 1)
-            ''', (student_id, lesson_id))
-            connection.commit()
-            current_level = 1
+    Parameters:
+        session_id (int): ID of the session.
+        lesson_title (str): Title of the lesson.
+    """
+    # Fetch session data
+    session_data = get_session_data(session_id, lesson_title)
+    if session_data is None:
+        log_message(f"No session data found for session_id: {session_id}")
+        return
 
-        # Check if the student scored 100% and should level up
-        if percent_correct == 100:
-            new_level = current_level + 1
-            log_message(f"Student {student_id} leveled up to {new_level} for lesson {lesson_id}.")
-        else:
-            new_level = current_level
+    student_id, lesson_id, questions_correct, questions_asked = session_data
 
-        # Update the student's progress in the database
+    # Calculate percentage correct
+    percent_correct = (questions_correct / questions_asked) * 100 if questions_asked > 0 else 0
+    log_message(f"Student {student_id} got {percent_correct}% in lesson {lesson_id} ({lesson_title}).")
+
+    # Fetch or initialize student progress using the existing get_student_progress function
+    current_level = get_student_progress(session_id, lesson_title)
+
+    # Determine if the student should level up
+    new_level = current_level + 1 if percent_correct == 100 else current_level
+
+    try:
+        # Update student progress
+        connection, cursor = get_database_cursor()
         cursor.execute('''
             UPDATE student_lesson_progress
             SET student_level = ?
             WHERE student_id = ? AND lesson_id = ?
         ''', (new_level, student_id, lesson_id))
-
-        # Commit the changes
         connection.commit()
 
         # Log the successful update
         cursor.execute('SELECT * FROM student_lesson_progress WHERE student_id = ? AND lesson_id = ?', (student_id, lesson_id))
         log_message(f"Updated student progress: {cursor.fetchall()}")
 
+        cursor.close()
+        connection.close()
+
     except sqlite3.Error as e:
         log_message(f"Error updating student progress: {e}")
         connection.rollback()
-    finally:
-        cursor.close()
-        connection.close()
 
 
 def fetch_lesson_id(lesson_title):
@@ -12001,13 +11998,13 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       # "hiragana_teach",                    #JP
-                       # "hiragana_quiz",                     #JP    
+                       "hiragana_teach",                    #JP
+                       "hiragana_quiz",                     #JP    
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
-                       # "japanese_animals_quiz",             #JP
-                       # "japanese_animals_teach",            #JP
+                       "japanese_animals_quiz",             #JP
+                       "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
                        # "month_of_the_year",                 #JP
                        # "psalm_23",                          #ENG
@@ -12028,7 +12025,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       "rainbow_numbers",                   #Math
+                       # "rainbow_numbers",                   #Math
                        
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
