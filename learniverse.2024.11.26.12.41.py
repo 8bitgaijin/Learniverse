@@ -3302,8 +3302,7 @@ def create_database_and_initialize_tables():
     Create the database and initialize tables if it doesn't exist.
     """
     try:
-        connection = sqlite3.connect(DB_NAME)
-        cursor = connection.cursor()
+        connection, cursor = get_database_cursor()
         _initialize_tables(cursor, connection)
     finally:
         cursor.close()
@@ -3316,8 +3315,7 @@ def verify_and_initialize_database():
     Insert lessons if they are missing.
     """
     try:
-        connection = sqlite3.connect(DB_NAME)
-        cursor = connection.cursor()
+        connection, cursor = get_database_cursor()
 
         # Check if 'students' table exists
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
@@ -3611,184 +3609,265 @@ def add_session_lesson(session_id: int, lesson_id: int, start_time: float, end_t
         return None
 
 
-def start_new_session(student_name):
-    """Start a new session for the current student and return the session ID."""
+def get_student_id_by_name(student_name: str) -> Optional[int]:
+    """
+    Retrieve the student ID based on the student's name.
+
+    Parameters:
+        student_name (str): The name of the student to search for.
+
+    Returns:
+        Optional[int]: The ID of the student if found, otherwise None.
+    """
     try:
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
+        with sqlite3.connect('learniverse.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT id FROM students WHERE name = ?", (student_name,))
+            result = cursor.fetchone()
 
-        # Get the student's ID based on their name
-        cursor.execute("SELECT id FROM students WHERE name = ?", (student_name,))
-        student_id = cursor.fetchone()
+            if result is None:
+                log_message(create_log_message(f"Error: Student '{student_name}' not found."))
+                return None
 
-        if student_id is None:
-            log_entry = create_log_message(f"Error: Student '{student_name}' not found.")
-            log_message(log_entry)
-            return -1  # Return -1 if the student is not found
-        else:
-            student_id = student_id[0]
-
-        # Get local time
-        local_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # Insert a new session for the student with local time
-        cursor.execute('''
-            INSERT INTO sessions (student_id, start_time)
-            VALUES (?, ?)
-        ''', (student_id, local_time))
-        connection.commit()
-
-        # Get the ID of the newly created session
-        session_id = cursor.lastrowid
-
-        # Log the start of the session
-        log_entry = create_log_message(f"New session started for student '{student_name}' with session ID {session_id}.")
-        log_message(log_entry)
-
-        cursor.close()
-        connection.close()
-
-        return session_id  # Return the session ID to track it later
+            return result[0]
 
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error starting session for student '{student_name}': {e}")
-        log_message(log_entry)
-        return -1
+        log_message(create_log_message(f"Error retrieving student ID for '{student_name}': {e}"))
+        return None
 
 
-def end_session(session_id, total_questions, total_correct, overall_avg_time):
-    """Update session with end time, total questions, correct answers, and avg time."""
+def insert_new_session(student_id: int) -> Optional[int]:
+    """
+    Insert a new session for the given student ID and return the session ID.
+
+    Parameters:
+        student_id (int): The ID of the student for whom the session is to be started.
+
+    Returns:
+        Optional[int]: The ID of the newly created session if successful, otherwise None.
+    """
+    local_time = datetime.now().strftime(DATETIME_FORMAT)
+
     try:
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
+        with sqlite3.connect('learniverse.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                INSERT INTO sessions (student_id, start_time)
+                VALUES (?, ?)
+            ''', (student_id, local_time))
+            connection.commit()
 
-        # Get the local end time
-        session_end_time_local = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            session_id = cursor.lastrowid
+            # log_message(create_log_message(f"New session started for student ID {student_id} with session ID {session_id}."))
 
-        # Retrieve the start_time from the database
-        cursor.execute("SELECT start_time FROM sessions WHERE session_id = ?", (session_id,))
-        result = cursor.fetchone()
-
-        if result is None:
-            log_entry = create_log_message(f"Session ID {session_id} not found.")
-            log_message(log_entry)
-            cursor.close()
-            connection.close()
-            return  # Or handle as appropriate
-
-        start_time_str = result[0]
-
-        # Parse the start_time string to a datetime object
-        try:
-            # Assuming the format is 'YYYY-MM-DD HH:MM:SS'
-            start_time_dt = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
-            session_start_time = start_time_dt.timestamp()
-        except ValueError as ve:
-            log_entry = create_log_message(f"Invalid start_time format for session {session_id}: {ve}")
-            log_message(log_entry)
-            cursor.close()
-            connection.close()
-            return  # Or handle as appropriate
-
-        # Calculate total time spent in session
-        total_time = round(time.time() - session_start_time, 1)
-
-        # Update session with overall stats using local end time
-        cursor.execute('''
-            UPDATE sessions
-            SET end_time = ?,
-                total_time = ?,
-                total_questions = ?,
-                total_correct = ?,
-                avg_time_per_question = ?
-            WHERE session_id = ?
-        ''', (session_end_time_local, total_time, total_questions, total_correct, overall_avg_time, session_id))
-
-        connection.commit()
-
-        log_entry = create_log_message(f"Session {session_id} ended. Total questions: {total_questions}, "
-                                       f"Total correct: {total_correct}, Overall avg time: {overall_avg_time}")
-        log_message(log_entry)
-
-        cursor.close()
-        connection.close()
+            return session_id
 
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Database error ending session {session_id}: {e}")
-        log_message(log_entry)
-    except Exception as e:
-        log_entry = create_log_message(f"Unexpected error ending session {session_id}: {e}")
-        log_message(log_entry)
+        log_message(create_log_message(f"Error inserting session for student ID {student_id}: {e}"))
+        return None
 
 
-def student_streak_query():
-    global current_student  # Access global current_student
+def start_new_session(student_name: str) -> Optional[int]:
+    """
+    Start a new session for the current student and return the session ID.
+
+    Parameters:
+        student_name (str): The name of the student for whom the session is to be started.
+
+    Returns:
+        Optional[int]: The ID of the newly created session if successful, or None if an error occurs.
+
+    Logs:
+        Logs an attempt to start a session, any errors, and the session ID if successful.
+
+    Example:
+        start_new_session("Alice")
+        -> Returns the session ID, e.g., 3, or None if an error occurs.
+    """
+    # log_message(create_log_message(f"Attempting to start a new session for student '{student_name}'..."))
+
+    student_id = get_student_id_by_name(student_name)
+    if student_id is None:
+        return None
+
+    return insert_new_session(student_id)
+
+
+def get_database_cursor() -> sqlite3.Cursor:
+    """Return a database cursor using a context manager for easier resource management."""
     connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    return connection, connection.cursor()
 
-    # First, get the student ID based on the current_student's name
-    cursor.execute("SELECT id FROM students WHERE name = ?", (current_student,))
-    result = cursor.fetchone()
 
-    if not result:
+def get_session_start_time(session_id: int) -> Optional[float]:
+    """
+    Retrieve the start time of a session and convert it to a timestamp.
+
+    Parameters:
+        session_id (int): The ID of the session.
+
+    Returns:
+        Optional[float]: The start time in Unix timestamp if successful, otherwise None.
+    """
+    try:
+        with sqlite3.connect('learniverse.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT start_time FROM sessions WHERE session_id = ?", (session_id,))
+            result = cursor.fetchone()
+
+            if result is None:
+                log_message(create_log_message(f"Session ID {session_id} not found."))
+                return None
+
+            start_time_str = result[0]
+            # Assuming the format is 'YYYY-MM-DD HH:MM:SS'
+            start_time_dt = datetime.strptime(start_time_str, DATETIME_FORMAT)
+            return start_time_dt.timestamp()
+
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Error retrieving start time for session {session_id}: {e}"))
+        return None
+    except ValueError as ve:
+        log_message(create_log_message(f"Invalid start_time format for session {session_id}: {ve}"))
+        return None
+
+
+def calculate_total_time(start_time: float) -> float:
+    """
+    Calculate the total time spent in the session.
+
+    Parameters:
+        start_time (float): The start time in Unix timestamp.
+
+    Returns:
+        float: The total time spent in the session in seconds.
+    """
+    return round(time.time() - start_time, 1)
+
+
+def end_session(session_id: int, total_questions: int, total_correct: int, overall_avg_time: float) -> None:
+    """
+    Update session with end time, total questions, correct answers, and avg time.
+
+    Parameters:
+        session_id (int): The ID of the session to be ended.
+        total_questions (int): Total number of questions asked in the session.
+        total_correct (int): Total number of questions answered correctly.
+        overall_avg_time (float): The average time per question during the session.
+    """
+    log_message(create_log_message(f"Attempting to end session {session_id}..."))
+
+    # Step 1: Get the start time for the session
+    session_start_time = get_session_start_time(session_id)
+    if session_start_time is None:
+        return
+
+    # Step 2: Calculate total time spent in the session
+    total_time = calculate_total_time(session_start_time)
+
+    # Step 3: Update the session in the database
+    session_end_time_local = datetime.now().strftime(DATETIME_FORMAT)
+
+    try:
+        with sqlite3.connect('learniverse.db') as connection:
+            cursor = connection.cursor()
+            cursor.execute('''
+                UPDATE sessions
+                SET end_time = ?,
+                    total_time = ?,
+                    total_questions = ?,
+                    total_correct = ?,
+                    avg_time_per_question = ?
+                WHERE session_id = ?
+            ''', (session_end_time_local, total_time, total_questions, total_correct, overall_avg_time, session_id))
+
+            connection.commit()
+
+            # Log the session end information
+            log_message(create_log_message(f"Session {session_id} ended. Total questions: {total_questions}, "
+                                           f"Total correct: {total_correct}, Overall avg time: {overall_avg_time}"))
+
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Database error ending session {session_id}: {e}"))
+    except Exception as e:
+        log_message(create_log_message(f"Unexpected error ending session {session_id}: {e}"))
+
+
+def get_session_count(student_id: int, date_to_check) -> int:
+    """
+    Retrieve the count of sessions for a student on a specific date.
+
+    Parameters:
+        student_id (int): The ID of the student.
+        date_to_check (datetime.date): The date to check for sessions.
+
+    Returns:
+        int: The count of sessions for the given student on the given date.
+    """
+    try:
+        connection, cursor = get_database_cursor()
+        cursor.execute('''
+            SELECT COUNT(*) FROM sessions 
+            WHERE student_id = ? 
+            AND date(start_time) = ?
+        ''', (student_id, date_to_check))
+        result = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        
+        if result:
+            return result[0]
+        return 0
+    except sqlite3.Error as e:
+        log_message(create_log_message(f"Error retrieving session count for student ID {student_id} on {date_to_check}: {e}"))
+        return 0
+
+
+def student_streak_query() -> int:
+    """
+    Query the current streak of consecutive days for a student based on session data.
+
+    Parameters:
+        student_name (str): The name of the student.
+
+    Returns:
+        int: The number of consecutive days the student has sessions.
+    """
+    global current_student  # Access global current_student
+    
+    student_id = get_student_id_by_name(current_student)
+    if student_id is None:
         return 0  # No student found, no streak
 
-    student_id = result[0]
-    today = datetime.today().date()  # Get today's date
-
-    streak = 0  # Initialize streak
-    days_to_check = 1  # Start by checking yesterday
+    today = datetime.today().date()
+    streak = 0
+    days_to_check = 1
 
     # Step 1: Check if there is data for yesterday
     yesterday = today - timedelta(days=1)
-    cursor.execute('''
-        SELECT COUNT(*) FROM sessions 
-        WHERE student_id = ? 
-        AND date(start_time) = ?
-    ''', (student_id, yesterday))
-
-    result = cursor.fetchone()
-
-    if result[0] == 0:
+    if get_session_count(student_id, yesterday) == 0:
         return 0  # No session for yesterday, no streak
 
     # Step 2: There is data for yesterday, so streak starts at 1
     streak = 1
 
     # Step 3: Check further consecutive days before yesterday
-    keep_checking = True
-    while keep_checking:
+    while True:
         days_to_check += 1
         streak_day = today - timedelta(days=days_to_check)
-
-        cursor.execute('''
-            SELECT COUNT(*) FROM sessions 
-            WHERE student_id = ? 
-            AND date(start_time) = ?
-        ''', (student_id, streak_day))
-
-        result = cursor.fetchone()
-
-        if result[0] > 0:
-            # If there's data for this streak_day, increment the streak
+        if get_session_count(student_id, streak_day) > 0:
             streak += 1
         else:
-            # No session found for this streak_day, stop the check
-            keep_checking = False
-
-    cursor.close()
-    connection.close()
+            break
 
     return streak
-
 
 def get_student_progress(session_id, lesson_title):
     """Retrieves the student's current level for a specific lesson based on the session_id and lesson_title.
     If no entry exists for the lesson, it initializes progress with level 1 and returns 1."""
     try:
         # Connect to the database
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
+        connection, cursor = get_database_cursor()
 
         # Fetch student_id from the sessions table
         cursor.execute('''
@@ -3851,8 +3930,7 @@ def set_student_progress(session_id, lesson_title):
     """Updates the student_lesson_progress table for the given student and lesson based on session results."""
     try:
         # Connect to the database
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
+        connection, cursor = get_database_cursor()
 
         # Fetch student_id, lesson_id, questions_correct, and questions_asked from the session and session_lessons tables
         cursor.execute('''
@@ -3924,8 +4002,7 @@ def set_student_progress(session_id, lesson_title):
 
 def fetch_lesson_id(lesson_title):
     """Fetches the lesson_id for a given lesson title."""
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", (lesson_title,))
     result = cursor.fetchone()
     cursor.close()
@@ -3944,8 +4021,7 @@ def perfect_score_lesson_skip(student_name, lesson_name):
     Returns True if they did, False otherwise.
     """
     # Connect to the database
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     
     try:
         # Get student_id for the specified student name
@@ -4027,9 +4103,8 @@ def perfect_score_lesson_skip(student_name, lesson_name):
 def was_last_session_incomplete_today(student_name):
     """Check if the last session started today for the student (by name) was incomplete (no end_time)."""
     try:
-        # Connect to the database to fetch the student ID based on name
-        connection = sqlite3.connect('learniverse.db')
-        cursor = connection.cursor()
+        # Connect to the database 
+        connection, cursor = get_database_cursor()
         
         # Look up the student ID based on the name
         cursor.execute("SELECT id FROM students WHERE name = ?", (student_name,))
@@ -4788,7 +4863,7 @@ def draw_and_wait_continue_button():
     return
 
 
-def draw_skip_button():
+def draw_skip_button(hovered_over=False):
     global current_font_name_or_path  # Ensure we're using the global font variable
 
     # Set font size for the skip button, similar to continue button
@@ -4803,9 +4878,14 @@ def draw_skip_button():
     # Position "Skip..." text on the lower left (at 10% width across the screen)
     x_position = WIDTH * 0.1
     y_position = HEIGHT * 0.90
+    
+    if (hovered_over == True):
+        skip_button_color = shadow_color
+    else:
+        skip_button_color = text_color
 
     # Draw the "Skip..." text with a shadow and return the rectangle for click detection
-    skip_rect = draw_text("Skip...", skip_font, text_color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
+    skip_rect = draw_text("Skip...", skip_font, skip_button_color, x_position, y_position, screen, enable_shadow=True, return_rect=True)
     return skip_rect
 
 
@@ -6536,7 +6616,7 @@ def bonus_game_tuna_tower():
     running = True
     try:
         while running:
-            current_time = time.time()
+            # current_time = time.time()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -6926,9 +7006,9 @@ def rainbow_numbers(session_id):
     # Initialize the clock for controlling frame rate
     clock = pygame.time.Clock()
 
-    # Connect to the database and retrieve lesson_id for "Rainbow Numbers"
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    # Connect to the database 
+    connection, cursor = get_database_cursor()
+    # Retrieve lesson_id for "Rainbow Numbers"
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Rainbow Numbers',))
     result = cursor.fetchone()
     if result:
@@ -7006,18 +7086,11 @@ def rainbow_numbers(session_id):
 
         # Determine hover color for "Skip..." button
         if skip_rect:
-            skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
-
-            # Redraw the "Skip..." button with hover effect
-            draw_text(
-                "Skip...",
-                pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
-                skip_color,
-                x=WIDTH * 0.3,
-                y=HEIGHT * 0.9,
-                enable_shadow=True,
-                shadow_color=shadow_color
-            )
+            # skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
+            if skip_rect.collidepoint(mouse_pos):
+                draw_skip_button(hovered_over=True)
+            else:
+                draw_skip_button(hovered_over=False)
 
         # Generate particles if hovering over "Continue..." or "Skip..."
         if continue_rect.collidepoint(mouse_pos) or (skip_rect and skip_rect.collidepoint(mouse_pos)):
@@ -7063,8 +7136,7 @@ def rainbow_numbers(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
 
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -7395,8 +7467,7 @@ def single_digit_addition(session_id):
     clock = pygame.time.Clock()
 
     # Retrieve the lesson_id for Single Digit Addition
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Addition',))
     result = cursor.fetchone()
 
@@ -7488,18 +7559,11 @@ def single_digit_addition(session_id):
 
             # Determine hover color for "Skip..." button
             if skip_rect:
-                skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
-
-                # Redraw the "Skip..." button with hover effect
-                draw_text(
-                    "Skip...",
-                    pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
-                    skip_color,
-                    x=WIDTH * 0.3,
-                    y=HEIGHT * 0.9,
-                    enable_shadow=True,
-                    shadow_color=shadow_color
-                )
+                # skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
+                if skip_rect.collidepoint(mouse_pos):
+                    draw_skip_button(hovered_over=True)
+                else:
+                    draw_skip_button(hovered_over=False)
 
             # Generate particles if hovering over "Continue..." or "Skip..." buttons
             if continue_rect.collidepoint(mouse_pos):
@@ -7559,8 +7623,7 @@ def single_digit_addition(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
 
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -7768,8 +7831,7 @@ def double_digit_addition(session_id):
     clock = pygame.time.Clock()
 
     # Retrieve the lesson_id for Double Digit Addition
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Double Digit Addition',))
     result = cursor.fetchone()
 
@@ -7849,18 +7911,11 @@ def double_digit_addition(session_id):
 
         # Determine hover color for "Skip..." button
         if skip_rect:
-            skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
-
-            # Redraw the "Skip..." button with hover effect
-            draw_text(
-                "Skip...",
-                pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
-                skip_color,
-                x=WIDTH * 0.3,
-                y=HEIGHT * 0.9,
-                enable_shadow=True,
-                shadow_color=shadow_color
-            )
+            # skip_color = shadow_color if skip_rect.collidepoint(mouse_pos) else text_color
+            if skip_rect.collidepoint(mouse_pos):
+                draw_skip_button(hovered_over=True)
+            else:
+                draw_skip_button(hovered_over=False)
 
         # Generate particles if hovering over "Continue..." or "Skip..."
         if continue_rect.collidepoint(mouse_pos) or (skip_rect and skip_rect.collidepoint(mouse_pos)):
@@ -7905,8 +7960,7 @@ def double_digit_addition(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
 
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -8094,8 +8148,7 @@ def triple_digit_addition(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Triple Digit Addition
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Triple Digit Addition',))
     result = cursor.fetchone()
     
@@ -8234,8 +8287,7 @@ def quad_digit_addition(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Quad Digit Addition
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Quad Digit Addition',))
     result = cursor.fetchone()
     
@@ -8374,8 +8426,7 @@ def single_digit_subtraction(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Single Digit Subtraction
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Subtraction',))
     result = cursor.fetchone()
     
@@ -8444,8 +8495,7 @@ def single_digit_subtraction(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -8581,8 +8631,7 @@ def double_digit_subtraction(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Double Digit Subtraction
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Double Digit Subtraction',))
     result = cursor.fetchone()
     
@@ -8651,8 +8700,7 @@ def double_digit_subtraction(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -8788,8 +8836,7 @@ def triple_digit_subtraction(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Triple Digit Subtraction
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Triple Digit Subtraction',))
     result = cursor.fetchone()
     
@@ -8929,8 +8976,7 @@ def quad_digit_subtraction(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Quad Digit Subtraction
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Quad Digit Subtraction',))
     result = cursor.fetchone()
     
@@ -9070,8 +9116,7 @@ def subtraction_borrowing(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Subtraction with Borrowing
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Subtraction Borrowing',))
     result = cursor.fetchone()
     
@@ -9140,8 +9185,7 @@ def subtraction_borrowing(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -9294,8 +9338,7 @@ def single_digit_multiplication(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Single Digit Multiplication
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Multiplication',))
     result = cursor.fetchone()
     
@@ -9364,8 +9407,7 @@ def single_digit_multiplication(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -9501,8 +9543,7 @@ def single_by_double_multiplication(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Single by Double Digit Multiplication
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single by Double Digit Multiplication',))
     result = cursor.fetchone()
     
@@ -9571,8 +9612,7 @@ def single_by_double_multiplication(session_id):
     # If skip was clicked, record session with NULL values for scores and return early
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -9712,8 +9752,7 @@ def double_digit_multiplication(session_id):
     global current_student  # Access the global current student
 
     # Retrieve the lesson_id for Double Digit Multiplication
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Double Digit Multiplication',))
     result = cursor.fetchone()
     
@@ -10013,8 +10052,7 @@ def single_denominator_addition_intro(session_id):
     # Handle the skip functionality
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
             
             # Format the current time to match the desired format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -10068,8 +10106,7 @@ def single_denominator_addition(session_id):
         return 0, 0, None
 
     # Retrieve the lesson_id for Fraction Addition
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Denominator Fraction Addition',))
     result = cursor.fetchone()
     
@@ -10395,8 +10432,7 @@ def lowest_common_denominator_quiz_intro(session_id):
     # Handle skip functionality
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
 
             # Get the current time and format without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -10449,8 +10485,7 @@ def lowest_common_denominator_quiz(session_id):
         return 0, 0, None
 
     # Retrieve the lesson_id for LCD Problems
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Lowest Common Denominator',))
     result = cursor.fetchone()
     
@@ -10789,8 +10824,7 @@ def basic_shapes_quiz_intro(session_id):
     # Handle skip functionality
     if skip_clicked:
         try:
-            connection = sqlite3.connect('learniverse.db')
-            cursor = connection.cursor()
+            connection, cursor = get_database_cursor()
 
             # Get the current time without microseconds
             current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -10905,8 +10939,7 @@ def basic_shapes_quiz(session_id):
         return 0, 0, None
 
     # Retrieve the lesson_id for Basic Geometric Shapes
-    connection = sqlite3.connect('learniverse.db')
-    cursor = connection.cursor()
+    connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Basic Geometric Shapes',))
     result = cursor.fetchone()
     
@@ -11960,7 +11993,7 @@ def session_manager():
                        # "john_3_16",                         #ENG
                        # "skip_counting_japanese",
                        # "psalm_23",                          #ENG
-                       # "rainbow_numbers",                   #Math
+                       "rainbow_numbers",                   #Math
                        
                        # "psalm_23",                          #ENG
                        # "japanese_body_parts_quiz",          #JP
