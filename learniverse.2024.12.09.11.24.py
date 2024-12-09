@@ -6875,6 +6875,40 @@ def bonus_game_generic():
 ### Math Problem Functions ###
 ##############################
 
+def warm_up_math(session_id):
+    """
+    Selects and runs a random math warm-up lesson.
+
+    This function randomly chooses one of the available math warm-up lessons
+    and executes it. Each lesson provides practice with a different math skill.
+    It gathers the results of the lesson, including questions asked, correct answers,
+    and average response time, for cumulative tracking.
+
+    Args:
+        session_id (int): The session identifier for tracking progress.
+
+    Returns:
+        tuple: A summary of the session with total questions, total correct answers,
+               and average response time across all lessons.
+    """
+    math_lessons = [
+        rainbow_numbers,
+        single_digit_addition,
+        single_digit_subtraction,
+        single_digit_multiplication
+        # single_by_double_multiplication
+    ]
+    
+    selected_lesson = random.choice(math_lessons)
+    lesson_result = selected_lesson(session_id)
+
+    if lesson_result is not None:
+        questions_asked, correct_answers, avg_time = lesson_result
+        return questions_asked, correct_answers, avg_time
+    else:
+        log_message(f"Error: {selected_lesson.__name__} did not return a valid result.")
+        return 0, 0, 0  # Return defaults if an error occurs
+
 def display_rainbow_math_problem(num1, 
                                  num2, 
                                  user_input, 
@@ -11986,6 +12020,7 @@ def session_manager():
                        
                        
                        
+                       
                                           
                        ### DEBUG TESTING ###
                        # "single_digit_addition",             #Math
@@ -12041,13 +12076,10 @@ def session_manager():
                        "skip_counting",                     #Math
                        "bible_verse_selector",              #Eng
                        "month_of_the_year",                 #JP
-                       "rainbow_numbers",                   #Math
+                       "warm_up_math",                      #Math
                        "hiragana_teach",                    #JP
-                       "single_digit_addition",             #Math
                        "skip_counting_japanese",            #JP
-                       "single_digit_subtraction",          #Math
                        "hiragana_quiz",                     #JP                      
-                       "single_digit_multiplication",       #Math
                        "japanese_colors_teach",             #JP
                        "double_digit_subtraction",          #Math
                        "japanese_colors_quiz",              #JP
@@ -12145,6 +12177,8 @@ def session_manager():
         #     numbers_6_24_26()
             
         ### Maths ###
+        elif lesson == "warm_up_math":
+            warm_up_math(session_id)
         elif lesson == "skip_counting":
             skip_counting()
         elif lesson == "skip_counting_fibonacci":
