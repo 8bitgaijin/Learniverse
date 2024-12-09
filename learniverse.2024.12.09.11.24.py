@@ -6073,7 +6073,7 @@ def bonus_game_cat_pong():
     BOMB_SPEED_X = 8 * scale_factor  # Initial horizontal speed of the bomb
     BOMB_SPEED_Y = 7 * scale_factor  # Initial vertical speed of the bomb
     # PLAYER_SPEED = 6 * scale_factor  # Slightly slower than the bomb’s initial speed
-    AI_SPEED = 7 * scale_factor  # AI speed matches player speed
+    AI_SPEED = 6 * scale_factor  # AI speed matches player speed
     PLAYER_SPEED = AI_SPEED * 1.2
     
     running = True
@@ -11798,9 +11798,9 @@ def main_menu():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     # bonus_game_tuna_tower()
-                    # bonus_game_cat_pong()
+                    bonus_game_cat_pong()
                     # bonus_game_falling_fish()
-                    bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+                    # bonus_game_fat_tuna() # Skip directly to the bonus game for debug
 
         # Control the frame rate
         clock.tick(120)
@@ -11985,6 +11985,7 @@ def session_manager():
                        
                        
                        
+                       
                                           
                        ### DEBUG TESTING ###
                        # "single_digit_addition",             #Math
@@ -12038,22 +12039,17 @@ def session_manager():
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "skip_counting",                     #Math
-                       "john_3_16",                         #ENG
+                       "bible_verse_selector",              #Eng
                        "month_of_the_year",                 #JP
                        "rainbow_numbers",                   #Math
-                       # "john_13_34",                        #ENG
                        "hiragana_teach",                    #JP
                        "single_digit_addition",             #Math
-                       "hebrews_11_1",                      #ENG
                        "skip_counting_japanese",            #JP
                        "single_digit_subtraction",          #Math
-                       "philippians_4_6",                   #ENG
                        "hiragana_quiz",                     #JP                      
                        "single_digit_multiplication",       #Math
-                       "ephesians_4_32",                    #ENG
                        "japanese_colors_teach",             #JP
                        "double_digit_subtraction",          #Math
-                       "numbers_6_24_26",                   #ENG
                        "japanese_colors_quiz",              #JP
                        "subtraction_borrowing",             #Math
                        
@@ -12131,20 +12127,22 @@ def session_manager():
             month_of_the_year()
         
         ### Jr. Church ###
-        elif lesson == "john_3_16":
-            john_3_16()
-        elif lesson == "john_13_34":
-            john_13_34()
-        elif lesson == "psalm_23":
-            psalm_23()
-        elif lesson == "hebrews_11_1":
-            hebrews_11_1()
-        elif lesson == "philippians_4_6":
-             philippians_4_6()
-        elif lesson == "ephesians_4_32":
-            ephesians_4_32()
-        elif lesson == "numbers_6_24_26":
-            numbers_6_24_26()
+        elif lesson == "bible_verse_selector":
+            bible_verse_selector()
+        # elif lesson == "john_3_16":
+        #     john_3_16()
+        # elif lesson == "john_13_34":
+        #     john_13_34()
+        # elif lesson == "psalm_23":
+        #     psalm_23()
+        # elif lesson == "hebrews_11_1":
+        #     hebrews_11_1()
+        # elif lesson == "philippians_4_6":
+        #      philippians_4_6()
+        # elif lesson == "ephesians_4_32":
+        #     ephesians_4_32()
+        # elif lesson == "numbers_6_24_26":
+        #     numbers_6_24_26()
             
         ### Maths ###
         elif lesson == "skip_counting":
@@ -12720,6 +12718,31 @@ def streak_check():
 ### Jr. Church Functions ###
 ############################
 
+def bible_verse_selector():
+    """
+    Selects and launches a random Bible verse module.
+
+    This function randomly chooses one of the available Bible verse modules
+    and initiates it. Each module focuses on a specific verse, offering a
+    unique lesson and reflection opportunity. Additional modules may be added
+    to the selection list in the future.
+
+    Returns:
+        None
+    """
+    bible_verse_modules = [
+        john_3_16,
+        john_13_34,
+        psalm_23,
+        hebrews_11_1,
+        philippians_4_6,
+        ephesians_4_32,
+        numbers_6_24_26
+    ]
+    selected_module = random.choice(bible_verse_modules)
+    selected_module()
+    
+    
 def display_bible_verse(greeting_message, 
                         verse_title, 
                         verse_text, 
