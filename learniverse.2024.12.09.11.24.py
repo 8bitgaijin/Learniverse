@@ -11998,13 +11998,13 @@ def session_manager():
                        # "lowest_common_denominator_quiz",      #Math
                        # "basic_shapes_quiz",
                        
-                       "hiragana_teach",                    #JP
-                       "hiragana_quiz",                     #JP    
+                       # "hiragana_teach",                    #JP
+                       # "hiragana_quiz",                     #JP    
                        # "katakana_teach",                    #JP
                        # "katakana_quiz",                     #JP    
                        # "japanese_song_zou_san_teach",       #JP
-                       "japanese_animals_quiz",             #JP
-                       "japanese_animals_teach",            #JP
+                       # "japanese_animals_quiz",             #JP
+                       # "japanese_animals_teach",            #JP
                        # "skip_counting_japanese",            #JP
                        # "month_of_the_year",                 #JP
                        # "psalm_23",                          #ENG
@@ -12041,7 +12041,7 @@ def session_manager():
                        "john_3_16",                         #ENG
                        "month_of_the_year",                 #JP
                        "rainbow_numbers",                   #Math
-                       "john_13_34",                        #ENG
+                       # "john_13_34",                        #ENG
                        "hiragana_teach",                    #JP
                        "single_digit_addition",             #Math
                        "hebrews_11_1",                      #ENG
@@ -12057,50 +12057,50 @@ def session_manager():
                        "japanese_colors_quiz",              #JP
                        "subtraction_borrowing",             #Math
                        
-                       "japanese_body_parts_teach",         #JP
-                       "double_digit_addition",             #Math
+                       # "japanese_body_parts_teach",         #JP
+                       # "double_digit_addition",             #Math
                        
-                       "japanese_body_parts_quiz",          #JP
-                       "single_denominator_addition",       #Math
+                       # "japanese_body_parts_quiz",          #JP
+                       # "single_denominator_addition",       #Math
                        
-                       "japanese_animals_teach",            #JP
-                       "lowest_common_denominator_quiz",    #Math
+                       # "japanese_animals_teach",            #JP
+                       # "lowest_common_denominator_quiz",    #Math
                        
-                       "japanese_animals_quiz",             #JP
-                       "basic_shapes_quiz",                 #Math
+                       # "japanese_animals_quiz",             #JP
+                       # "basic_shapes_quiz",                 #Math
                        
-                       "japanese_adjectives_teach",         #JP
-                       "single_by_double_multiplication",   #Math
+                       # "japanese_adjectives_teach",         #JP
+                       # "single_by_double_multiplication",   #Math
                        
-                       "japanese_adjectives_quiz",          #JP
-                       "skip_counting_fibonacci",           #Math
+                       # "japanese_adjectives_quiz",          #JP
+                       # "skip_counting_fibonacci",           #Math
                        
-                       "japanese_family_teach",             #JP
-                       "skip_counting_primes",              #Math
+                       # "japanese_family_teach",             #JP
+                       # "skip_counting_primes",              #Math
                        
-                       "japanese_family_quiz",              #JP
+                       # "japanese_family_quiz",              #JP
                        
-                       "skip_counting_kanji",               #JP
-                       "japanese_fruits_teach",             #JP
-                       "japanese_fruits_quiz",              #JP
-                       "japanese_greetings_teach",          #JP
-                       "japanese_greetings_quiz",           #JP
-                       "one_piece_teach",                   #JP
-                       "one_piece_quiz",                    #JP
-                       "japanese_self_introduction_teach",  #JP
-                       "japanese_self_introduction_quiz",   #JP
-                       "japanese_nouns_teach",              #JP
-                       "japanese_nouns_quiz",               #JP
-                       "japanese_time_teach",               #JP
-                       "japanese_time_quiz",                #JP
-                       "japanese_vegtables_teach",          #JP
-                       "japanese_vegtables_quiz",           #JP
-                       "japanese_verbs_teach",              #JP
-                       # "japanese_verbs_quiz",               #JP
-                       "japanese_song_zou_san_teach",       #JP
-                       # "japanese_song_zou_san_quiz",        #JP
-                       "japanese_song_sanpo_teach",         #JP
-                       "japanese_song_sanpo_quiz",          #JP
+                       # "skip_counting_kanji",               #JP
+                       # "japanese_fruits_teach",             #JP
+                       # "japanese_fruits_quiz",              #JP
+                       # "japanese_greetings_teach",          #JP
+                       # "japanese_greetings_quiz",           #JP
+                       # "one_piece_teach",                   #JP
+                       # "one_piece_quiz",                    #JP
+                       # "japanese_self_introduction_teach",  #JP
+                       # "japanese_self_introduction_quiz",   #JP
+                       # "japanese_nouns_teach",              #JP
+                       # "japanese_nouns_quiz",               #JP
+                       # "japanese_time_teach",               #JP
+                       # "japanese_time_quiz",                #JP
+                       # "japanese_vegtables_teach",          #JP
+                       # "japanese_vegtables_quiz",           #JP
+                       # "japanese_verbs_teach",              #JP
+                       # # "japanese_verbs_quiz",               #JP
+                       # "japanese_song_zou_san_teach",       #JP
+                       # # "japanese_song_zou_san_quiz",        #JP
+                       # "japanese_song_sanpo_teach",         #JP
+                       # "japanese_song_sanpo_quiz",          #JP
                        
                        "psalm_23",                          #ENG
                        
