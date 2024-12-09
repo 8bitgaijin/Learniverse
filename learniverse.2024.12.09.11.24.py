@@ -2972,9 +2972,31 @@ def create_log_message(message):
     return f"[{timestamp}] {message}"
 
 
+# def log_message(log_entry):
+#     """
+#     Log a message to both the console and the error_log.txt file.
+
+#     This function handles logging by printing the log entry to the console and 
+#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
+#     gracefully by logging the failure to the console.
+
+#     Parameters:
+#         log_entry (str): The log message to be printed and saved.
+#     """
+#     # Print the log entry to the console
+#     print(log_entry)
+
+#     try:
+#         # Attempt to open the log file and write the log entry
+#         log_file_path = "error_log.txt"
+#         with open(log_file_path, "a") as error_file:
+#             error_file.write(log_entry + "\n")
+#     except (IOError, OSError) as e:
+#         # If an error occurs, print an error message to the console
+#         print(f"Failed to log message to file '{log_file_path}': {e}")
 def log_message(log_entry):
     """
-    Log a message to both the console and the error_log.txt file.
+    Log a message to both the console and the error_log.txt file with UTF-8 encoding.
 
     This function handles logging by printing the log entry to the console and 
     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
@@ -2987,13 +3009,15 @@ def log_message(log_entry):
     print(log_entry)
 
     try:
-        # Attempt to open the log file and write the log entry
+        # Attempt to open the log file with UTF-8 encoding and write the log entry
         log_file_path = "error_log.txt"
-        with open(log_file_path, "a") as error_file:
+        with open(log_file_path, "a", encoding="utf-8") as error_file:
             error_file.write(log_entry + "\n")
     except (IOError, OSError) as e:
         # If an error occurs, print an error message to the console
         print(f"Failed to log message to file '{log_file_path}': {e}")
+        
+
 
 
 def list_images_in_folder(folder_path):
@@ -6073,7 +6097,7 @@ def bonus_game_cat_pong():
     BOMB_SPEED_X = 8 * scale_factor  # Initial horizontal speed of the bomb
     BOMB_SPEED_Y = 7 * scale_factor  # Initial vertical speed of the bomb
     # PLAYER_SPEED = 6 * scale_factor  # Slightly slower than the bomb’s initial speed
-    AI_SPEED = 6 * scale_factor  # AI speed matches player speed
+    AI_SPEED = 6.1 * scale_factor  # AI speed matches player speed
     PLAYER_SPEED = AI_SPEED * 1.2
     
     running = True
@@ -12016,6 +12040,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
+                       "wrap_up_session",
                        
                        
                        
@@ -12129,18 +12154,6 @@ def session_manager():
                        # # "japanese_song_zou_san_quiz",        #JP
                        # "japanese_song_sanpo_teach",         #JP
                        # "japanese_song_sanpo_quiz",          #JP
-                       
-                       "psalm_23",                          #ENG
-                       
-                       
-                       
-                       
-                       # These were kinda redundant and are not being used atm
-                       # "triple_digit_addition",
-                       # "triple_digit_subtraction",
-                       # "double_digit_multiplication",
-                       # "quad_digit_addition",
-                       # "quad_digit_subtraction",
                        ] 
     total_questions = 0
     total_correct = 0
@@ -12157,6 +12170,10 @@ def session_manager():
             day_of_the_week()
         elif lesson == "month_of_the_year":
             month_of_the_year()
+            
+        ### Outro ###
+        elif lesson == "wrap_up_session":
+            wrap_up_session()
         
         ### Jr. Church ###
         elif lesson == "bible_verse_selector":
@@ -13245,7 +13262,91 @@ def greet_student():
                     waiting = False  # Exit the loop
 
         clock.tick(60)
-        
+
+
+def wrap_up_session():
+    """
+    Displays a simple wrap-up message at the end of a session.
+
+    This function shows an English and Japanese wrap-up message on a static
+    background. The user clicks "Finish" to proceed, with no special effects
+    or dynamic elements for simplicity.
+    """
+    global current_student
+    global text_color, shadow_color, screen_color
+
+    stop_mp3()
+
+    # Prepare wrap-up messages
+    wrap_up_message_eng = f"Great job today, {current_student}! See you next time."
+    wrap_up_message_jp = "お疲れ様でした。"  # Otsukaresama deshita
+
+    # Set a static sky blue background
+    SKY_BLUE = (135, 206, 235)
+    screen.fill(SKY_BLUE)
+    screen.blit(generate_perlin_cloud(0), (0, 0))  # Static clouds background
+
+    # Draw static text for the wrap-up message
+    draw_text(
+        wrap_up_message_eng,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.30,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    draw_text(
+        wrap_up_message_jp,
+        j_font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.50,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw "Finish" button text
+    finish_text = "Finish"
+    finish_font_size = int(get_dynamic_font_size() * 0.8)
+    finish_font = pygame.font.SysFont(current_font_name_or_path, finish_font_size)
+    finish_x_position = WIDTH * 0.55
+    finish_y_position = HEIGHT * 0.80
+    text_width, text_height = finish_font.size(finish_text)
+    finish_rect = pygame.Rect(finish_x_position, finish_y_position, text_width, text_height)
+
+    draw_text(
+        finish_text,
+        finish_font,
+        text_color,
+        finish_x_position,
+        finish_y_position,
+        screen,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    pygame.display.flip()
+    speak_japanese(wrap_up_message_jp)  # Play Japanese wrap-up message
+
+    # Event loop to wait for user to click "Finish"
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if finish_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
+
+        clock.tick(60)
+
         
 def day_of_the_week():
     global text_color, shadow_color, screen_color  # Access the theme-related globals
