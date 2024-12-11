@@ -2972,28 +2972,6 @@ def create_log_message(message):
     return f"[{timestamp}] {message}"
 
 
-# def log_message(log_entry):
-#     """
-#     Log a message to both the console and the error_log.txt file.
-
-#     This function handles logging by printing the log entry to the console and 
-#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
-#     gracefully by logging the failure to the console.
-
-#     Parameters:
-#         log_entry (str): The log message to be printed and saved.
-#     """
-#     # Print the log entry to the console
-#     print(log_entry)
-
-#     try:
-#         # Attempt to open the log file and write the log entry
-#         log_file_path = "error_log.txt"
-#         with open(log_file_path, "a") as error_file:
-#             error_file.write(log_entry + "\n")
-#     except (IOError, OSError) as e:
-#         # If an error occurs, print an error message to the console
-#         print(f"Failed to log message to file '{log_file_path}': {e}")
 def log_message(log_entry):
     """
     Log a message to both the console and the error_log.txt file with UTF-8 encoding.
@@ -3017,8 +2995,6 @@ def log_message(log_entry):
         # If an error occurs, print an error message to the console
         print(f"Failed to log message to file '{log_file_path}': {e}")
         
-
-
 
 def list_images_in_folder(folder_path):
     """
@@ -3251,8 +3227,6 @@ def load_resolution_from_options(available_resolutions, default_resolution):
         default_index = available_resolutions.index(default_resolution)
         return default_resolution, default_index
         
-        
-
 
 ##############################################
 ### Pygame Initialization and Window Setup ###
@@ -3598,6 +3572,7 @@ def add_session_lesson(session_id: int, lesson_id: int, start_time: float, end_t
     Returns:
         Optional[int]: The ID of the new session lesson record, or None if an error occurs.
     """
+    log_message(create_log_message("Adding lesson to session in session_lessons table."))
     try:
         with sqlite3.connect('learniverse.db') as connection:
             cursor = connection.cursor()
@@ -4192,17 +4167,17 @@ def was_last_session_incomplete_today(student_name):
         cursor.close()
         connection.close()
         
-        # Debug logging for fetched result
+        # Logging for fetched result
         if result:
             session_id, start_time, end_time = result
-            log_message(f"Debug: Last session ID for today is {session_id}, start_time: {start_time}, end_time: {end_time}")
+            log_message(f"Last session ID for today is {session_id}, start_time: {start_time}, end_time: {end_time}")
         else:
-            log_message("Debug: No session found for today.")
+            log_message("No session found for today.")
             return False  # No session found for today means no incomplete session
         
         # Determine if the session is incomplete
         is_incomplete = end_time is None
-        log_message(f"Debug: Session ID {session_id} is marked incomplete: {is_incomplete}")
+        log_message(f"Session ID {session_id} is marked incomplete: {is_incomplete}")
         return is_incomplete
 
     except sqlite3.Error as e:
@@ -5214,6 +5189,7 @@ def bonus_game_selector():
     Returns:
         None
     """
+    log_message(create_log_message("Selecting random bonus game."))
     bonus_games = [bonus_game_fat_tuna, 
                    bonus_game_no_fish, 
                    bonus_game_falling_fish,
@@ -6915,12 +6891,14 @@ def warm_up_math(session_id):
         tuple: A summary of the session with total questions, total correct answers,
                and average response time across all lessons.
     """
+    # Debug
+    log_message(create_log_message("Warm up math begins."))
+    
     math_lessons = [
         rainbow_numbers,
         single_digit_addition,
         single_digit_subtraction,
         single_digit_multiplication
-        # single_by_double_multiplication
     ]
     
     selected_lesson = random.choice(math_lessons)
@@ -6932,6 +6910,7 @@ def warm_up_math(session_id):
     else:
         log_message(f"Error: {selected_lesson.__name__} did not return a valid result.")
         return 0, 0, 0  # Return defaults if an error occurs
+
 
 def display_rainbow_math_problem(num1, 
                                  num2, 
@@ -7092,6 +7071,9 @@ def generate_rainbow_number_problem():
 
 def rainbow_numbers(session_id):
     global current_student
+    
+    # Debug
+    log_message(create_log_message("Rainbow numbers begins."))
     
     # Initialize the clock for controlling frame rate
     clock = pygame.time.Clock()
@@ -7916,6 +7898,9 @@ def single_digit_addition(session_id):
 def double_digit_addition(session_id):
     """Presents a double-digit addition quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
+    
+    # Debug
+    log_message(create_log_message("Double digit addition begins."))
 
     # Initialize the clock for frame rate control
     clock = pygame.time.Clock()
@@ -8719,6 +8704,9 @@ def single_digit_subtraction(session_id):
 def double_digit_subtraction(session_id):
     """Presents a double-digit subtraction quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
+    
+    # Debug
+    log_message(create_log_message("Double digit subtraction begins."))
 
     # Retrieve the lesson_id for Double Digit Subtraction
     connection, cursor = get_database_cursor()
@@ -9427,6 +9415,9 @@ def single_digit_multiplication(session_id):
     """Presents a single-digit multiplication quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
 
+    # Debug
+    log_message(create_log_message("Single digit multiplication begins."))
+    
     # Retrieve the lesson_id for Single Digit Multiplication
     connection, cursor = get_database_cursor()
     cursor.execute("SELECT lesson_id FROM lessons WHERE title = ?", ('Single Digit Multiplication',))
@@ -11855,10 +11846,12 @@ def main_menu():
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+                    # Skip directly to the bonus game for debug
                     # bonus_game_tuna_tower()
-                    bonus_game_cat_pong()
+                    # bonus_game_cat_pong()
                     # bonus_game_falling_fish()
-                    # bonus_game_fat_tuna() # Skip directly to the bonus game for debug
+                    # bonus_game_fat_tuna() 
+                    bonus_game_selector()
 
         # Control the frame rate
         clock.tick(120)
@@ -12020,9 +12013,11 @@ def session_manager():
     
     # Step 1, check on an incomplete session BEFORE we start a new one
     is_session_incomplete = was_last_session_incomplete_today(current_student)
-    print("Current student variable")
-    print(current_student)
-    print("Debug: is the last session today complete?")
+    
+    # Debug
+    # print("Current student variable")
+    # print(current_student)
+    print("Debug: is the last session today incomplete? (True is BAD)")
     print(is_session_incomplete)
     
     # Step 2: Start the session and log in database
@@ -12040,7 +12035,9 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "wrap_up_session",
+                       "display_next_event",                #JP
+                       
+                       
                        
                        
                        
@@ -12048,6 +12045,9 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
+                       # "bible_verse_selector",              #Eng
+                       
+                       
                        # "single_digit_addition",             #Math
                        # "double_digit_addition",             #Math
                        # "single_digit_subtraction",          #Math
@@ -12111,25 +12111,25 @@ def session_manager():
                        "subtraction_borrowing",             #Math
                        
                        # "japanese_body_parts_teach",         #JP
-                       # "double_digit_addition",             #Math
+                       "double_digit_addition",             #Math
                        
                        # "japanese_body_parts_quiz",          #JP
-                       # "single_denominator_addition",       #Math
+                       "single_denominator_addition",       #Math
                        
                        # "japanese_animals_teach",            #JP
-                       # "lowest_common_denominator_quiz",    #Math
+                       "lowest_common_denominator_quiz",    #Math
                        
-                       # "japanese_animals_quiz",             #JP
+                       "japanese_animals_quiz",             #JP
                        # "basic_shapes_quiz",                 #Math
                        
                        # "japanese_adjectives_teach",         #JP
-                       # "single_by_double_multiplication",   #Math
+                       "single_by_double_multiplication",   #Math
                        
                        # "japanese_adjectives_quiz",          #JP
-                       # "skip_counting_fibonacci",           #Math
+                       "skip_counting_fibonacci",           #Math
                        
                        # "japanese_family_teach",             #JP
-                       # "skip_counting_primes",              #Math
+                       "skip_counting_primes",              #Math
                        
                        # "japanese_family_quiz",              #JP
                        
@@ -12154,6 +12154,8 @@ def session_manager():
                        # # "japanese_song_zou_san_quiz",        #JP
                        # "japanese_song_sanpo_teach",         #JP
                        # "japanese_song_sanpo_quiz",          #JP
+                       
+                       "wrap_up_session",                   #JP
                        ] 
     total_questions = 0
     total_correct = 0
@@ -12170,6 +12172,8 @@ def session_manager():
             day_of_the_week()
         elif lesson == "month_of_the_year":
             month_of_the_year()
+        elif lesson == "display_next_event":
+            display_next_event()
             
         ### Outro ###
         elif lesson == "wrap_up_session":
@@ -12788,7 +12792,9 @@ def bible_verse_selector():
         hebrews_11_1,
         philippians_4_6,
         ephesians_4_32,
-        numbers_6_24_26
+        numbers_6_24_26,
+        first_thessalonians_5_18,
+        luke_2_11
     ]
     selected_module = random.choice(bible_verse_modules)
     selected_module()
@@ -13121,6 +13127,22 @@ def ephesians_4_32():
     display_bible_verse(greeting_message, verse_title, verse_text)
 
 
+def first_thessalonians_5_18():
+    """Greets the student and introduces the Bible verse 1 Thessalonians 5:18 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "1 Thessalonians 5:18"
+    verse_text = "In everything give thanks; for this is the will of God in Christ Jesus for you."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
+def luke_2_11():
+    """Greets the student and introduces the Bible verse Luke 2:11 (NKJV)."""
+    greeting_message = "It's time to work on a Bible verse!"
+    verse_title = "Luke 2:11"
+    verse_text = "For there is born to you this day in the city of David a Savior, who is Christ the Lord."
+    display_bible_verse(greeting_message, verse_title, verse_text)
+
+
 def numbers_6_24_26():
     """Greets the student and introduces the Bible verse Numbers 6:24-26 (NKJV)."""
     greeting_message = "It's time to work on a Bible verse!"
@@ -13264,31 +13286,221 @@ def greet_student():
         clock.tick(60)
 
 
-def wrap_up_session():
-    """
-    Displays a simple wrap-up message at the end of a session.
+# def days_until_next_event():
+#     """
+#     Calculate the number of days until the next special event.
 
-    This function shows an English and Japanese wrap-up message on a static
-    background. The user clicks "Finish" to proceed, with no special effects
-    or dynamic elements for simplicity.
+#     Returns:
+#         tuple: (event_name, days_remaining)
+#     """
+#     # Dictionary of special events with MM-DD format
+#     special_dates = {
+#         "Christmas": "12-25",
+#         "New Year's Day": "01-01",
+#     }
+
+#     today = datetime.now().date()
+#     next_event = None
+#     min_days = float('inf')  # Start with a very large value
+
+#     for event, date_str in special_dates.items():
+#         # Parse the event date for this year
+#         event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=today.year)
+
+#         # Adjust for next year if the event has already passed this year
+#         if event_date < today:
+#             event_date = event_date.replace(year=today.year + 1)
+
+#         # Calculate days remaining
+#         days_remaining = (event_date - today).days
+#         if days_remaining < min_days:
+#             min_days = days_remaining
+#             next_event = event
+
+#     return next_event, min_days
+def calculate_easter(year):
+    """Calculate the date of Easter Sunday for a given year."""
+    a = year % 19
+    b = year // 100
+    c = year % 100
+    d = b // 4
+    e = b % 4
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i = c // 4
+    k = c % 4
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month = (h + l - 7 * m + 114) // 31
+    day = ((h + l - 7 * m + 114) % 31) + 1
+    return datetime(year, month, day).date()
+
+
+def calculate_nth_weekday(year, month, weekday, n):
     """
-    global current_student
+    Calculate the date of the nth occurrence of a weekday in a given month.
+    
+    Args:
+        year (int): Year.
+        month (int): Month (1-12).
+        weekday (int): Weekday (0=Monday, 6=Sunday).
+        n (int): nth occurrence (e.g., 1 for first, 4 for fourth).
+    
+    Returns:
+        date: The date of the nth weekday.
+    """
+    first_day = datetime(year, month, 1).date()
+    first_weekday = first_day.weekday()
+    days_to_weekday = (weekday - first_weekday) % 7
+    nth_weekday_date = first_day + timedelta(days=days_to_weekday + (n - 1) * 7)
+    return nth_weekday_date
+
+
+# def days_until_next_event():
+#     """
+#     Calculate the number of days until the next special event.
+
+#     Returns:
+#         tuple: (event_name, days_remaining)
+#     """
+#     # Dictionary of fixed-date special events
+#     special_dates = {
+#         "Christmas": "12-25",
+#         "Daddy's birthday": "12-30",
+#         "New Year's Day": "01-01",
+#         "Groundhog Day": "02-02",
+#         "Valentine's Day": "02-14",
+#         "Pi Day": "03-14",
+#         "St. Patrick's Day": "03-17",
+#         "April Fool's Day": "04-01",
+#         "Ethan's birthday": "06-16",
+#         "4th of July": "07-04",
+#         "Mommy's birthday": "07-29",
+#         "Halloween": "10-31",     
+#         "William's birthday": "11-19"
+#     }
+
+#     # Get today's date
+#     today = datetime.now().date()
+#     current_year = today.year
+
+#     # Add dynamically calculated holidays
+#     special_dates_dynamic = {
+#         "Easter": calculate_easter(current_year),
+#         # "Thanksgiving": calculate_nth_weekday(current_year, 11, 3, 4),  # 4th Thursday of November
+#         # "Labor Day": calculate_nth_weekday(current_year, 9, 0, 1),  # 1st Monday of September
+#         # "Memorial Day": calculate_nth_weekday(current_year, 5, 0, -1),  # Last Monday of May
+#         # "Martin Luther King Jr. Day": calculate_nth_weekday(current_year, 1, 0, 3),  # 3rd Monday of January
+#     }
+
+#     # Combine fixed and dynamic dates
+#     all_events = {**special_dates}
+#     all_events.update({name: date.strftime("%m-%d") for name, date in special_dates_dynamic.items()})
+
+#     next_event = None
+#     min_days = float('inf')  # Start with a very large value
+
+#     for event, date_str in all_events.items():
+#         # Parse the event date for this year
+#         event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=current_year)
+
+#         # Adjust for next year if the event has already passed this year
+#         if event_date < today:
+#             event_date = event_date.replace(year=current_year + 1)
+
+#         # Calculate days remaining
+#         days_remaining = (event_date - today).days
+#         if days_remaining < min_days:
+#             min_days = days_remaining
+#             next_event = event
+
+#     return next_event, min_days
+def days_until_next_event():
+    """
+    Calculate the number of days until the next special event.
+
+    Returns:
+        tuple: (event_name, days_remaining)
+    """
+    # Dictionary of fixed-date special events
+    special_dates = {
+        # "Christmas": "12-25",
+        # "Daddy's birthday": "12-30",
+        # "New Year's Day": "01-01",
+        # "Groundhog Day": "02-02",
+        # "Valentine's Day": "02-14",
+        # "Pi Day": "03-14",
+        # "St. Patrick's Day": "03-17",
+        # "April Fool's Day": "04-01",
+        "Ethan's birthday": "06-16",
+        "4th of July": "07-04",
+        "Mommy's birthday": "07-29",
+        "Halloween": "10-31",
+        "William's birthday": "11-19"
+    }
+
+    # Get today's date
+    today = datetime.now().date()
+    current_year = today.year
+
+    # Add dynamically calculated holidays
+    easter_date = calculate_easter(current_year)
+    if today > easter_date:  # If today is after Easter, calculate for next year
+        easter_date = calculate_easter(current_year + 1)
+
+    special_dates_dynamic = {
+        "Easter": easter_date,
+        "Thanksgiving": calculate_nth_weekday(current_year, 11, 3, 4),  # 4th Thursday of November
+        "Labor Day": calculate_nth_weekday(current_year, 9, 0, 1),  # 1st Monday of September
+        "Memorial Day": calculate_nth_weekday(current_year, 5, 0, -1),  # Last Monday of May
+        # "Martin Luther King Jr. Day": calculate_nth_weekday(current_year, 1, 0, 3),  # 3rd Monday of January
+        # Additional dynamic holidays can go here
+    }
+
+    # Combine fixed and dynamic dates
+    all_events = {**special_dates}
+    all_events.update({name: date.strftime("%m-%d") for name, date in special_dates_dynamic.items()})
+
+    next_event = None
+    min_days = float('inf')  # Start with a very large value
+
+    for event, date_str in all_events.items():
+        # Parse the event date for this year
+        event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=current_year)
+
+        # Adjust for next year if the event has already passed this year
+        if event_date < today:
+            event_date = event_date.replace(year=current_year + 1)
+
+        # Calculate days remaining
+        days_remaining = (event_date - today).days
+        if days_remaining < min_days:
+            min_days = days_remaining
+            next_event = event
+
+    return next_event, min_days
+
+
+def display_next_event():
+    """
+    Display a message about the next special event and allow the user to continue.
+    """
     global text_color, shadow_color, screen_color
 
-    stop_mp3()
+    # Get the next event and days remaining
+    event_name, days_remaining = days_until_next_event()
 
-    # Prepare wrap-up messages
-    wrap_up_message_eng = f"Great job today, {current_student}! See you next time."
-    wrap_up_message_jp = "お疲れ様でした。"  # Otsukaresama deshita
+    # Prepare the message
+    message_eng = f"It's {days_remaining} days until {event_name}!"
+    message_jp = f"{event_name}まで、 あと{days_remaining}日です！"  # Japanese equivalent
 
-    # Set a static sky blue background
-    SKY_BLUE = (135, 206, 235)
-    screen.fill(SKY_BLUE)
-    screen.blit(generate_perlin_cloud(0), (0, 0))  # Static clouds background
+    # Set the background color
+    screen.fill(screen_color)
 
-    # Draw static text for the wrap-up message
+    # Display the event message in English
     draw_text(
-        wrap_up_message_eng,
+        message_eng,
         font,
         text_color,
         x=0,
@@ -13299,7 +13511,141 @@ def wrap_up_session():
         shadow_color=shadow_color
     )
 
+    # Display the static Japanese message (no hover effect)
     draw_text(
+        message_jp,
+        j_font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.50,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
+    # Draw "Continue" button and save rect for hover detection
+    continue_font_size = int(get_dynamic_font_size() * 0.8)
+    continue_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+    continue_text = "Continue..."
+    continue_x_position = WIDTH * 0.55
+    continue_y_position = HEIGHT * 0.90
+    text_width, text_height = continue_font.size(continue_text)
+    continue_rect = pygame.Rect(continue_x_position, continue_y_position, text_width, text_height)
+
+    draw_text(
+        continue_text,
+        continue_font,
+        text_color,
+        continue_x_position,
+        continue_y_position,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Create a static background surface
+    static_background = screen.copy()  # Save current screen as the static background
+    pygame.display.flip()
+
+    # Particle effect settings
+    particle_count = 3
+    particle_lifetime = 30
+    particles = []
+
+    # Main event loop
+    waiting = True
+    while waiting:
+        # Blit the static background to clear the screen each frame
+        screen.blit(static_background, (0, 0))
+
+        # Get current mouse position for hover detection
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Hover effect for "Continue" button
+        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+        # Generate particles if hovering over "Continue..."
+        if continue_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        # Redraw "Continue" button
+        draw_text(
+            continue_text,
+            continue_font,
+            continue_color,
+            continue_x_position,
+            continue_y_position,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        pygame.display.flip()
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if continue_rect.collidepoint(event.pos):
+                    waiting = False  # Exit the loop
+
+        clock.tick(60)
+
+
+def wrap_up_session():
+    """
+    Displays a wrap-up message with interactive hover effects.
+
+    This function shows an English and Japanese wrap-up message. Both messages
+    and the "Finish" button are interactive, with hover effects and particle
+    effects. The user clicks "Finish" to proceed.
+    """
+    global current_student
+    global text_color, shadow_color, screen_color
+
+    stop_mp3()
+
+    # Prepare wrap-up messages
+    wrap_up_message_eng = f"Great job today, {current_student}! See you next time."
+    wrap_up_message_jp = "お疲れ様でした。"  # Otsukaresama deshita
+
+    # Set a static sky blue background with Perlin clouds
+    SKY_BLUE = (135, 206, 235)
+    screen.fill(SKY_BLUE)
+    cloud_surface = generate_perlin_cloud(0)  # Static clouds
+    screen.blit(cloud_surface, (0, 0))
+
+    # Draw static wrap-up text
+    draw_text(
+        wrap_up_message_eng,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.20,
+        max_width=WIDTH * 0.95,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw Japanese wrap-up message and save rect for hover detection
+    japanese_text_rect = draw_text(
         wrap_up_message_jp,
         j_font,
         text_color,
@@ -13308,15 +13654,16 @@ def wrap_up_session():
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True,
-        shadow_color=shadow_color
+        shadow_color=shadow_color,
+        return_rect=True
     )
 
-    # Draw "Finish" button text
+    # Position "Finish" button
     finish_text = "Finish"
     finish_font_size = int(get_dynamic_font_size() * 0.8)
     finish_font = pygame.font.SysFont(current_font_name_or_path, finish_font_size)
     finish_x_position = WIDTH * 0.55
-    finish_y_position = HEIGHT * 0.80
+    finish_y_position = HEIGHT * 0.90  # Aligning to 90% down the screen
     text_width, text_height = finish_font.size(finish_text)
     finish_rect = pygame.Rect(finish_x_position, finish_y_position, text_width, text_height)
 
@@ -13331,18 +13678,83 @@ def wrap_up_session():
         shadow_color=shadow_color
     )
 
+    # Create a static background surface
+    static_background = screen.copy()  # Save current screen as static background
     pygame.display.flip()
     speak_japanese(wrap_up_message_jp)  # Play Japanese wrap-up message
 
-    # Event loop to wait for user to click "Finish"
+    # Particle effect settings
+    particle_count = 3
+    particle_lifetime = 30
+    particles = []
+
+    # Main event loop
     waiting = True
     while waiting:
+        # Blit the static background to clear the screen each frame
+        screen.blit(static_background, (0, 0))
+
+        # Get current mouse position for hover detection
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Hover color logic
+        japanese_text_color = shadow_color if japanese_text_rect.collidepoint(mouse_pos) else text_color
+        finish_color = shadow_color if finish_rect.collidepoint(mouse_pos) else text_color
+
+        # Redraw hoverable elements
+        draw_text(
+            wrap_up_message_jp,
+            j_font,
+            japanese_text_color,
+            0,
+            HEIGHT * 0.50,
+            screen,
+            center=True,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        draw_text(
+            finish_text,
+            finish_font,
+            finish_color,
+            finish_x_position,
+            finish_y_position,
+            screen,
+            enable_shadow=True,
+            shadow_color=shadow_color
+        )
+
+        # Generate particles on hover
+        if japanese_text_rect.collidepoint(mouse_pos) or finish_rect.collidepoint(mouse_pos):
+            for _ in range(particle_count):
+                particle_color = random.choice([shadow_color, text_color, screen_color])
+                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                particle.lifetime = particle_lifetime
+                angle = random.uniform(0, 2 * math.pi)
+                speed = random.uniform(1, 3)
+                particle.dx = math.cos(angle) * speed
+                particle.dy = math.sin(angle) * speed
+                particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()
+
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if finish_rect.collidepoint(event.pos):
+                if japanese_text_rect.collidepoint(event.pos):
+                    speak_japanese(wrap_up_message_jp)
+                elif finish_rect.collidepoint(event.pos):
                     waiting = False  # Exit the loop
 
         clock.tick(60)
@@ -15279,12 +15691,6 @@ def options_menu():
         clock.tick(60)
 
 
-
-
-
-
-
-
 def save_options():
     """Save the current user options to a JSON file."""
     options = {
@@ -15826,6 +16232,7 @@ class Fish:
 # Main function #
 #################
 def main():
+    log_message(create_log_message("Loading options."))
     # Load user options first to apply settings like font and resolution
     load_options()
        
@@ -15856,8 +16263,8 @@ def main():
             current_state = main_menu()
         elif current_state == "options_menu":
             current_state = options_menu()
-        elif current_state == "rainbow_numbers":
-            current_state = rainbow_numbers()
+        # elif current_state == "rainbow_numbers":
+        #     current_state = rainbow_numbers()
         elif current_state == "learniverse_explanation":
             current_state = learniverse_explanation()
         elif current_state == "student_select_menu":
