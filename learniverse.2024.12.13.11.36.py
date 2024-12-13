@@ -4650,7 +4650,7 @@ def update_cube():
     if hue > 1.0:
         hue -= 1.0
 
-
+### SEASONAL SFX ###
 # Colors: White to light blue
 def random_snow_color():
     return (
@@ -4780,9 +4780,9 @@ class LeafParticle:
         pygame.draw.ellipse(surface, self.color, (self.x, self.y, self.width, self.height))
         
         
-################################    
+################################
 ### Display and UI Functions ###
-################################    
+################################
 
 def apply_resolution():
     global WIDTH, HEIGHT, screen, current_resolution_index
@@ -6753,21 +6753,6 @@ def bonus_game_tuna_tower():
                     waiting = False
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # TODO For later use
 def bonus_game_generic():
     # Check if the assets/images directory exists
@@ -7891,8 +7876,6 @@ def single_digit_addition(session_id):
 
         # Cap the frame rate
         clock.tick(60)
-
-
 
 
 def double_digit_addition(session_id):
@@ -11724,7 +11707,7 @@ def skip_counting():
 
 
 ########################################
-### 4. Menu and Navigation Functions ###
+### Menu and Navigation Functions ###
 ########################################
 
 def introduction(font):
@@ -11844,14 +11827,14 @@ def main_menu():
                     return "options_menu"  # Return to indicate transitioning to options menu
                 elif explanation_rect.collidepoint(event.pos):
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            # elif event.type == pygame.KEYDOWN:
+            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     # Skip directly to the bonus game for debug
                     # bonus_game_tuna_tower()
                     # bonus_game_cat_pong()
                     # bonus_game_falling_fish()
                     # bonus_game_fat_tuna() 
-                    bonus_game_selector()
+                    # bonus_game_selector()
 
         # Control the frame rate
         clock.tick(120)
@@ -12008,8 +11991,6 @@ def learniverse_explanation():
 
 def session_manager():
     global current_student  # Access global current_student
-
-    
     
     # Step 1, check on an incomplete session BEFORE we start a new one
     is_session_incomplete = was_last_session_incomplete_today(current_student)
@@ -12035,7 +12016,7 @@ def session_manager():
     ### Step 2: Logic for lesson flow ###
     #####################################
     lessons_to_play = ["greet_student",                     #JP
-                       "display_next_event",                #JP
+                       
                        
                        
                        
@@ -12046,6 +12027,7 @@ def session_manager():
                                           
                        ### DEBUG TESTING ###
                        # "bible_verse_selector",              #Eng
+                       # "display_next_event",                #JP
                        
                        
                        # "single_digit_addition",             #Math
@@ -12099,37 +12081,50 @@ def session_manager():
                        "streak_check",                      #ENG
                        "day_of_the_week",                   #JP
                        "skip_counting",                     #Math
+                       
                        "bible_verse_selector",              #Eng
                        "month_of_the_year",                 #JP
                        "warm_up_math",                      #Math
-                       "hiragana_teach",                    #JP
-                       "skip_counting_japanese",            #JP
-                       "hiragana_quiz",                     #JP                      
-                       "japanese_colors_teach",             #JP
-                       "double_digit_subtraction",          #Math
-                       "japanese_colors_quiz",              #JP
-                       "subtraction_borrowing",             #Math
                        
-                       # "japanese_body_parts_teach",         #JP
+                       "display_next_event",                #JP
+                       "skip_counting_primes",              #Math
+                       
+                       "hiragana_teach",                    #JP
                        "double_digit_addition",             #Math
                        
-                       # "japanese_body_parts_quiz",          #JP
-                       "single_denominator_addition",       #Math
+                       "skip_counting_japanese",            #JP
+                       "subtraction_borrowing",             #Math
                        
-                       # "japanese_animals_teach",            #JP
-                       "lowest_common_denominator_quiz",    #Math
-                       
-                       "japanese_animals_quiz",             #JP
-                       # "basic_shapes_quiz",                 #Math
-                       
-                       # "japanese_adjectives_teach",         #JP
-                       "single_by_double_multiplication",   #Math
-                       
-                       # "japanese_adjectives_quiz",          #JP
+                       "hiragana_quiz",                     #JP     
                        "skip_counting_fibonacci",           #Math
                        
+                       "japanese_colors_teach",             #JP
+                       "double_digit_subtraction",          #Math
+                       
+                       "japanese_colors_quiz",              #JP
+                       "single_denominator_addition",       #Math
+                       
+                       "japanese_body_parts_teach",         #JP
+                       "lowest_common_denominator_quiz",    #Math
+                       
+                       "japanese_body_parts_quiz",          #JP
+                       "basic_shapes_quiz",                 #Math
+                       
+                       
+                       # "japanese_animals_teach",            #JP
+                      
+                       
+                       # "japanese_animals_quiz",             #JP
+                       
+                       
+                       # "japanese_adjectives_teach",         #JP
+                       # "single_by_double_multiplication",   #Math
+                       
+                       # "japanese_adjectives_quiz",          #JP
+                       
+                       
                        # "japanese_family_teach",             #JP
-                       "skip_counting_primes",              #Math
+                       
                        
                        # "japanese_family_quiz",              #JP
                        
@@ -12578,25 +12573,7 @@ def session_manager():
         
         # Check if there's another lesson or handle lesson completion here
         # You can add more lessons to `lessons_to_play` and logic here
-        
-
-    # # Step 3: Calculate total stats for the session
-    # if total_times:
-    #     # overall_avg_time = round(sum(total_times) / len(total_times), 1)
-    #     valid_times = [time for time in total_times if time is not None]
-    #     if valid_times:
-    #         overall_avg_time = round(sum(valid_times) / len(valid_times), 1)
-    #     else:
-    #         overall_avg_time = 0
-
-    # else:
-    #     overall_avg_time = 0
-
-    # # Step 4: End the session and log overall session stats
-    # end_session(session_id, total_questions, total_correct, overall_avg_time)
-
-    # # Return to main menu after all lessons are done
-    # return "main_menu"
+    
     # Step 3: Calculate total stats for the session
     valid_times = [time for time in total_times if time is not None]
     if valid_times:
@@ -12609,7 +12586,6 @@ def session_manager():
     
     # Return to main menu after all lessons are done
     return "main_menu"
-
 
 
 def streak_check():
@@ -12767,6 +12743,446 @@ def streak_check():
         clock.tick(60)
 
     return
+
+
+def lesson_selector(session_id, lesson_title):
+    """Presents a quiz based on the lesson_title and returns the result."""
+    
+    # Fetch the student's current level for the specified lesson
+    student_level = get_student_progress(session_id, lesson_title)  # Ensure this is a string like 'Japanese Colors'
+
+    # Dynamically determine the available levels for the lesson
+    lesson_data_sets = []
+    
+    # Populate the lesson_data_sets based on the lesson_title
+    if lesson_title == 'Japanese Colors':
+        lesson_data_sets = [j_colors1, 
+                            j_colors2, 
+                            j_colors3, 
+                            j_colors4, 
+                            j_colors5,
+                            j_colors6,
+                            j_colors7,
+                            j_colors8,
+                            j_colors9,
+                            j_colors10,
+                            ]
+    elif lesson_title == 'Japanese Body Parts':
+        lesson_data_sets = [j_body_parts1, 
+                            j_body_parts2, 
+                            j_body_parts3, 
+                            j_body_parts4, 
+                            j_body_parts5]
+    elif lesson_title == 'Japanese Adjectives':
+        lesson_data_sets = [j_adjectives1]
+    elif lesson_title == 'Japanese Animals':
+        lesson_data_sets = [j_animals1, 
+                            j_animals2, 
+                            j_animals3, 
+                            j_animals4, 
+                            j_animals5,
+                            j_animals6,
+                            j_animals7,
+                            j_animals8,
+                            j_animals9]
+    elif lesson_title == 'Japanese Family':
+        lesson_data_sets = [j_family1, 
+                            j_family2, 
+                            j_family3, 
+                            j_family4, 
+                            j_family5,
+                            j_family6,
+                            j_family7]
+    elif lesson_title == 'Japanese Fruits':
+        lesson_data_sets = [j_fruits1, 
+                            j_fruits2, 
+                            j_fruits3, 
+                            j_fruits4, 
+                            j_fruits5]
+    elif lesson_title == 'Japanese Greetings':
+        lesson_data_sets = [j_greetings1, 
+                            j_greetings2, 
+                            j_greetings3]
+    elif lesson_title == 'One Piece Vocab':
+        lesson_data_sets = [j_one_piece1, 
+                            j_one_piece2, 
+                            j_one_piece3,
+                            j_one_piece4]
+    elif lesson_title == 'Japanese Self Introduction':
+        lesson_data_sets = [j_self_introduction1, 
+                            j_self_introduction2, 
+                            j_self_introduction3, 
+                            j_self_introduction4, 
+                            j_self_introduction5,
+                            j_self_introduction6]
+    elif lesson_title == 'Japanese Nouns':
+        lesson_data_sets = [j_nouns1, 
+                            j_nouns2, 
+                            j_nouns3,
+                            j_nouns4]
+    elif lesson_title == 'Japanese Time':
+        lesson_data_sets = [j_time1, 
+                            j_time2, 
+                            j_time3, 
+                            j_time4, 
+                            j_time5,
+                            j_time6,
+                            j_time7]
+    elif lesson_title == 'Japanese Vegtables':
+        lesson_data_sets = [j_vegtables1, 
+                            j_vegtables2, 
+                            j_vegtables3, 
+                            j_vegtables4, 
+                            j_vegtables5]
+    elif lesson_title == 'Japanese Verbs':
+        lesson_data_sets = [j_verbs1]
+    elif lesson_title == 'Japanese Song Sanpo':
+        lesson_data_sets = [j_song_sanpo1, 
+                            j_song_sanpo2, 
+                            j_song_sanpo3]
+    elif lesson_title == 'Japanese Song Zou-san':
+        lesson_data_sets = [j_song_zou_san1, 
+                            j_song_zou_san2]
+    else:
+        log_message(f"Error: Invalid lesson title {lesson_title}.")
+        return None
+
+    # Dynamically set the max level based on the number of datasets
+    max_level = len(lesson_data_sets)
+
+    # Cap the student level if they've reached the highest available content
+    if student_level > max_level:
+        student_level = max_level
+        log_message(f"Student has capped out on available content for {lesson_title} (Level {max_level}).")
+        # Optionally, notify the student
+        screen.fill(screen_color)
+        draw_text(
+            f"Great job! You've mastered all available levels for {lesson_title}!",
+            font,
+            text_color,
+            x=0,
+            y=HEIGHT * 0.4,
+            center=True,
+            enable_shadow=True,
+            max_width=WIDTH
+        )
+        draw_and_wait_continue_button()
+        return None  # Exit, since there’s no new content to show
+
+    # Select the appropriate lesson data based on the student's current level
+    lesson_data = lesson_data_sets[student_level - 1]  # Adjust for 0-indexing
+
+    # Start the lesson timer
+    lesson_start_time = time.time()
+
+    # Run the quiz using japanese_quiz (pass lesson_title and lesson_data separately)
+    total_questions, correct_answers, avg_time = japanese_quiz(session_id, lesson_title, lesson_data)
+
+    # End the lesson timer
+    lesson_end_time = time.time()
+
+    # Fetch the lesson_id from the database for the specified lesson title
+    lesson_id = fetch_lesson_id(lesson_title)
+
+    # Add session lesson to the database, tracking progress
+    add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
+
+    # Handle perfect score and leveling up
+    if correct_answers == total_questions and student_level < max_level + 1:
+        set_student_progress(session_id, lesson_title)  # Level up on perfect score
+        log_message(f"Student leveled up in {lesson_title}")
+
+    return total_questions, correct_answers, avg_time
+
+
+def options_menu():
+    global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color
+
+    # Particle effect settings
+    particle_count = 2  # Number of particles to generate on hover per frame
+    particle_lifetime = 30  # Lifetime for each particle in frames
+    particles = []  # List to hold active particles
+
+    # Get the filtered fonts list
+    filtered_fonts = get_filtered_fonts() or ["arial"]
+
+    # Set the current font index to match the current font
+    current_font_index = filtered_fonts.index(current_font_name_or_path) if current_font_name_or_path in filtered_fonts else 0
+    current_font_name_or_path = filtered_fonts[current_font_index]
+
+    # Track the current theme index based on the current applied theme
+    for theme_name, theme_values in color_themes.items():
+        if (text_color == theme_values["text_color"] and
+            shadow_color == theme_values["shadow_color"] and
+            screen_color == theme_values["screen_color"]):
+            current_theme_index = list(color_themes.keys()).index(theme_name)
+            break
+    else:
+        current_theme_index = list(color_themes.keys()).index("light")
+
+    while True:
+        font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())
+        draw_background(options_background)
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Y positions for consistent alignment
+        volume_y, resolution_y, theme_y, font_y, credits_y, back_to_main_y = (
+            HEIGHT * 0.1, HEIGHT * 0.25, HEIGHT * 0.4, HEIGHT * 0.55, HEIGHT * 0.7, HEIGHT * 0.85
+        )
+        left_buffer, right_buffer = 0.05, 0.95
+
+        # Draw each interactive element and calculate hover effects
+        back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
+        
+        # Volume Label and Percentage
+        draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
+        volume_percentage = f"{int(music_volume * 100)}%"
+        draw_text(volume_percentage, font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
+        minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+        plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
+
+        # Resolution Controls
+        draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
+        resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
+        draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
+        resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+        resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
+
+        # Theme Label and Current Theme Name
+        draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
+        current_theme_name = list(color_themes.keys())[current_theme_index].capitalize()
+        draw_text(current_theme_name, font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
+        theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+        theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
+
+        # Font Controls
+        left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+        draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
+        right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
+
+        # Credits
+        credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
+
+        # Generate hover colors and particles if hovered
+        hover_elements = [
+            (back_to_main_menu_rect, "Back to Main Menu"),
+            (minus_rect, "<"), (plus_rect, ">"),
+            (resolution_minus_rect, "<"), (resolution_plus_rect, ">"),
+            (theme_minus_rect, "<"), (theme_plus_rect, ">"),
+            (left_arrow_rect, "<"), (right_arrow_rect, ">"),
+            (credits_rect, "Credits")
+        ]
+
+        for rect, text in hover_elements:
+            is_hovered = rect.collidepoint(mouse_pos)
+            color = shadow_color if is_hovered else text_color
+            y_pos = rect.y  # Get the y position from the rect for consistent placement
+            draw_text(text, font, color, rect.x, y_pos, screen, center=(text in ["Back to Main Menu", "Credits"]), enable_shadow=True)
+
+            # Generate particles on hover
+            if is_hovered:
+                for _ in range(particle_count):
+                    particle_color = random.choice([shadow_color, text_color, screen_color])
+                    particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                    particle.lifetime = particle_lifetime
+                    angle = random.uniform(0, 2 * math.pi)
+                    speed = random.uniform(1, 3)
+                    particle.dx = math.cos(angle) * speed
+                    particle.dy = math.sin(angle) * speed
+                    particles.append(particle)
+
+        # Update and draw particles
+        for particle in particles[:]:
+            particle.update()
+            particle.draw(screen)
+            if particle.lifetime <= 0:
+                particles.remove(particle)
+
+        pygame.display.flip()
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = event.pos
+                
+                if back_to_main_menu_rect and back_to_main_menu_rect.collidepoint(mouse_pos):
+                    save_options()
+                    return "main_menu"
+                
+                elif minus_rect and minus_rect.collidepoint(mouse_pos):
+                    decrease_volume()
+                
+                elif plus_rect and plus_rect.collidepoint(mouse_pos):
+                    increase_volume()
+
+                if resolution_minus_rect and resolution_minus_rect.collidepoint(mouse_pos):
+                    current_resolution_index = max(0, current_resolution_index - 1)
+                    current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
+                    pygame.display.quit()
+                    center_window(current_windowed_resolution[0], current_windowed_resolution[1])
+                    screen = pygame.display.set_mode(current_windowed_resolution)
+                    WIDTH, HEIGHT = current_windowed_resolution
+                    update_positions()
+
+                if resolution_plus_rect and resolution_plus_rect.collidepoint(mouse_pos):
+                    current_resolution_index = min(len(AVAILABLE_RESOLUTIONS) - 1, current_resolution_index + 1)
+                    current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
+                    pygame.display.quit()
+                    center_window(current_windowed_resolution[0], current_windowed_resolution[1])
+                    screen = pygame.display.set_mode(current_windowed_resolution)
+                    WIDTH, HEIGHT = current_windowed_resolution
+                    update_positions()
+                
+                if theme_minus_rect and theme_minus_rect.collidepoint(mouse_pos):
+                    current_theme_index = (current_theme_index - 1) % len(color_themes)
+                    apply_theme(list(color_themes.keys())[current_theme_index])
+                
+                if theme_plus_rect and theme_plus_rect.collidepoint(mouse_pos):
+                    current_theme_index = (current_theme_index + 1) % len(color_themes)
+                    apply_theme(list(color_themes.keys())[current_theme_index])
+
+                if left_arrow_rect and left_arrow_rect.collidepoint(mouse_pos):
+                    current_font_index = (current_font_index - 1) % len(filtered_fonts)
+                    current_font_name_or_path = filtered_fonts[current_font_index]
+                
+                if right_arrow_rect and right_arrow_rect.collidepoint(mouse_pos):
+                    current_font_index = (current_font_index + 1) % len(filtered_fonts)
+                    current_font_name_or_path = filtered_fonts[current_font_index]
+
+                if credits_rect and credits_rect.collidepoint(mouse_pos):
+                    credit_roll()
+
+        clock.tick(60)
+
+
+def save_options():
+    """Save the current user options to a JSON file."""
+    options = {
+        "font": current_font_name_or_path,
+        "volume": music_volume,
+        "current_resolution_index": current_resolution_index,
+        "current_theme": current_theme  # Save the currently selected theme
+    }
+
+    try:
+        with open("options.json", "w") as file:
+            json.dump(options, file)
+    except Exception as e:
+        log_entry = create_log_message(f"Error saving options: {e}")
+        log_message(log_entry)
+        
+
+def credit_roll():
+    # Load the cat sprite and initialize its position and direction
+    try:
+        cat_image = pygame.image.load("assets/images/sprites/cat01.png").convert_alpha()
+        cat_rect = cat_image.get_rect()
+        cat_rect.y = HEIGHT - cat_rect.height  # Position the cat at the bottom of the screen
+        cat_speed = 4  # Set the speed of the cat
+        cat_direction = 1  # 1 for right, -1 for left
+        cat_loaded = True
+    except (FileNotFoundError, pygame.error) as e:
+        log_entry = create_log_message(f"Error loading cat sprite: {e}")
+        log_message(log_entry)
+        cat_loaded = False
+
+    # Function to update and draw the cat sprite
+    def draw_moving_cat(cat_image, cat_rect, cat_direction):
+        nonlocal cat_speed
+
+        cat_rect.x += cat_speed * cat_direction
+        
+        # Flip direction if the cat hits the edge of the screen
+        if cat_rect.left <= 0 or cat_rect.right >= WIDTH:
+            cat_direction *= -1
+            cat_image = pygame.transform.flip(cat_image, True, False)
+        
+        screen.blit(cat_image, cat_rect)
+        return cat_image, cat_direction
+
+    # Override the fade_text_in_and_out function to include the moving cat
+    def fade_text_in_and_out_with_cat(line1, line2, font, max_width=None):
+        alpha = 0
+        fading_in = True
+        text_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        pause_time = 2000  # Time in milliseconds to pause at full alpha
+        pause_counter = 0
+
+        while fading_in or alpha > 0:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                    return  # Skip to the main menu
+
+            # Clear the text surface
+            text_surface.fill((0, 0, 0, 0))
+
+            # Adjust the alpha of the surface
+            text_surface.set_alpha(alpha)
+
+            # Draw the first line of text onto the transparent text surface
+            draw_text(
+                line1, font, text_color, 0, HEIGHT * 0.3, text_surface,
+                max_width=WIDTH, center=True, enable_shadow=True
+            )
+
+            # Draw the second line of text onto the transparent text surface
+            draw_text(
+                line2, font, text_color, 0, HEIGHT * 0.6, text_surface,
+                max_width=WIDTH, center=True, enable_shadow=True
+            )
+
+            # Fill the screen with black
+            screen.fill(screen_color)
+
+            # Blit the transparent text surface onto the main screen
+            screen.blit(text_surface, (0, 0))
+            
+            # Draw the moving cat sprite if it was successfully loaded
+            if cat_loaded:
+                nonlocal cat_image, cat_direction
+                cat_image, cat_direction = draw_moving_cat(cat_image, cat_rect, cat_direction)
+
+            pygame.display.flip()
+            clock.tick(60)
+
+            # Handle the fade-in and fade-out logic
+            if fading_in:
+                alpha += FADE_SPEED
+                if alpha >= 255:
+                    alpha = 255
+                    fading_in = False
+                    pause_counter = pause_time  # Start the pause counter
+            else:
+                if pause_counter > 0:
+                    pause_counter -= clock.get_time()  # Decrease the counter based on elapsed time
+                else:
+                    alpha -= FADE_SPEED
+
+    # Use the modified fade_text_in_and_out_with_cat function
+    fade_text_in_and_out_with_cat("Developed by:", "Alvadore Retro Technology", font)
+    fade_text_in_and_out_with_cat("Chief Executive Officer", "William Alexander Martins", font)
+    fade_text_in_and_out_with_cat("Chief Financial Officer", "Mary Evangeline Martins", font)
+    fade_text_in_and_out_with_cat("Chief Information Officer", "Shane William Martins", font)
+    fade_text_in_and_out_with_cat("Chief Operations Officer", "Ethan Hunter Martins", font)
+    fade_text_in_and_out_with_cat("Chief Technology Officer", "Jeffrey Matthew Neff Esq.", font)
+    fade_text_in_and_out_with_cat("Made possible by:", "Supporters like you!", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "Guido van Rossum", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "Richard Stallman", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the PyInstaller team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Pygame team", font)
+    fade_text_in_and_out_with_cat("Pygame is licensed under", "LGPL version 2.1", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Suno team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Blender team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Krita team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Stable Diffusion team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the Ubuntu team", font)
+    fade_text_in_and_out_with_cat("Special thanks to:", "the ChatGPT team", font)
 
 
 ############################
@@ -13286,38 +13702,6 @@ def greet_student():
         clock.tick(60)
 
 
-# def days_until_next_event():
-#     """
-#     Calculate the number of days until the next special event.
-
-#     Returns:
-#         tuple: (event_name, days_remaining)
-#     """
-#     # Dictionary of special events with MM-DD format
-#     special_dates = {
-#         "Christmas": "12-25",
-#         "New Year's Day": "01-01",
-#     }
-
-#     today = datetime.now().date()
-#     next_event = None
-#     min_days = float('inf')  # Start with a very large value
-
-#     for event, date_str in special_dates.items():
-#         # Parse the event date for this year
-#         event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=today.year)
-
-#         # Adjust for next year if the event has already passed this year
-#         if event_date < today:
-#             event_date = event_date.replace(year=today.year + 1)
-
-#         # Calculate days remaining
-#         days_remaining = (event_date - today).days
-#         if days_remaining < min_days:
-#             min_days = days_remaining
-#             next_event = event
-
-#     return next_event, min_days
 def calculate_easter(year):
     """Calculate the date of Easter Sunday for a given year."""
     a = year % 19
@@ -13337,85 +13721,30 @@ def calculate_easter(year):
     return datetime(year, month, day).date()
 
 
-def calculate_nth_weekday(year, month, weekday, n):
-    """
-    Calculate the date of the nth occurrence of a weekday in a given month.
-    
-    Args:
-        year (int): Year.
-        month (int): Month (1-12).
-        weekday (int): Weekday (0=Monday, 6=Sunday).
-        n (int): nth occurrence (e.g., 1 for first, 4 for fourth).
-    
-    Returns:
-        date: The date of the nth weekday.
-    """
-    first_day = datetime(year, month, 1).date()
-    first_weekday = first_day.weekday()
-    days_to_weekday = (weekday - first_weekday) % 7
-    nth_weekday_date = first_day + timedelta(days=days_to_weekday + (n - 1) * 7)
-    return nth_weekday_date
+def calculate_thanksgiving(year):
+    """Calculate the date of Thanksgiving (4th Thursday of November)."""
+    first_day_of_november = datetime(year, 11, 1).date()
+    first_thursday = first_day_of_november + timedelta(days=(3 - first_day_of_november.weekday()) % 7)
+    thanksgiving = first_thursday + timedelta(weeks=3)
+    return thanksgiving
 
 
-# def days_until_next_event():
-#     """
-#     Calculate the number of days until the next special event.
+def calculate_mothers_day(year):
+    """Calculate the date of Mother's Day (2nd Sunday of May)."""
+    first_day_of_may = datetime(year, 5, 1).date()
+    first_sunday = first_day_of_may + timedelta(days=(6 - first_day_of_may.weekday()) % 7)
+    mothers_day = first_sunday + timedelta(weeks=1)
+    return mothers_day
 
-#     Returns:
-#         tuple: (event_name, days_remaining)
-#     """
-#     # Dictionary of fixed-date special events
-#     special_dates = {
-#         "Christmas": "12-25",
-#         "Daddy's birthday": "12-30",
-#         "New Year's Day": "01-01",
-#         "Groundhog Day": "02-02",
-#         "Valentine's Day": "02-14",
-#         "Pi Day": "03-14",
-#         "St. Patrick's Day": "03-17",
-#         "April Fool's Day": "04-01",
-#         "Ethan's birthday": "06-16",
-#         "4th of July": "07-04",
-#         "Mommy's birthday": "07-29",
-#         "Halloween": "10-31",     
-#         "William's birthday": "11-19"
-#     }
 
-#     # Get today's date
-#     today = datetime.now().date()
-#     current_year = today.year
+def calculate_fathers_day(year):
+    """Calculate the date of Father's Day (3rd Sunday of June)."""
+    first_day_of_june = datetime(year, 6, 1).date()
+    first_sunday = first_day_of_june + timedelta(days=(6 - first_day_of_june.weekday()) % 7)
+    fathers_day = first_sunday + timedelta(weeks=2)
+    return fathers_day
 
-#     # Add dynamically calculated holidays
-#     special_dates_dynamic = {
-#         "Easter": calculate_easter(current_year),
-#         # "Thanksgiving": calculate_nth_weekday(current_year, 11, 3, 4),  # 4th Thursday of November
-#         # "Labor Day": calculate_nth_weekday(current_year, 9, 0, 1),  # 1st Monday of September
-#         # "Memorial Day": calculate_nth_weekday(current_year, 5, 0, -1),  # Last Monday of May
-#         # "Martin Luther King Jr. Day": calculate_nth_weekday(current_year, 1, 0, 3),  # 3rd Monday of January
-#     }
 
-#     # Combine fixed and dynamic dates
-#     all_events = {**special_dates}
-#     all_events.update({name: date.strftime("%m-%d") for name, date in special_dates_dynamic.items()})
-
-#     next_event = None
-#     min_days = float('inf')  # Start with a very large value
-
-#     for event, date_str in all_events.items():
-#         # Parse the event date for this year
-#         event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=current_year)
-
-#         # Adjust for next year if the event has already passed this year
-#         if event_date < today:
-#             event_date = event_date.replace(year=current_year + 1)
-
-#         # Calculate days remaining
-#         days_remaining = (event_date - today).days
-#         if days_remaining < min_days:
-#             min_days = days_remaining
-#             next_event = event
-
-#     return next_event, min_days
 def days_until_next_event():
     """
     Calculate the number of days until the next special event.
@@ -13423,39 +13752,43 @@ def days_until_next_event():
     Returns:
         tuple: (event_name, days_remaining)
     """
-    # Dictionary of fixed-date special events
     special_dates = {
-        # "Christmas": "12-25",
-        # "Daddy's birthday": "12-30",
-        # "New Year's Day": "01-01",
-        # "Groundhog Day": "02-02",
-        # "Valentine's Day": "02-14",
-        # "Pi Day": "03-14",
-        # "St. Patrick's Day": "03-17",
-        # "April Fool's Day": "04-01",
+        "New Year's Day": "01-01",
+        "Groundhog Day": "02-02",
+        "Valentine's Day": "02-14",
+        "Pi Day": "03-14",
+        "St. Patrick's Day": "03-17",
+        "April Fool's Day": "04-01",
         "Ethan's birthday": "06-16",
         "4th of July": "07-04",
         "Mommy's birthday": "07-29",
         "Halloween": "10-31",
-        "William's birthday": "11-19"
+        "William's birthday": "11-19",
+        "Christmas": "12-25",
+        "Daddy's birthday": "12-30"
     }
 
-    # Get today's date
     today = datetime.now().date()
     current_year = today.year
 
-    # Add dynamically calculated holidays
-    easter_date = calculate_easter(current_year)
-    if today > easter_date:  # If today is after Easter, calculate for next year
-        easter_date = calculate_easter(current_year + 1)
+    # Dynamically calculate holiday dates
+    def get_next_event_date(event_name, date_function, year):
+        """Helper to calculate the next occurrence of a dynamic event."""
+        event_date = date_function(year)
+        if today > event_date:  # If event has passed, calculate for next year
+            event_date = date_function(year + 1)
+        return event_date
+
+    easter_date = get_next_event_date("Easter", calculate_easter, current_year)
+    thanksgiving_date = get_next_event_date("Thanksgiving", calculate_thanksgiving, current_year)
+    mothers_day_date = get_next_event_date("Mother's Day", calculate_mothers_day, current_year)
+    fathers_day_date = get_next_event_date("Father's Day", calculate_fathers_day, current_year)
 
     special_dates_dynamic = {
         "Easter": easter_date,
-        "Thanksgiving": calculate_nth_weekday(current_year, 11, 3, 4),  # 4th Thursday of November
-        "Labor Day": calculate_nth_weekday(current_year, 9, 0, 1),  # 1st Monday of September
-        "Memorial Day": calculate_nth_weekday(current_year, 5, 0, -1),  # Last Monday of May
-        # "Martin Luther King Jr. Day": calculate_nth_weekday(current_year, 1, 0, 3),  # 3rd Monday of January
-        # Additional dynamic holidays can go here
+        "Mother's Day": mothers_day_date,
+        "Father's Day": fathers_day_date,
+        "Thanksgiving": thanksgiving_date
     }
 
     # Combine fixed and dynamic dates
@@ -13463,17 +13796,15 @@ def days_until_next_event():
     all_events.update({name: date.strftime("%m-%d") for name, date in special_dates_dynamic.items()})
 
     next_event = None
-    min_days = float('inf')  # Start with a very large value
+    min_days = float('inf')
 
     for event, date_str in all_events.items():
-        # Parse the event date for this year
         event_date = datetime.strptime(date_str, "%m-%d").date().replace(year=current_year)
 
-        # Adjust for next year if the event has already passed this year
+        # If the event date has passed this year, calculate it for the next year
         if event_date < today:
             event_date = event_date.replace(year=current_year + 1)
 
-        # Calculate days remaining
         days_remaining = (event_date - today).days
         if days_remaining < min_days:
             min_days = days_remaining
@@ -13542,6 +13873,12 @@ def display_next_event():
         enable_shadow=True,
         shadow_color=shadow_color
     )
+    
+    # Update the screen with all elements drawn
+    pygame.display.flip()
+
+    # Speak the English message after everything is displayed
+    speak_english(message_eng)
 
     # Create a static background surface
     static_background = screen.copy()  # Save current screen as the static background
@@ -14075,8 +14412,6 @@ def month_of_the_year():
 
         # Cap frame rate
         clock.tick(60)
-
-
 
 
 def skip_counting_japanese(COUNT_TO=30):
@@ -15315,157 +15650,6 @@ def japanese_quiz(session_id, lesson_title, lesson_data):
     return total_questions, correct_answers, avg_time
 
 
-
-def lesson_selector(session_id, lesson_title):
-    """Presents a quiz based on the lesson_title and returns the result."""
-    
-    # Fetch the student's current level for the specified lesson
-    student_level = get_student_progress(session_id, lesson_title)  # Ensure this is a string like 'Japanese Colors'
-
-    # Dynamically determine the available levels for the lesson
-    lesson_data_sets = []
-    
-    # Populate the lesson_data_sets based on the lesson_title
-    if lesson_title == 'Japanese Colors':
-        lesson_data_sets = [j_colors1, 
-                            j_colors2, 
-                            j_colors3, 
-                            j_colors4, 
-                            j_colors5,
-                            j_colors6,
-                            j_colors7,
-                            j_colors8,
-                            j_colors9,
-                            j_colors10,
-                            ]
-    elif lesson_title == 'Japanese Body Parts':
-        lesson_data_sets = [j_body_parts1, 
-                            j_body_parts2, 
-                            j_body_parts3, 
-                            j_body_parts4, 
-                            j_body_parts5]
-    elif lesson_title == 'Japanese Adjectives':
-        lesson_data_sets = [j_adjectives1]
-    elif lesson_title == 'Japanese Animals':
-        lesson_data_sets = [j_animals1, 
-                            j_animals2, 
-                            j_animals3, 
-                            j_animals4, 
-                            j_animals5,
-                            j_animals6,
-                            j_animals7,
-                            j_animals8,
-                            j_animals9]
-    elif lesson_title == 'Japanese Family':
-        lesson_data_sets = [j_family1, 
-                            j_family2, 
-                            j_family3, 
-                            j_family4, 
-                            j_family5,
-                            j_family6,
-                            j_family7]
-    elif lesson_title == 'Japanese Fruits':
-        lesson_data_sets = [j_fruits1, 
-                            j_fruits2, 
-                            j_fruits3, 
-                            j_fruits4, 
-                            j_fruits5]
-    elif lesson_title == 'Japanese Greetings':
-        lesson_data_sets = [j_greetings1, 
-                            j_greetings2, 
-                            j_greetings3]
-    elif lesson_title == 'One Piece Vocab':
-        lesson_data_sets = [j_one_piece1, 
-                            j_one_piece2, 
-                            j_one_piece3,
-                            j_one_piece4]
-    elif lesson_title == 'Japanese Self Introduction':
-        lesson_data_sets = [j_self_introduction1, 
-                            j_self_introduction2, 
-                            j_self_introduction3, 
-                            j_self_introduction4, 
-                            j_self_introduction5,
-                            j_self_introduction6]
-    elif lesson_title == 'Japanese Nouns':
-        lesson_data_sets = [j_nouns1, 
-                            j_nouns2, 
-                            j_nouns3,
-                            j_nouns4]
-    elif lesson_title == 'Japanese Time':
-        lesson_data_sets = [j_time1, 
-                            j_time2, 
-                            j_time3, 
-                            j_time4, 
-                            j_time5,
-                            j_time6,
-                            j_time7]
-    elif lesson_title == 'Japanese Vegtables':
-        lesson_data_sets = [j_vegtables1, 
-                            j_vegtables2, 
-                            j_vegtables3, 
-                            j_vegtables4, 
-                            j_vegtables5]
-    elif lesson_title == 'Japanese Verbs':
-        lesson_data_sets = [j_verbs1]
-    elif lesson_title == 'Japanese Song Sanpo':
-        lesson_data_sets = [j_song_sanpo1, 
-                            j_song_sanpo2, 
-                            j_song_sanpo3]
-    elif lesson_title == 'Japanese Song Zou-san':
-        lesson_data_sets = [j_song_zou_san1, 
-                            j_song_zou_san2]
-    else:
-        log_message(f"Error: Invalid lesson title {lesson_title}.")
-        return None
-
-    # Dynamically set the max level based on the number of datasets
-    max_level = len(lesson_data_sets)
-
-    # Cap the student level if they've reached the highest available content
-    if student_level > max_level:
-        student_level = max_level
-        log_message(f"Student has capped out on available content for {lesson_title} (Level {max_level}).")
-        # Optionally, notify the student
-        screen.fill(screen_color)
-        draw_text(
-            f"Great job! You've mastered all available levels for {lesson_title}!",
-            font,
-            text_color,
-            x=0,
-            y=HEIGHT * 0.4,
-            center=True,
-            enable_shadow=True,
-            max_width=WIDTH
-        )
-        draw_and_wait_continue_button()
-        return None  # Exit, since there’s no new content to show
-
-    # Select the appropriate lesson data based on the student's current level
-    lesson_data = lesson_data_sets[student_level - 1]  # Adjust for 0-indexing
-
-    # Start the lesson timer
-    lesson_start_time = time.time()
-
-    # Run the quiz using japanese_quiz (pass lesson_title and lesson_data separately)
-    total_questions, correct_answers, avg_time = japanese_quiz(session_id, lesson_title, lesson_data)
-
-    # End the lesson timer
-    lesson_end_time = time.time()
-
-    # Fetch the lesson_id from the database for the specified lesson title
-    lesson_id = fetch_lesson_id(lesson_title)
-
-    # Add session lesson to the database, tracking progress
-    add_session_lesson(session_id, lesson_id, lesson_start_time, lesson_end_time, total_questions, correct_answers)
-
-    # Handle perfect score and leveling up
-    if correct_answers == total_questions and student_level < max_level + 1:
-        set_student_progress(session_id, lesson_title)  # Level up on perfect score
-        log_message(f"Student leveled up in {lesson_title}")
-
-    return total_questions, correct_answers, avg_time
-
-
 def display_quiz(screen, kanji, furigana, options):
     """
     Draws the kanji, furigana, and multiple-choice options on the screen.
@@ -15528,296 +15712,11 @@ def display_quiz(screen, kanji, furigana, options):
     return kanji_rect, furigana_rect, option_rects
 
 
-def options_menu():
-    global music_volume, current_resolution_index, screen, WIDTH, HEIGHT, current_windowed_resolution, current_font_name_or_path, font, text_color, shadow_color, screen_color
-
-    # Particle effect settings
-    particle_count = 2  # Number of particles to generate on hover per frame
-    particle_lifetime = 30  # Lifetime for each particle in frames
-    particles = []  # List to hold active particles
-
-    # Get the filtered fonts list
-    filtered_fonts = get_filtered_fonts() or ["arial"]
-
-    # Set the current font index to match the current font
-    current_font_index = filtered_fonts.index(current_font_name_or_path) if current_font_name_or_path in filtered_fonts else 0
-    current_font_name_or_path = filtered_fonts[current_font_index]
-
-    # Track the current theme index based on the current applied theme
-    for theme_name, theme_values in color_themes.items():
-        if (text_color == theme_values["text_color"] and
-            shadow_color == theme_values["shadow_color"] and
-            screen_color == theme_values["screen_color"]):
-            current_theme_index = list(color_themes.keys()).index(theme_name)
-            break
-    else:
-        current_theme_index = list(color_themes.keys()).index("light")
-
-    while True:
-        font = pygame.font.SysFont(current_font_name_or_path, get_dynamic_font_size())
-        draw_background(options_background)
-        mouse_pos = pygame.mouse.get_pos()
-
-        # Y positions for consistent alignment
-        volume_y, resolution_y, theme_y, font_y, credits_y, back_to_main_y = (
-            HEIGHT * 0.1, HEIGHT * 0.25, HEIGHT * 0.4, HEIGHT * 0.55, HEIGHT * 0.7, HEIGHT * 0.85
-        )
-        left_buffer, right_buffer = 0.05, 0.95
-
-        # Draw each interactive element and calculate hover effects
-        back_to_main_menu_rect = draw_text("Back to Main Menu", font, text_color, 0, back_to_main_y, screen, center=True, enable_shadow=True, return_rect=True)
-        
-        # Volume Label and Percentage
-        draw_text("Volume:", font, text_color, WIDTH * (left_buffer * 2), volume_y, screen, enable_shadow=True)
-        volume_percentage = f"{int(music_volume * 100)}%"
-        draw_text(volume_percentage, font, text_color, WIDTH * 0.5, volume_y, screen, enable_shadow=True)
-        minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-        plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, volume_y, screen, enable_shadow=True, return_rect=True)
-
-        # Resolution Controls
-        draw_text("Resolution:", font, text_color, WIDTH * (left_buffer * 2), resolution_y, screen, enable_shadow=True)
-        resolution_text = f"{AVAILABLE_RESOLUTIONS[current_resolution_index][0]}x{AVAILABLE_RESOLUTIONS[current_resolution_index][1]}"
-        draw_text(resolution_text, font, text_color, WIDTH * 0.5, resolution_y, screen, enable_shadow=True)
-        resolution_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-        resolution_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, resolution_y, screen, enable_shadow=True, return_rect=True)
-
-        # Theme Label and Current Theme Name
-        draw_text("Theme:", font, text_color, WIDTH * (left_buffer * 2), theme_y, screen, enable_shadow=True)
-        current_theme_name = list(color_themes.keys())[current_theme_index].capitalize()
-        draw_text(current_theme_name, font, text_color, WIDTH * 0.5, theme_y, screen, enable_shadow=True)
-        theme_minus_rect = draw_text("<", font, text_color, WIDTH * left_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-        theme_plus_rect = draw_text(">", font, text_color, WIDTH * right_buffer, theme_y, screen, enable_shadow=True, return_rect=True)
-
-        # Font Controls
-        left_arrow_rect = draw_text("<", font, text_color, WIDTH * left_buffer, font_y, screen, enable_shadow=True, return_rect=True)
-        draw_text(f"Font: {current_font_name_or_path}", font, text_color, WIDTH * 0.5, font_y, screen, center=True, enable_shadow=True)
-        right_arrow_rect = draw_text(">", font, text_color, WIDTH * right_buffer, font_y, screen, enable_shadow=True, return_rect=True)
-
-        # Credits
-        credits_rect = draw_text("Credits", font, text_color, 0, credits_y, screen, center=True, enable_shadow=True, return_rect=True)
-
-        # Generate hover colors and particles if hovered
-        hover_elements = [
-            (back_to_main_menu_rect, "Back to Main Menu"),
-            (minus_rect, "<"), (plus_rect, ">"),
-            (resolution_minus_rect, "<"), (resolution_plus_rect, ">"),
-            (theme_minus_rect, "<"), (theme_plus_rect, ">"),
-            (left_arrow_rect, "<"), (right_arrow_rect, ">"),
-            (credits_rect, "Credits")
-        ]
-
-        for rect, text in hover_elements:
-            is_hovered = rect.collidepoint(mouse_pos)
-            color = shadow_color if is_hovered else text_color
-            y_pos = rect.y  # Get the y position from the rect for consistent placement
-            draw_text(text, font, color, rect.x, y_pos, screen, center=(text in ["Back to Main Menu", "Credits"]), enable_shadow=True)
-
-            # Generate particles on hover
-            if is_hovered:
-                for _ in range(particle_count):
-                    particle_color = random.choice([shadow_color, text_color, screen_color])
-                    particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
-                    particle.lifetime = particle_lifetime
-                    angle = random.uniform(0, 2 * math.pi)
-                    speed = random.uniform(1, 3)
-                    particle.dx = math.cos(angle) * speed
-                    particle.dy = math.sin(angle) * speed
-                    particles.append(particle)
-
-        # Update and draw particles
-        for particle in particles[:]:
-            particle.update()
-            particle.draw(screen)
-            if particle.lifetime <= 0:
-                particles.remove(particle)
-
-        pygame.display.flip()
-
-        # Event handling
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = event.pos
-                
-                if back_to_main_menu_rect and back_to_main_menu_rect.collidepoint(mouse_pos):
-                    save_options()
-                    return "main_menu"
-                
-                elif minus_rect and minus_rect.collidepoint(mouse_pos):
-                    decrease_volume()
-                
-                elif plus_rect and plus_rect.collidepoint(mouse_pos):
-                    increase_volume()
-
-                if resolution_minus_rect and resolution_minus_rect.collidepoint(mouse_pos):
-                    current_resolution_index = max(0, current_resolution_index - 1)
-                    current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-                    pygame.display.quit()
-                    center_window(current_windowed_resolution[0], current_windowed_resolution[1])
-                    screen = pygame.display.set_mode(current_windowed_resolution)
-                    WIDTH, HEIGHT = current_windowed_resolution
-                    update_positions()
-
-                if resolution_plus_rect and resolution_plus_rect.collidepoint(mouse_pos):
-                    current_resolution_index = min(len(AVAILABLE_RESOLUTIONS) - 1, current_resolution_index + 1)
-                    current_windowed_resolution = AVAILABLE_RESOLUTIONS[current_resolution_index]
-                    pygame.display.quit()
-                    center_window(current_windowed_resolution[0], current_windowed_resolution[1])
-                    screen = pygame.display.set_mode(current_windowed_resolution)
-                    WIDTH, HEIGHT = current_windowed_resolution
-                    update_positions()
-                
-                if theme_minus_rect and theme_minus_rect.collidepoint(mouse_pos):
-                    current_theme_index = (current_theme_index - 1) % len(color_themes)
-                    apply_theme(list(color_themes.keys())[current_theme_index])
-                
-                if theme_plus_rect and theme_plus_rect.collidepoint(mouse_pos):
-                    current_theme_index = (current_theme_index + 1) % len(color_themes)
-                    apply_theme(list(color_themes.keys())[current_theme_index])
-
-                if left_arrow_rect and left_arrow_rect.collidepoint(mouse_pos):
-                    current_font_index = (current_font_index - 1) % len(filtered_fonts)
-                    current_font_name_or_path = filtered_fonts[current_font_index]
-                
-                if right_arrow_rect and right_arrow_rect.collidepoint(mouse_pos):
-                    current_font_index = (current_font_index + 1) % len(filtered_fonts)
-                    current_font_name_or_path = filtered_fonts[current_font_index]
-
-                if credits_rect and credits_rect.collidepoint(mouse_pos):
-                    credit_roll()
-
-        clock.tick(60)
+### MENUS ###
 
 
-def save_options():
-    """Save the current user options to a JSON file."""
-    options = {
-        "font": current_font_name_or_path,
-        "volume": music_volume,
-        "current_resolution_index": current_resolution_index,
-        "current_theme": current_theme  # Save the currently selected theme
-    }
 
-    try:
-        with open("options.json", "w") as file:
-            json.dump(options, file)
-    except Exception as e:
-        log_entry = create_log_message(f"Error saving options: {e}")
-        log_message(log_entry)
-        
-
-def credit_roll():
-    # Load the cat sprite and initialize its position and direction
-    try:
-        cat_image = pygame.image.load("assets/images/sprites/cat01.png").convert_alpha()
-        cat_rect = cat_image.get_rect()
-        cat_rect.y = HEIGHT - cat_rect.height  # Position the cat at the bottom of the screen
-        cat_speed = 4  # Set the speed of the cat
-        cat_direction = 1  # 1 for right, -1 for left
-        cat_loaded = True
-    except (FileNotFoundError, pygame.error) as e:
-        log_entry = create_log_message(f"Error loading cat sprite: {e}")
-        log_message(log_entry)
-        cat_loaded = False
-
-    # Function to update and draw the cat sprite
-    def draw_moving_cat(cat_image, cat_rect, cat_direction):
-        nonlocal cat_speed
-
-        cat_rect.x += cat_speed * cat_direction
-        
-        # Flip direction if the cat hits the edge of the screen
-        if cat_rect.left <= 0 or cat_rect.right >= WIDTH:
-            cat_direction *= -1
-            cat_image = pygame.transform.flip(cat_image, True, False)
-        
-        screen.blit(cat_image, cat_rect)
-        return cat_image, cat_direction
-
-    # Override the fade_text_in_and_out function to include the moving cat
-    def fade_text_in_and_out_with_cat(line1, line2, font, max_width=None):
-        alpha = 0
-        fading_in = True
-        text_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-        pause_time = 2000  # Time in milliseconds to pause at full alpha
-        pause_counter = 0
-
-        while fading_in or alpha > 0:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
-                    return  # Skip to the main menu
-
-            # Clear the text surface
-            text_surface.fill((0, 0, 0, 0))
-
-            # Adjust the alpha of the surface
-            text_surface.set_alpha(alpha)
-
-            # Draw the first line of text onto the transparent text surface
-            draw_text(
-                line1, font, text_color, 0, HEIGHT * 0.3, text_surface,
-                max_width=WIDTH, center=True, enable_shadow=True
-            )
-
-            # Draw the second line of text onto the transparent text surface
-            draw_text(
-                line2, font, text_color, 0, HEIGHT * 0.6, text_surface,
-                max_width=WIDTH, center=True, enable_shadow=True
-            )
-
-            # Fill the screen with black
-            screen.fill(screen_color)
-
-            # Blit the transparent text surface onto the main screen
-            screen.blit(text_surface, (0, 0))
-            
-            # Draw the moving cat sprite if it was successfully loaded
-            if cat_loaded:
-                nonlocal cat_image, cat_direction
-                cat_image, cat_direction = draw_moving_cat(cat_image, cat_rect, cat_direction)
-
-            pygame.display.flip()
-            clock.tick(60)
-
-            # Handle the fade-in and fade-out logic
-            if fading_in:
-                alpha += FADE_SPEED
-                if alpha >= 255:
-                    alpha = 255
-                    fading_in = False
-                    pause_counter = pause_time  # Start the pause counter
-            else:
-                if pause_counter > 0:
-                    pause_counter -= clock.get_time()  # Decrease the counter based on elapsed time
-                else:
-                    alpha -= FADE_SPEED
-
-    # Use the modified fade_text_in_and_out_with_cat function
-    fade_text_in_and_out_with_cat("Developed by:", "Alvadore Retro Technology", font)
-    fade_text_in_and_out_with_cat("Chief Executive Officer", "William Alexander Martins", font)
-    fade_text_in_and_out_with_cat("Chief Financial Officer", "Mary Evangeline Martins", font)
-    fade_text_in_and_out_with_cat("Chief Information Officer", "Shane William Martins", font)
-    fade_text_in_and_out_with_cat("Chief Operations Officer", "Ethan Hunter Martins", font)
-    fade_text_in_and_out_with_cat("Chief Technology Officer", "Jeffrey Matthew Neff Esq.", font)
-    fade_text_in_and_out_with_cat("Made possible by:", "Supporters like you!", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "Guido van Rossum", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "Richard Stallman", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the PyInstaller team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Pygame team", font)
-    fade_text_in_and_out_with_cat("Pygame is licensed under", "LGPL version 2.1", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Suno team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Blender team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Krita team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Stable Diffusion team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the Ubuntu team", font)
-    fade_text_in_and_out_with_cat("Special thanks to:", "the ChatGPT team", font)
-
-
+# Move these to Bonus game section
 class Cat:
     """
     A class to represent the player's cat character with jumping, movement, and particle effects.
