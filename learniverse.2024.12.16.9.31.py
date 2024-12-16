@@ -12257,7 +12257,7 @@ def session_manager():
                        
                                           
                        ### DEBUG TESTING ###
-                       # "bible_verse_selector",              #Eng
+                       "bible_verse_selector",              #Eng
                        # "display_next_event",                #JP
                        
                        
@@ -13635,13 +13635,289 @@ def bible_verse_selector():
     selected_module()
     
     
+# def display_bible_verse(greeting_message, 
+#                         verse_title, 
+#                         verse_text, 
+#                         split_text=None):
+#     """Displays a Bible verse with support for any number of text splits."""
+#     global screen_color, text_color, shadow_color, font  # Use global font
+    
+#     # Define a larger font size for the Bible verse
+#     large_font_size = 60  # Adjust size as necessary
+
+#     # Initialize the larger font based on whether the current font is a file or system font
+#     if os.path.isfile(current_font_name_or_path):
+#         large_font = pygame.font.Font(current_font_name_or_path, large_font_size)
+#     else:
+#         large_font = pygame.font.SysFont(current_font_name_or_path, large_font_size)
+
+#     # Particle effect settings
+#     particle_count = 3
+#     particle_lifetime = 30
+#     particles = []
+
+#     # Clear the screen and display the greeting message
+#     waiting = True
+#     while waiting:
+#         screen.fill(screen_color)
+
+#         # Draw the greeting message
+#         draw_text(
+#             greeting_message,
+#             font,  # Use the global font for the greeting
+#             text_color,
+#             x=0,
+#             y=HEIGHT * 0.4,
+#             center=True,
+#             enable_shadow=True,
+#             shadow_color=shadow_color,
+#             max_width=WIDTH
+#         )
+
+#         # Draw the "Continue..." button
+#         continue_rect = draw_continue_button()
+        
+#         # Update the display to show the full screen before TTS
+#         pygame.display.flip()
+    
+#         # Speak the greeting message aloud using TTS
+#         speak_english(greeting_message)
+
+#         # Get current mouse position
+#         mouse_pos = pygame.mouse.get_pos()
+
+#         # Determine hover color for the "Continue..." button
+#         continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+#         # Redraw the "Continue..." button with hover effect
+#         draw_text(
+#             "Continue...",
+#             pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+#             continue_color,
+#             x=WIDTH * 0.55,
+#             y=HEIGHT * 0.9,
+#             enable_shadow=True,
+#             shadow_color=shadow_color
+#         )
+
+#         # Generate particles if hovering over the "Continue..." button
+#         if continue_rect.collidepoint(mouse_pos):
+#             for _ in range(particle_count):
+#                 particle_color = random.choice([shadow_color, text_color, screen_color])
+#                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+#                 particle.lifetime = particle_lifetime
+#                 angle = random.uniform(0, 2 * math.pi)
+#                 speed = random.uniform(1, 3)
+#                 particle.dx = math.cos(angle) * speed
+#                 particle.dy = math.sin(angle) * speed
+#                 particles.append(particle)
+
+#         # Update and draw particles
+#         for particle in particles[:]:
+#             particle.update()
+#             particle.draw(screen)
+#             if particle.lifetime <= 0:
+#                 particles.remove(particle)
+
+#         pygame.display.flip()  # Update the display
+
+#         # Handle events
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 # Check if the "Continue..." button is clicked
+#                 if continue_rect.collidepoint(event.pos):
+#                     waiting = False  # Exit the loop
+
+#         clock.tick(60)
+
+#     # Initialize display_text for the final rendering
+#     display_text = ""
+
+#     # Display each split text, one at a time
+#     if split_text:
+#         for index, part in enumerate(split_text):
+#             waiting = True
+#             while waiting:
+#                 screen.fill(screen_color)
+
+#                 # Adjust the y-position dynamically based on the index
+#                 y_position = HEIGHT * 0.1
+
+#                 # Display the verse title on the first part and the content on each part
+#                 if index == 0:
+#                     display_text = verse_title + "\n" + part
+#                 else:
+#                     display_text = part
+
+#                 # Display the current part of the verse
+#                 draw_text(
+#                     display_text,
+#                     font,  # Use the global font for the title
+#                     text_color,
+#                     x=0,
+#                     y=y_position,
+#                     center=True,
+#                     enable_shadow=True,
+#                     shadow_color=shadow_color,
+#                     max_width=WIDTH * 0.955,
+#                     font_override=large_font  # Override the font size for the verse
+#                 )
+
+#                 # Draw the "Continue..." button
+#                 continue_rect = draw_continue_button()
+
+#                 # Get current mouse position
+#                 mouse_pos = pygame.mouse.get_pos()
+
+#                 # Determine hover color for the "Continue..." button
+#                 continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+#                 # Redraw the "Continue..." button with hover effect
+#                 draw_text(
+#                     "Continue...",
+#                     pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+#                     continue_color,
+#                     x=WIDTH * 0.55,
+#                     y=HEIGHT * 0.9,
+#                     enable_shadow=True,
+#                     shadow_color=shadow_color
+#                 )
+
+#                 # Generate particles if hovering over the "Continue..." button
+#                 if continue_rect.collidepoint(mouse_pos):
+#                     for _ in range(particle_count):
+#                         particle_color = random.choice([shadow_color, text_color, screen_color])
+#                         particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+#                         particle.lifetime = particle_lifetime
+#                         angle = random.uniform(0, 2 * math.pi)
+#                         speed = random.uniform(1, 3)
+#                         particle.dx = math.cos(angle) * speed
+#                         particle.dy = math.sin(angle) * speed
+#                         particles.append(particle)
+
+#                 # Update and draw particles
+#                 for particle in particles[:]:
+#                     particle.update()
+#                     particle.draw(screen)
+#                     if particle.lifetime <= 0:
+#                         particles.remove(particle)
+
+#                 pygame.display.flip()  # Update the display
+
+#                 # Handle events
+#                 for event in pygame.event.get():
+#                     if event.type == pygame.QUIT:
+#                         pygame.quit()
+#                         sys.exit()
+#                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                         # Check if the "Continue..." button is clicked
+#                         if continue_rect.collidepoint(event.pos):
+#                             waiting = False  # Exit the loop
+
+#                 clock.tick(60)
+
+#             # Speak the current part of the verse
+#             speak_english(display_text)
+#     else:
+#         # Display the entire verse if there's no split text
+#         display_text = verse_title + "\n" + verse_text
+#         screen.fill(screen_color)
+#         draw_text(
+#             display_text,
+#             font,  # Use the global font
+#             text_color,
+#             x=0,
+#             y=HEIGHT * 0.1,
+#             center=True,
+#             enable_shadow=True,
+#             shadow_color=shadow_color,
+#             max_width=WIDTH * 0.95,
+#             font_override=large_font  # Override the font size for the verse
+#         )
+
+#         pygame.display.flip()  # Update the screen before speaking
+#         speak_english(verse_title + " " + verse_text)
+
+#     # Draw the "Continue" button again after displaying the verse
+#     waiting = True
+#     while waiting:
+#         # Keep the last displayed verse or verse part visible
+#         screen.fill(screen_color)
+#         draw_text(
+#             display_text,
+#             font,
+#             text_color,
+#             x=0,
+#             y=HEIGHT * 0.1,
+#             center=True,
+#             enable_shadow=True,
+#             shadow_color=shadow_color,
+#             max_width=WIDTH * 0.955,
+#             font_override=large_font
+#         )
+
+#         # Draw the "Continue..." button
+#         continue_rect = draw_continue_button()
+
+#         # Get current mouse position
+#         mouse_pos = pygame.mouse.get_pos()
+
+#         # Determine hover color for the "Continue..." button
+#         continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+
+#         # Redraw the "Continue..." button with hover effect
+#         draw_text(
+#             "Continue...",
+#             pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+#             continue_color,
+#             x=WIDTH * 0.55,
+#             y=HEIGHT * 0.9,
+#             enable_shadow=True,
+#             shadow_color=shadow_color
+#         )
+
+#         # Generate particles if hovering over the "Continue..." button
+#         if continue_rect.collidepoint(mouse_pos):
+#             for _ in range(particle_count):
+#                 particle_color = random.choice([shadow_color, text_color, screen_color])
+#                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+#                 particle.lifetime = particle_lifetime
+#                 angle = random.uniform(0, 2 * math.pi)
+#                 speed = random.uniform(1, 3)
+#                 particle.dx = math.cos(angle) * speed
+#                 particle.dy = math.sin(angle) * speed
+#                 particles.append(particle)
+
+#         # Update and draw particles
+#         for particle in particles[:]:
+#             particle.update()
+#             particle.draw(screen)
+#             if particle.lifetime <= 0:
+#                 particles.remove(particle)
+
+#         pygame.display.flip()  # Update the display
+
+#         # Handle events
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 # Check if the "Continue..." button is clicked
+#                 if continue_rect.collidepoint(event.pos):
+#                     waiting = False  # Exit the loop
+
+#         clock.tick(60)
 def display_bible_verse(greeting_message, 
                         verse_title, 
                         verse_text, 
                         split_text=None):
     """Displays a Bible verse with support for any number of text splits."""
     global screen_color, text_color, shadow_color, font  # Use global font
-    
+
     # Define a larger font size for the Bible verse
     large_font_size = 60  # Adjust size as necessary
 
@@ -13657,14 +13933,39 @@ def display_bible_verse(greeting_message,
     particles = []
 
     # Clear the screen and display the greeting message
+    screen.fill(screen_color)
+
+    # Draw the greeting message
+    draw_text(
+        greeting_message,
+        font,  # Use the global font for the greeting
+        text_color,
+        x=0,
+        y=HEIGHT * 0.4,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color,
+        max_width=WIDTH
+    )
+
+    # Draw the "Continue..." button
+    continue_rect = draw_continue_button()
+
+    # Update the display to show the greeting message
+    pygame.display.flip()
+
+    # Speak the greeting message aloud
+    speak_english(greeting_message)
+
+    # Wait for the user to click "Continue..." with hover effects and particles
     waiting = True
     while waiting:
         screen.fill(screen_color)
 
-        # Draw the greeting message
+        # Redraw the greeting message
         draw_text(
             greeting_message,
-            font,  # Use the global font for the greeting
+            font,
             text_color,
             x=0,
             y=HEIGHT * 0.4,
@@ -13674,16 +13975,11 @@ def display_bible_verse(greeting_message,
             max_width=WIDTH
         )
 
-        # Draw the "Continue..." button
-        continue_rect = draw_continue_button()
-
-        # Get current mouse position
+        # Handle hover effects and particles for "Continue..." button
         mouse_pos = pygame.mouse.get_pos()
-
-        # Determine hover color for the "Continue..." button
         continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
 
-        # Redraw the "Continue..." button with hover effect
+        # Redraw the "Continue..." button
         draw_text(
             "Continue...",
             pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
@@ -13694,7 +13990,7 @@ def display_bible_verse(greeting_message,
             shadow_color=shadow_color
         )
 
-        # Generate particles if hovering over the "Continue..." button
+        # Generate hover particles if hovering over the "Continue..." button
         if continue_rect.collidepoint(mouse_pos):
             for _ in range(particle_count):
                 particle_color = random.choice([shadow_color, text_color, screen_color])
@@ -13713,7 +14009,7 @@ def display_bible_verse(greeting_message,
             if particle.lifetime <= 0:
                 particles.remove(particle)
 
-        pygame.display.flip()  # Update the display
+        pygame.display.flip()
 
         # Handle events
         for event in pygame.event.get():
@@ -13721,55 +14017,61 @@ def display_bible_verse(greeting_message,
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Check if the "Continue..." button is clicked
                 if continue_rect.collidepoint(event.pos):
                     waiting = False  # Exit the loop
 
         clock.tick(60)
 
-    # Initialize display_text for the final rendering
-    display_text = ""
-
-    # Display each split text, one at a time
+    # Display the verse content, one part at a time
     if split_text:
-        for index, part in enumerate(split_text):
+        for part in split_text:
+            # Clear the screen
+            screen.fill(screen_color)
+
+            # Combine the title and current part of the verse
+            display_text = verse_title + "\n" + part if verse_title else part
+
+            # Draw the verse text
+            draw_text(
+                display_text,
+                font,
+                text_color,
+                x=0,
+                y=HEIGHT * 0.1,
+                center=True,
+                enable_shadow=True,
+                shadow_color=shadow_color,
+                max_width=WIDTH * 0.9,
+                font_override=large_font
+            )
+
+            pygame.display.flip()
+
+            # Speak the current part of the verse
+            speak_english(part)
+
+            # Wait for "Continue..." click before moving to the next part
             waiting = True
             while waiting:
                 screen.fill(screen_color)
 
-                # Adjust the y-position dynamically based on the index
-                y_position = HEIGHT * 0.1
-
-                # Display the verse title on the first part and the content on each part
-                if index == 0:
-                    display_text = verse_title + "\n" + part
-                else:
-                    display_text = part
-
-                # Display the current part of the verse
+                # Redraw the verse text
                 draw_text(
                     display_text,
-                    font,  # Use the global font for the title
+                    font,
                     text_color,
                     x=0,
-                    y=y_position,
+                    y=HEIGHT * 0.1,
                     center=True,
                     enable_shadow=True,
                     shadow_color=shadow_color,
-                    max_width=WIDTH * 0.955,
-                    font_override=large_font  # Override the font size for the verse
+                    max_width=WIDTH * 0.9,
+                    font_override=large_font
                 )
 
-                # Draw the "Continue..." button
-                continue_rect = draw_continue_button()
-
-                # Get current mouse position
+                # Handle hover effects and particles for "Continue..." button
                 mouse_pos = pygame.mouse.get_pos()
-
-                # Determine hover color for the "Continue..." button
                 continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
-
-                # Redraw the "Continue..." button with hover effect
                 draw_text(
                     "Continue...",
                     pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
@@ -13780,7 +14082,7 @@ def display_bible_verse(greeting_message,
                     shadow_color=shadow_color
                 )
 
-                # Generate particles if hovering over the "Continue..." button
+                # Generate hover particles if hovering over the "Continue..." button
                 if continue_rect.collidepoint(mouse_pos):
                     for _ in range(particle_count):
                         particle_color = random.choice([shadow_color, text_color, screen_color])
@@ -13799,47 +14101,21 @@ def display_bible_verse(greeting_message,
                     if particle.lifetime <= 0:
                         particles.remove(particle)
 
-                pygame.display.flip()  # Update the display
+                pygame.display.flip()
 
-                # Handle events
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         pygame.quit()
                         sys.exit()
                     elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        # Check if the "Continue..." button is clicked
                         if continue_rect.collidepoint(event.pos):
                             waiting = False  # Exit the loop
 
                 clock.tick(60)
-
-            # Speak the current part of the verse
-            speak_english(display_text)
     else:
-        # Display the entire verse if there's no split text
-        display_text = verse_title + "\n" + verse_text
+        # Display the full verse if no splits are provided
         screen.fill(screen_color)
-        draw_text(
-            display_text,
-            font,  # Use the global font
-            text_color,
-            x=0,
-            y=HEIGHT * 0.1,
-            center=True,
-            enable_shadow=True,
-            shadow_color=shadow_color,
-            max_width=WIDTH * 0.95,
-            font_override=large_font  # Override the font size for the verse
-        )
-
-        pygame.display.flip()  # Update the screen before speaking
-        speak_english(verse_title + " " + verse_text)
-
-    # Draw the "Continue" button again after displaying the verse
-    waiting = True
-    while waiting:
-        # Keep the last displayed verse or verse part visible
-        screen.fill(screen_color)
+        display_text = verse_title + "\n" + verse_text if verse_title else verse_text
         draw_text(
             display_text,
             font,
@@ -13849,62 +14125,77 @@ def display_bible_verse(greeting_message,
             center=True,
             enable_shadow=True,
             shadow_color=shadow_color,
-            max_width=WIDTH * 0.955,
+            max_width=WIDTH * 0.9,
             font_override=large_font
         )
 
-        # Draw the "Continue..." button
-        continue_rect = draw_continue_button()
+        pygame.display.flip()
 
-        # Get current mouse position
-        mouse_pos = pygame.mouse.get_pos()
+        # Speak the full verse aloud
+        speak_english(display_text)
 
-        # Determine hover color for the "Continue..." button
-        continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+        # Wait for the user to click "Continue..." with hover effects and particles
+        waiting = True
+        while waiting:
+            screen.fill(screen_color)
 
-        # Redraw the "Continue..." button with hover effect
-        draw_text(
-            "Continue...",
-            pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
-            continue_color,
-            x=WIDTH * 0.55,
-            y=HEIGHT * 0.9,
-            enable_shadow=True,
-            shadow_color=shadow_color
-        )
+            # Redraw the verse text
+            draw_text(
+                display_text,
+                font,
+                text_color,
+                x=0,
+                y=HEIGHT * 0.1,
+                center=True,
+                enable_shadow=True,
+                shadow_color=shadow_color,
+                max_width=WIDTH * 0.9,
+                font_override=large_font
+            )
 
-        # Generate particles if hovering over the "Continue..." button
-        if continue_rect.collidepoint(mouse_pos):
-            for _ in range(particle_count):
-                particle_color = random.choice([shadow_color, text_color, screen_color])
-                particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
-                particle.lifetime = particle_lifetime
-                angle = random.uniform(0, 2 * math.pi)
-                speed = random.uniform(1, 3)
-                particle.dx = math.cos(angle) * speed
-                particle.dy = math.sin(angle) * speed
-                particles.append(particle)
+            # Handle hover effects and particles for "Continue..." button
+            mouse_pos = pygame.mouse.get_pos()
+            continue_color = shadow_color if continue_rect.collidepoint(mouse_pos) else text_color
+            draw_text(
+                "Continue...",
+                pygame.font.SysFont(current_font_name_or_path, int(get_dynamic_font_size() * 0.8)),
+                continue_color,
+                x=WIDTH * 0.55,
+                y=HEIGHT * 0.9,
+                enable_shadow=True,
+                shadow_color=shadow_color
+            )
 
-        # Update and draw particles
-        for particle in particles[:]:
-            particle.update()
-            particle.draw(screen)
-            if particle.lifetime <= 0:
-                particles.remove(particle)
+            # Generate hover particles if hovering over the "Continue..." button
+            if continue_rect.collidepoint(mouse_pos):
+                for _ in range(particle_count):
+                    particle_color = random.choice([shadow_color, text_color, screen_color])
+                    particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+                    particle.lifetime = particle_lifetime
+                    angle = random.uniform(0, 2 * math.pi)
+                    speed = random.uniform(1, 3)
+                    particle.dx = math.cos(angle) * speed
+                    particle.dy = math.sin(angle) * speed
+                    particles.append(particle)
 
-        pygame.display.flip()  # Update the display
+            # Update and draw particles
+            for particle in particles[:]:
+                particle.update()
+                particle.draw(screen)
+                if particle.lifetime <= 0:
+                    particles.remove(particle)
 
-        # Handle events
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # Check if the "Continue..." button is clicked
-                if continue_rect.collidepoint(event.pos):
-                    waiting = False  # Exit the loop
+            pygame.display.flip()
 
-        clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    if continue_rect.collidepoint(event.pos):
+                        waiting = False  # Exit the loop
+
+            clock.tick(60)
 
 
 def john_3_16():
