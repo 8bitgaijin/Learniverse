@@ -12588,6 +12588,161 @@ def session_manager():
     return "main_menu"
 
 
+# def streak_check():
+#     global angle_x, angle_y, angle_z, hue  # Declare global for cube rotation and color
+#     global text_color, shadow_color, screen_color, current_font_name_or_path  # Access the theme-related globals
+
+#     # Initialize hover particles for "Continue..." button
+#     hover_particles = []
+
+#     # Query the student's streak
+#     streak_days = student_streak_query()
+
+#     # Check if the student is on a streak and create the message
+#     if streak_days > 1:
+#         message = f"Great job! You've been on a streak for {streak_days} days in a row!"
+#         show_cube = True
+#     elif streak_days == 1:
+#         message = "You're on a 1-day streak! Keep it up!"
+#         show_cube = True
+#     else:
+#         message = "Let's start a streak today! Keep it up!"
+#         show_cube = False
+
+#     # Check the current month
+#     current_month = datetime.now().month
+#     is_december = current_month == 12
+#     is_november = current_month == 11
+#     is_april = current_month == 4
+
+#     # Set the background color and particle type based on the month
+#     if is_december:
+#         background_color = (10, 10, 40)  # DARK_BLUE for December
+#         monthly_particle_class = SnowflakeParticle
+#     elif is_november:
+#         background_color = (30, 15, 10)  # Dark earthy background for November
+#         monthly_particle_class = LeafParticle
+#     elif is_april:
+#         background_color = (220, 220, 255)  # Light blue spring sky for April
+#         monthly_particle_class = SakuraBlossom
+#     else:
+#         background_color = screen_color  # Default screen color
+#         monthly_particle_class = None  # No monthly particles in other months
+
+#     # Prepare the "Continue..." button
+#     continue_font_size = int(get_dynamic_font_size() * 0.8)
+#     if os.path.isfile(current_font_name_or_path):
+#         button_font = pygame.font.Font(current_font_name_or_path, continue_font_size)
+#     else:
+#         button_font = pygame.font.SysFont(current_font_name_or_path, continue_font_size)
+
+#     button_text = "Continue..."
+#     button_color = text_color
+
+#     # Get the rect for the button for hover and click detection
+#     button_rect = draw_text(
+#         button_text,
+#         button_font,
+#         button_color,
+#         x=WIDTH * 0.55,
+#         y=HEIGHT * 0.9,
+#         enable_shadow=True,
+#         shadow_color=shadow_color,
+#         return_rect=True
+#     )
+
+#     # Initialize monthly particles list
+#     monthly_particles = []
+
+#     waiting = True
+#     while waiting:
+#         # Clear the screen with the appropriate background color
+#         screen.fill(background_color)
+
+#         # Draw the streak message
+#         draw_text(
+#             message, 
+#             font, 
+#             text_color, 
+#             x=0, 
+#             y=HEIGHT * 0.25, 
+#             max_width=WIDTH * 0.8, 
+#             center=True, 
+#             enable_shadow=True, 
+#             shadow_color=shadow_color
+#         )
+
+#         # Get the current mouse position
+#         mouse_pos = pygame.mouse.get_pos()
+
+#         # Check for hover over the "Continue..." button
+#         if button_rect.collidepoint(mouse_pos):
+#             button_color = shadow_color
+#             # Generate hover particles
+#             for _ in range(3):  # Adjust particle count as needed
+#                 particle_color = random.choice([shadow_color, text_color, background_color])
+#                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
+#                 angle = random.uniform(0, 2 * math.pi)
+#                 speed = random.uniform(1, 3)
+#                 particle.dx = math.cos(angle) * speed
+#                 particle.dy = math.sin(angle) * speed
+#                 particle.lifetime = 30  # Adjust lifetime if needed
+#                 hover_particles.append(particle)
+#         else:
+#             button_color = text_color
+
+#         # Generate new monthly particles if applicable
+#         if monthly_particle_class:
+#             monthly_particles.append(monthly_particle_class())
+
+#         # Update and draw hover particles
+#         for particle in hover_particles[:]:
+#             particle.update()
+#             particle.draw(screen)
+#             if particle.lifetime <= 0:
+#                 hover_particles.remove(particle)
+
+#         # Update and draw monthly particles
+#         if monthly_particle_class:
+#             for particle in monthly_particles:
+#                 particle.update()
+#                 particle.draw(screen)
+
+#         # Draw the "Continue..." button
+#         draw_text(
+#             button_text,
+#             button_font,
+#             button_color,
+#             x=WIDTH * 0.55,
+#             y=HEIGHT * 0.9,
+#             enable_shadow=True,
+#             shadow_color=shadow_color
+#         )
+
+#         # Handle events
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+#                 sys.exit()
+#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+#                 if button_rect.collidepoint(event.pos):
+#                     waiting = False  # Exit the loop when the button is clicked
+
+#         # Draw the rotating cube if streak > 0
+#         if show_cube:
+#             mouse_x, mouse_y = pygame.mouse.get_pos()
+#             draw_wireframe_cube(screen, mouse_x, mouse_y)
+
+#             # Update the cube's rotation and color
+#             hue += 0.00833
+#             if hue > 1.0:
+#                 hue -= 1.0
+
+#         # Refresh the display
+#         pygame.display.flip()
+#         clock.tick(60)
+
+#     return
 def streak_check():
     global angle_x, angle_y, angle_z, hue  # Declare global for cube rotation and color
     global text_color, shadow_color, screen_color, current_font_name_or_path  # Access the theme-related globals
@@ -12650,6 +12805,39 @@ def streak_check():
         shadow_color=shadow_color,
         return_rect=True
     )
+
+    # Draw the initial screen with text
+    screen.fill(background_color)
+
+    # Draw the streak message
+    draw_text(
+        message,
+        font,
+        text_color,
+        x=0,
+        y=HEIGHT * 0.25,
+        max_width=WIDTH * 0.8,
+        center=True,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Draw the "Continue..." button
+    draw_text(
+        button_text,
+        button_font,
+        button_color,
+        x=WIDTH * 0.55,
+        y=HEIGHT * 0.9,
+        enable_shadow=True,
+        shadow_color=shadow_color
+    )
+
+    # Update the display to show everything
+    pygame.display.flip()
+
+    # Speak the streak message out loud AFTER the screen is drawn
+    speak_english(message)
 
     # Initialize monthly particles list
     monthly_particles = []
