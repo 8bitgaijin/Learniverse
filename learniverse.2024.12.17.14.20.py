@@ -2955,162 +2955,399 @@ j_song_zou_san2 = {
 ### Helper Functions ###
 ########################
 
+# def create_log_message(message):
+#     """
+#     Create a log message with a current timestamp.
+
+#     This is a pure function that generates a string formatted with a timestamp 
+#     and the provided message. The timestamp is in the format YYYY-MM-DD HH:MM:SS.
+
+#     Parameters:
+#         message (str): The log message to be included after the timestamp.
+
+#     Returns:
+#         str: The log message formatted with a timestamp.
+#     """
+#     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#     return f"[{timestamp}] {message}"
+
+
+# def log_message(log_entry):
+#     """
+#     Log a message to both the console and the error_log.txt file with UTF-8 encoding.
+
+#     This function handles logging by printing the log entry to the console and 
+#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
+#     gracefully by logging the failure to the console.
+
+#     Parameters:
+#         log_entry (str): The log message to be printed and saved.
+#     """
+#     # Print the log entry to the console
+#     print(log_entry)
+
+#     try:
+#         # Attempt to open the log file with UTF-8 encoding and write the log entry
+#         log_file_path = "error_log.txt"
+#         with open(log_file_path, "a", encoding="utf-8") as error_file:
+#             error_file.write(log_entry + "\n")
+#     except (IOError, OSError) as e:
+#         # If an error occurs, print an error message to the console
+#         print(f"Failed to log message to file '{log_file_path}': {e}")
+def get_current_timestamp():
+    """
+    Get the current timestamp as a formatted string.
+
+    Returns:
+        str: The timestamp in 'YYYY-MM-DD HH:MM:SS' format.
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def format_log_message(timestamp, message):
+    """
+    Format a log message with a provided timestamp.
+
+    Parameters:
+        timestamp (str): The timestamp string.
+        message (str): The log message to include.
+
+    Returns:
+        str: The log message formatted with the timestamp.
+    """
+    return f"[{timestamp}] {message}"
+
+
+def write_to_file(file_path, content):
+    """
+    Write content to a file with UTF-8 encoding.
+
+    Handles file I/O errors gracefully.
+
+    Parameters:
+        file_path (str): The path to the file to write to.
+        content (str): The content to write to the file.
+    """
+    try:
+        with open(file_path, "a", encoding="utf-8") as file:
+            file.write(content + "\n")
+    except (IOError, OSError) as e:
+        print(f"Failed to write to file '{file_path}': {e}")
+
+
+def log_to_console(log_entry):
+    """
+    Print a log entry to the console.
+
+    Parameters:
+        log_entry (str): The log message to print.
+    """
+    print(log_entry)
+
+
 def create_log_message(message):
     """
     Create a log message with a current timestamp.
 
-    This is a pure function that generates a string formatted with a timestamp 
-    and the provided message. The timestamp is in the format YYYY-MM-DD HH:MM:SS.
-
     Parameters:
-        message (str): The log message to be included after the timestamp.
+        message (str): The log message to include.
 
     Returns:
         str: The log message formatted with a timestamp.
     """
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    return f"[{timestamp}] {message}"
+    timestamp = get_current_timestamp()
+    return format_log_message(timestamp, message)
 
 
-def log_message(log_entry):
+def log_message(log_entry, log_file="error_log.txt"):
     """
-    Log a message to both the console and the error_log.txt file with UTF-8 encoding.
-
-    This function handles logging by printing the log entry to the console and 
-    appending it to a file named 'error_log.txt'. It handles any file I/O errors 
-    gracefully by logging the failure to the console.
+    Log a message to both the console and a specified log file.
 
     Parameters:
-        log_entry (str): The log message to be printed and saved.
+        log_entry (str): The log message to log.
+        log_file (str): The path to the log file (default is 'error_log.txt').
     """
-    # Print the log entry to the console
-    print(log_entry)
+    log_to_console(log_entry)
+    write_to_file(log_file, log_entry)
 
-    try:
-        # Attempt to open the log file with UTF-8 encoding and write the log entry
-        log_file_path = "error_log.txt"
-        with open(log_file_path, "a", encoding="utf-8") as error_file:
-            error_file.write(log_entry + "\n")
-    except (IOError, OSError) as e:
-        # If an error occurs, print an error message to the console
-        print(f"Failed to log message to file '{log_file_path}': {e}")
-        
 
-def list_images_in_folder(folder_path):
+# def list_images_in_folder(folder_path):
+#     """
+#     List all image files in the specified folder.
+
+#     This function scans the provided folder for image files with common image 
+#     extensions (such as .png, .jpg, .jpeg, and .bmp) and returns a list of 
+#     matching file names.
+
+#     Parameters:
+#         folder_path (str): The path to the folder containing images.
+
+#     Returns:
+#         list: A list of image file names in the specified folder. Returns an 
+#         empty list if no image files are found.
+#     """
+#     try:
+#         # List all image files in the folder
+#         image_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
+#         image_files = [f for f in os.listdir(folder_path) 
+#                        if f.lower().endswith(image_extensions)]
+#         return image_files
+#     except OSError as e:
+#         # Log an error if there is an issue accessing the folder
+#         log_entry = create_log_message(f"File operation error while listing images: {e}")
+#         log_message(log_entry)
+#         return []
+
+
+# def select_random_image_from_list(image_list):
+#     """
+#     Select a random image from a provided list of image files.
+
+#     This function takes a list of image file names and selects one at random.
+
+#     Parameters:
+#         image_list (list): A list of image file names to select from.
+
+#     Returns:
+#         str: The randomly selected image file name, or None if the list is empty.
+#     """
+#     if not image_list:
+#         return None
+
+#     return random.choice(image_list)
+
+
+# def select_random_background(folder_path):
+#     """
+#     Select a random background image from the specified folder.
+
+#     This function lists the image files in the specified folder and selects 
+#     one at random. If no image files are found, it returns None.
+
+#     Parameters:
+#         folder_path (str): The path to the folder containing background images.
+
+#     Returns:
+#         str: The file path of the randomly selected image, or None if no image 
+#         files are found or an error occurs during the selection process.
+#     """
+#     # Get a list of all images in the folder
+#     image_files = list_images_in_folder(folder_path)
+
+#     # Select a random image from the list
+#     selected_image = select_random_image_from_list(image_files)
+
+#     if selected_image:
+#         return os.path.join(folder_path, selected_image)
+#     else:
+#         # Log an error if no image files were found
+#         log_entry = create_log_message(f"No image files found in folder: {folder_path}")
+#         log_message(log_entry)
+#         return None
+def get_image_files(folder_path):
     """
-    List all image files in the specified folder.
-
-    This function scans the provided folder for image files with common image 
-    extensions (such as .png, .jpg, .jpeg, and .bmp) and returns a list of 
-    matching file names.
+    Get a list of image files in the specified folder.
 
     Parameters:
         folder_path (str): The path to the folder containing images.
 
     Returns:
-        list: A list of image file names in the specified folder. Returns an 
-        empty list if no image files are found.
+        list: A list of image file names with common image extensions.
     """
+    image_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
     try:
-        # List all image files in the folder
-        image_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
-        image_files = [f for f in os.listdir(folder_path) 
-                       if f.lower().endswith(image_extensions)]
-        return image_files
+        return [
+            f for f in os.listdir(folder_path)
+            if f.lower().endswith(image_extensions)
+        ]
     except OSError as e:
-        # Log an error if there is an issue accessing the folder
-        log_entry = create_log_message(f"File operation error while listing images: {e}")
-        log_message(log_entry)
-        return []
+        return log_file_error(folder_path, e)
 
 
-def select_random_image_from_list(image_list):
+def log_file_error(folder_path, exception):
     """
-    Select a random image from a provided list of image files.
-
-    This function takes a list of image file names and selects one at random.
+    Log an error related to file operations.
 
     Parameters:
-        image_list (list): A list of image file names to select from.
+        folder_path (str): The folder path involved in the error.
+        exception (Exception): The exception raised during the operation.
 
     Returns:
-        str: The randomly selected image file name, or None if the list is empty.
+        list: Returns an empty list for compatibility with calling functions.
     """
-    if not image_list:
-        return None
+    log_entry = create_log_message(
+        f"File operation error in folder '{folder_path}': {exception}"
+    )
+    log_message(log_entry)
+    return []
 
-    return random.choice(image_list)
+
+def pick_random_item(items):
+    """
+    Pick a random item from a list.
+
+    Parameters:
+        items (list): The list of items to select from.
+
+    Returns:
+        str: The randomly selected item, or None if the list is empty.
+    """
+    if not items:
+        return None
+    return random.choice(items)
+
+
+def log_empty_folder_error(folder_path):
+    """
+    Log an error when no images are found in a folder.
+
+    Parameters:
+        folder_path (str): The folder path where no images were found.
+    """
+    log_entry = create_log_message(f"No image files found in folder: {folder_path}")
+    log_message(log_entry)
 
 
 def select_random_background(folder_path):
     """
     Select a random background image from the specified folder.
 
-    This function lists the image files in the specified folder and selects 
-    one at random. If no image files are found, it returns None.
-
     Parameters:
         folder_path (str): The path to the folder containing background images.
 
     Returns:
-        str: The file path of the randomly selected image, or None if no image 
-        files are found or an error occurs during the selection process.
+        str: The file path of the randomly selected image, or None if no images
+        are found or an error occurs.
     """
-    # Get a list of all images in the folder
-    image_files = list_images_in_folder(folder_path)
+    image_files = get_image_files(folder_path)
 
-    # Select a random image from the list
-    selected_image = select_random_image_from_list(image_files)
+    selected_image = pick_random_item(image_files)
 
-    if selected_image:
-        return os.path.join(folder_path, selected_image)
-    else:
-        # Log an error if no image files were found
-        log_entry = create_log_message(f"No image files found in folder: {folder_path}")
-        log_message(log_entry)
+    if not selected_image:
+        log_empty_folder_error(folder_path)
         return None
 
+    return os.path.join(folder_path, selected_image)
 
+
+# def calculate_center_position(screen_width, screen_height, window_width, window_height):
+#     """Calculate the center position of a window given screen and window dimensions."""
+#     window_x = (screen_width - window_width) // 2
+#     window_y = (screen_height - window_height) // 2
+#     return window_x, window_y
+
+
+# def center_window(width, height):
+#     """Centers the Pygame window on the screen.
+
+#     Parameters:
+#         width (int): The width of the window.
+#         height (int): The height of the window.
+
+#     This function sets the environment variable `SDL_VIDEO_WINDOW_POS` 
+#     to center the Pygame window on the user's screen.
+#     """
+#     try:
+#         # Clear existing window position to avoid residual settings
+#         if 'SDL_VIDEO_WINDOW_POS' in os.environ:
+#             del os.environ['SDL_VIDEO_WINDOW_POS']
+
+#         # Get screen dimensions
+#         user32 = ctypes.windll.user32
+#         screen_width = user32.GetSystemMetrics(0)
+#         screen_height = user32.GetSystemMetrics(1)
+
+#         # Get calculated center position
+#         window_x, window_y = calculate_center_position(
+#             screen_width, screen_height, width, height
+#         )
+
+#         # Set environment variable for window position
+#         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
+
+#     except AttributeError as err:
+#         log_entry = create_log_message(f"Failed to center window: {err}")
+#         log_message(log_entry)
 def calculate_center_position(screen_width, screen_height, window_width, window_height):
-    """Calculate the center position of a window given screen and window dimensions."""
+    """
+    Calculate the center position of a window given screen and window dimensions.
+
+    Parameters:
+        screen_width (int): The width of the screen.
+        screen_height (int): The height of the screen.
+        window_width (int): The width of the window.
+        window_height (int): The height of the window.
+
+    Returns:
+        tuple: (x, y) position for the centered window.
+    """
     window_x = (screen_width - window_width) // 2
     window_y = (screen_height - window_height) // 2
     return window_x, window_y
 
 
+def clear_window_position_env():
+    """
+    Clear the SDL_VIDEO_WINDOW_POS environment variable if it exists.
+    """
+    if 'SDL_VIDEO_WINDOW_POS' in os.environ:
+        del os.environ['SDL_VIDEO_WINDOW_POS']
+
+
+def get_screen_dimensions():
+    """
+    Get the screen dimensions using the system's user32 API.
+
+    Returns:
+        tuple: (screen_width, screen_height)
+    """
+    try:
+        user32 = ctypes.windll.user32
+        screen_width = user32.GetSystemMetrics(0)
+        screen_height = user32.GetSystemMetrics(1)
+        return screen_width, screen_height
+    except AttributeError as err:
+        log_entry = create_log_message(f"Failed to get screen dimensions: {err}")
+        log_message(log_entry)
+        return None, None
+
+
+def set_window_position(x, y):
+    """
+    Set the SDL_VIDEO_WINDOW_POS environment variable to position the window.
+
+    Parameters:
+        x (int): X-coordinate for the window.
+        y (int): Y-coordinate for the window.
+    """
+    os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x},{y}"
+
+
 def center_window(width, height):
-    """Centers the Pygame window on the screen.
+    """
+    Centers the Pygame window on the screen.
 
     Parameters:
         width (int): The width of the window.
         height (int): The height of the window.
-
-    This function sets the environment variable `SDL_VIDEO_WINDOW_POS` 
-    to center the Pygame window on the user's screen.
     """
-    try:
-        # Clear existing window position to avoid residual settings
-        if 'SDL_VIDEO_WINDOW_POS' in os.environ:
-            del os.environ['SDL_VIDEO_WINDOW_POS']
+    clear_window_position_env()
 
-        # Get screen dimensions
-        user32 = ctypes.windll.user32
-        screen_width = user32.GetSystemMetrics(0)
-        screen_height = user32.GetSystemMetrics(1)
+    screen_width, screen_height = get_screen_dimensions()
+    if not screen_width or not screen_height:
+        return  # Exit if screen dimensions could not be fetched
 
-        # Get calculated center position
-        window_x, window_y = calculate_center_position(
-            screen_width, screen_height, width, height
-        )
+    window_x, window_y = calculate_center_position(
+        screen_width, screen_height, width, height
+    )
 
-        # Set environment variable for window position
-        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
-
-    except AttributeError as err:
-        log_entry = create_log_message(f"Failed to center window: {err}")
-        log_message(log_entry)
+    set_window_position(window_x, window_y)
 
         
+
+
+
+
 def bring_window_to_front():
     """Bring the Pygame window to the front of all other windows.
     
@@ -6860,122 +7097,6 @@ def bonus_game_generic():
 ## English section ###
 ######################
 
-# def random_quote_display():
-#     """
-#     Selects a random quote, displays it on the screen, reads it aloud, 
-#     and shows a 'Continue...' button with hover effects.
-#     """
-#     # Define a list of quotes
-#     quotes = [
-#         "The only limit to our realization of tomorrow is our doubts of today.",
-#         "Success is not final, failure is not fatal: it is the courage to continue that counts."
-#     ]
-    
-#     # Choose a random quote
-#     selected_quote = random.choice(quotes)
-
-#     # Clear the screen with the background color
-#     screen.fill(screen_color)
-
-#     # Draw the selected quote on the screen
-#     draw_text(
-#         selected_quote,
-#         font,
-#         text_color,
-#         x=0,
-#         y=HEIGHT * 0.4,
-#         max_width=WIDTH * 0.9,
-#         center=True,
-#         enable_shadow=True,
-#         shadow_color=shadow_color
-#     )
-
-#     # Update the display to show the quote
-#     pygame.display.flip()
-
-#     # Read the selected quote aloud using TTS
-#     speak_english(selected_quote)
-
-#     # Prepare for the "Continue..." button
-#     button_font_size = int(get_dynamic_font_size() * 0.8)
-#     if os.path.isfile(current_font_name_or_path):
-#         button_font = pygame.font.Font(current_font_name_or_path, button_font_size)
-#     else:
-#         button_font = pygame.font.SysFont(current_font_name_or_path, button_font_size)
-
-#     button_text = "Continue..."
-#     hover_particles = []  # To store active hover particles
-#     particle_count = 3
-#     particle_lifetime = 30
-
-#     # Initialize button_rect to avoid UnboundLocalError
-#     button_rect = pygame.Rect(0, 0, 0, 0)
-
-#     # Event loop for handling hover effects and the Continue button
-#     waiting = True
-#     while waiting:
-#         # Clear the screen for a new frame
-#         screen.fill(screen_color)
-
-#         # Redraw the quote
-#         draw_text(
-#             selected_quote,
-#             font,
-#             text_color,
-#             x=0,
-#             y=HEIGHT * 0.4,
-#             max_width=WIDTH * 0.9,
-#             center=True,
-#             enable_shadow=True,
-#             shadow_color=shadow_color
-#         )
-
-#         # Draw the "Continue..." button
-#         mouse_pos = pygame.mouse.get_pos()
-#         button_rect = draw_text(
-#             button_text,
-#             button_font,
-#             shadow_color if button_rect.collidepoint(mouse_pos) else text_color,
-#             x=WIDTH * 0.55,
-#             y=HEIGHT * 0.9,
-#             enable_shadow=True,
-#             shadow_color=shadow_color,
-#             return_rect=True
-#         )
-
-#         # Handle hover particles for the button
-#         if button_rect.collidepoint(mouse_pos):
-#             for _ in range(particle_count):
-#                 particle_color = random.choice([shadow_color, text_color, screen_color])
-#                 particle = Particle(mouse_pos[0], mouse_pos[1], particle_color)
-#                 particle.lifetime = particle_lifetime
-#                 angle = random.uniform(0, 2 * math.pi)
-#                 speed = random.uniform(1, 3)
-#                 particle.dx = math.cos(angle) * speed
-#                 particle.dy = math.sin(angle) * speed
-#                 hover_particles.append(particle)
-
-#         # Update and draw hover particles
-#         for particle in hover_particles[:]:
-#             particle.update()
-#             particle.draw(screen)
-#             if particle.lifetime <= 0:
-#                 hover_particles.remove(particle)
-
-#         # Update the display
-#         pygame.display.flip()
-
-#         # Handle events
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-#                 sys.exit()
-#             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#                 if button_rect.collidepoint(event.pos):
-#                     waiting = False  # Exit the loop
-
-#         # Cap the frame rate
-#         clock.tick(60)
 def random_quote_display():
     """
     Selects a random quote with an author, displays it on the screen, 
@@ -7006,9 +7127,148 @@ def random_quote_display():
         ("To handle yourself, use your head; to handle others, use your heart.", "Eleanor Roosevelt"),
         ("The purpose of our lives is to be happy.", "Dalai Lama"),
         ("Life is what happens when you’re busy making other plans.", "John Lennon"),
-        ("If you look at what you have in life, you’ll always have more.", "Oprah Winfrey"),
         ("The future belongs to those who believe in the beauty of their dreams.", "Eleanor Roosevelt"),
-        ("Tell me and I forget. Teach me and I remember. Involve me and I learn.", "Benjamin Franklin")
+        ("Tell me and I forget. Teach me and I remember. Involve me and I learn.", "Benjamin Franklin"),
+        ("Be yourself; everyone else is already taken.", "Oscar Wilde"),
+        ("Life is short, smile while you still have teeth.", "Unknown"),
+        ("It is from their foes, not their friends, that cities learn the lesson of building high walls.", "Aristophanes"),
+        ("Meditation brings wisdom; lack of meditation leaves ignorance. Know well what leads you forward and what holds you back.", "The Buddha"),
+        ("The man who moves a mountain begins by carrying away small stones.", "Confucius"),
+        ("I am the Lord thy God. Thou shalt have no other gods before Me.", "The Bible, Exodus"),
+        ("Nature herself has imprinted on the minds of all the idea of God.", "Cicero"),
+        ("Not at all similar are the race of the immortal gods and the race of men who walk upon the earth.", "Homer"),
+        ("Hath not the potter power over the clay, to make one vessel unto honor, and another unto dishonor?", "The Bible, Romans"),
+        ("The Lord bless you and keep you; the Lord make His face to shine upon you and be gracious to you; the Lord lift up His countenance upon you and give you peace.", "The Bible, Numbers"),
+        ("You can't direct the wind, but you can adjust your sails.", "Unknown"),
+        ("Put your shoulder to the wheel.", "Aesop"),
+        ("True glory consists in doing what deserves to be written, in writing what deserves to be read.", "Pliny the Elder"),
+        ("Art for art's sake is an empty phrase. Art for the sake of truth, art for the sake of the good and the beautiful, that is the faith I am searching for.", "George Sand"),
+        ("Words have the power to both destroy and heal. When words are both true and kind, they can change our world.", "The Buddha"),
+        ("For everything there is a season and a time for every purpose under heaven.", "Ecclesiastes"),
+        ("To bring about the rule of righteousness in the land, so that the strong should not harm the weak.", "Hammurabi's Code; Prologue"),
+        ("The wisest men follow their own direction.", "Euripides"),
+        ("And on the pedestal these words appear: 'My name is Ozymandias, king of kings: Look on my works, ye Mighty, and despair!' Nothing beside remains.", "Percy Bysshe Shelley"),
+        ("Everything is worth what its purchaser will pay for it.", "Publius Syrus"),
+        ("All the world's a stage, and all the men and women merely players. They have their exits and their entrances; and one man in his time plays many parts.", "William Shakespeare"),
+        ("You should hammer your iron when it is glowing hot.", "Publius Syrus"),
+        ("Some books are to be tasted, others to be swallowed, and some to be chewed and digested.", "Sir Francis Bacon"),
+        ("If in other sciences we should arrive at certainty without doubt and truth without error, it behooves us to place the foundations of knowledge in mathematics.", "Roger Bacon"),
+        ("And them that take the sword shall perish by the sword.", "The Bible, Matthew"),
+        ("A multitude of rulers is not a good thing. Let there be one ruler, one king.", "Herodotus"),
+        ("Banking establishments are more dangerous than standing armies.", "Thomas Jefferson"),
+        ("The bureaucracy is expanding to meet the needs of the expanding bureaucracy.", "Unknown"),
+        ("I am the state.", "Louis XIV"),
+        ("A designer knows he has achieved perfection not when there is nothing left to add, but when there is nothing left to take away.", "Antoine de Saint-Exupery"),
+        ("I cannot live without books.", "Thomas Jefferson"),
+        ("Astronomy compels the soul to look upwards and leads us from this world to another.", "Plato"),
+        ("Chemistry means the difference between poverty and starvation and the abundant life.", "Robert Brent"),
+        ("No freeman shall be taken, imprisoned, or in any other way destroyed, except by the lawful judgment of his peers.", "The Magna Carta"),
+        ("Corporation, n. An ingenious device for obtaining individual profit without individual responsibility.", "Ambrose Bierce"),
+        ("It has been said that democracy is the worst form of government except all the others that have been tried.", "Winston Churchill"),
+        ("Compound interest is the most powerful force in the universe.", "Albert Einstein"),
+        ("There is no wealth like knowledge, no poverty like ignorance.", "Ali ibn Abi-Talib"),
+        ("You can get more of what you want with a kind word and a gun than you can with just a kind word.", "Al Capone"),
+        ("Any society that would give up a little liberty to gain a little security will deserve neither and lose both.", "Benjamin Franklin"),
+        ("Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.", "Sun-Tzu"),
+        ("What gunpowder did for war, the printing press has done for the mind.", "Wendell Phillips"),
+        ("Political power grows out of the barrel of a gun.", "Mao Zedong"),
+        ("Artillery adds dignity to what would otherwise be a vulgar brawl.", "Frederick the Great"),
+        ("People can have the Model T in any color - so long as it's black.", "Henry Ford"),
+        ("We do not inherit the earth from our ancestors, we borrow it from our children.", "Native American Song"),
+        ("Any sufficiently advanced technology is indistinguishable from magic.", "Arthur C. Clarke"),
+        ("I just want to say one word to you. Just one word: plastics.", "Calder Willingham, The Graduate"),
+        ("Never trust a computer you can't throw out a window.", "Steve Wozniak"),
+        ("The future will be better tomorrow.", "Dan Quayle"),
+        ("The Earth is the cradle of the mind, but one cannot eternally live in a cradle.", "Konstantin E. Tsiolkovsky"),
+        ("Their rising all at once was as the sound of a thunder heard remote.", "Milton"),
+        ("Once the rockets are up, who cares where they come down?", "Tom Hehrer"),
+        ("Where tillage begins, other arts follow. The farmers therefore are the founders of human civilization.", "Daniel Webster"),
+        ("Thou shalt not muzzle the ox when he treadeth out the corn.", "The Bible, Deuteronomy 25:4"),
+        ("Those who cannot remember the past are condemned to repeat it.", "George Santayana"),
+        ("The haft of the arrow had been feathered with one of the eagle's own plumes. We often give our enemies the means of our own destruction.", "Aesop"),
+        ("Joyfully to the breeze royal Odysseus spread his sail, and with his rudder skillfully he steered.", "Homer"),
+        ("The unleashed power of the atom has changed everything save our modes of thinking, and we thus drift toward unparalleled catastrophes.", "Albert Einstein"),
+        ("Happiness: a good bank account, a good cook and a good digestion.", "Jean Jacques Rousseau"),
+        ("If the brain were so simple we could understand it, we would be so simple we couldn't.", "Lyall Watson"),
+        ("Here Hector entered, with a spear eleven cubits long in his hand; the bronze point gleamed in front of him, and was fastened to the shaft of the spear by a ring of gold.", "Homer"),
+        ("So teach us to number our days, so that we may apply our hearts unto wisdom.", "The Bible, Psalms 90:12"),
+        ("Wherever we look, the work of the chemist has raised the level of our civilization and has increased the productive capacity of our nation.", "Calvin Coolidge"),
+        ("Who pulleth out this sword of this stone and anvil, is rightwise king born of all England.", "Malory"),
+        ("The only thing that saves us from the bureaucracy is its inefficiency.", "Eugene McCarthy"),
+        ("Any man who can drive safely while kissing a pretty girl is simply not giving the kiss the attention it deserves.", "Albert Einstein"),
+        ("I find the great thing in this world is not so much where we stand, as in what direction we are moving.", "Oliver Wendell Holmes"),
+        ("Computers are like Old Testament gods: lots of rules and no mercy.", "Joseph Campbell"),
+        ("Three things are to be looked to in a building: that it stand on the right spot; that it be securely founded; that it be successfully executed.", "Johann Wolfgang von Goethe"),
+        ("Better is bread with a happy heart/Than wealth with vexation.", "Amenemope"),
+        ("As soon as men decide that all means are permitted to fight an evil, then their good becomes indistinguishable from the evil that they set out to destroy.", "Christopher Dawson"),
+        ("Compound interest is the most powerful force in the universe.", "Albert Einstein"),
+        ("Only within the moment of time represented by the present century has one species, man, acquired significant power to alter the nature of his world.", "Rachel Carson"),
+        ("Education is the best provision for old age.", "Aristotle"),
+        ("Is it a fact - or have I dreamt it - that, by means of electricity, the world of matter has become a great nerve, vibrating thousands of miles in a breathless point of time?", "Nathaniel Hawthorne"),
+        ("There's a basic principle about consumer electronics: it gets more powerful all the time and it gets cheaper all the time.", "Trip Hawkins"),
+        ("Instrumental or mechanical science is the noblest and, above all others, the most useful.", "Leonardo da Vinci"),
+        ("The nation that destroys its soil destroys itself.", "Franklin Delano Roosevelt"),
+        ("Aeronautics was neither an industry nor a science. It was a miracle.", "Igor Sikorsky"),
+        ("I think we all agree, the past is over.", "George W. Bush"),
+        ("The new electronic interdependence recreates the world in the image of a global village.", "Marshall McLuhan"),
+        ("The day when two army corps can annihilate each other in one second, all civilized nations, it is to be hoped, will recoil from war and discharge their troops.", "Alfred Nobel"),
+        ("My kingdom for a horse!", "Shakespeare (Richard III)"),
+        ("Do not wait to strike 'til the iron is hot; but make it hot by striking.", "William Butler Yeats"),
+        ("The night is far spent, the day is at hand; let us therefore cast off the works of darkness, and let us put on the armor of light.", "The Bible, Romans 13:12"),
+        ("The press is the best instrument for enlightening the mind of man, and improving him as a rational, moral and social being.", "Thomas Jefferson"),
+        ("How happy are those whose walls already rise!", "Virgil"),
+        ("The speed of communication is wondrous to behold. It is also true that speed can multiply the distribution of information that we know to be untrue.", "Edward R. Murrow"),
+        ("Mathematics is the gate and key to the sciences.", "Roger Bacon"),
+        ("When pieces of bronze or gold or iron break, the metal-smith welds them together again in the fire, and the bond is established.", "Sri Guru Granth Sahib"),
+        ("There never was a good knife made of bad steel.", "Benjamin Franklin"),
+        ("Wars may be fought with weapons, but they are won by men. It is the spirit of the men who follow and of the man who leads that gains the victory.", "George S. Patton"),
+        ("The meek shall inherit the Earth, but not its mineral rights.", "J. Paul Getty"),
+        ("The impact of nanotechnology is expected to exceed the impact the electronics revolution has had on our lives.", "Richard Schwartz"),
+        ("The winds and the waves are always on the side of the ablest navigators.", "Edward Gibbon"),
+        ("I am become Death, the destroyer of worlds.", "J. Robert Oppenheimer"),
+        ("The release of atomic energy has not created a new problem. It has merely made more urgent the necessity of solving an existing one.", "Albert Einstein"),
+        ("He made an instrument to know/If the moon shine at full or no.", "Samuel Butler"),
+        ("Every particle of matter is attracted by or gravitates to every other particle of matter with a force inversely proportional to the squares of their distances.", "Isaac Newton"),
+        ("In nothing do men more nearly approach the gods than in giving health to men.", "Cicero"),
+        ("There is only one good, knowledge, and one evil, ignorance.", "Socrates"),
+        ("Measure what is measurable, and make measurable what is not so.", "Galileo"),
+        ("Ben, I want to say one word to you, just one word: plastics.", "Buck Henry and Calder Willingham, The Graduate"),
+        ("Shall the clay say to him that fashioneth it, What makest thou?", "The Bible, Isaiah 45:9"),
+        ("It is a newspaper's duty to print the news and raise hell.", "The Chicago Times"),
+        ("Vision is the art of seeing things invisible.", "Jonathan Swift"),
+        ("The whole country was tied together by radio. We all experienced the same heroes and comedians and singers. They were giants.", "Woody Allen"),
+        ("The introduction of so powerful an agent as steam to a carriage on wheels will make a great change in the situation of man.", "Thomas Jefferson"),
+        ("And homeless near a thousand homes I stood, and near a thousand tables pined and wanted food.", "William Wordsworth"),
+        ("Nothing is particularly hard if you divide it into small jobs.", "Henry Ford"),
+        ("It is well that war is so terrible, or we should grow too fond of it.", "Robert E. Lee"),
+        ("A good rule for rocket experimenters to follow is this: always assume that it will explode.", "Astronautics Magazine, 1937"),
+        ("He who commands the sea has command of everything.", "Themistocles"),
+        ("Now, somehow, in some new way, the sky seemed almost alien.", "Lyndon B. Johnson"),
+        ("Every great advance in science has issued from a new audacity of imagination.", "John Dewey"),
+        ("Be extremely subtle, even to the point of formlessness. Be extremely mysterious, even to the point of soundlessness. Thereby you can be the director of the opponent's fate.", "Sun Tzu"),
+        ("The nations of the West hope that by means of steam communications all the world will become as one family.", "Townsend Harris"),
+        ("Wisdom and virtue are like the two wheels of a cart.", "Japanese Proverb"),
+        ("He who destroys a good book kills reason itself.", "John Milton"),
+        ("Empty your mind, be formless, shapeless, like water. You put water into a cup, it becomes the cup. You put water into a bottle, it becomes the bottle. You put it in a teapot, it becomes the teapot. Now, water can flow or it can crash. Be water, my friend.", "Bruce Lee"),
+        ("Knowing is not enough, we must apply. Willing is not enough, we must do.", "Bruce Lee"),
+        ("Do not pray for an easy life, pray for the strength to endure a difficult one.", "Bruce Lee"),
+        ("Adapt what is useful, reject what is useless, and add what is specifically your own.", "Bruce Lee"),
+        ("Absorb what is useful, discard what is not, add what is uniquely your own.", "Bruce Lee"),
+        ("Mistakes are always forgivable, if one has the courage to admit them.", "Bruce Lee"),
+        ("I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.", "Bruce Lee"),
+        ("If you spend too much time thinking about a thing, you’ll never get it done. Make at least one definite move daily toward your goal.", "Bruce Lee"),
+        ("The successful warrior is the average man, with laser-like focus.", "Bruce Lee"),
+        ("To hell with circumstances; I create opportunities.", "Bruce Lee"),
+        ("Your mind is for having ideas, not holding them.", "David Allen"),
+        ("The ancestor of every action is a thought.", "Ralph Waldo Emerson"),
+        ("It is not enough to be busy. So are the ants. The question is: What are we busy about?", "Henry David Thoreau"),
+        ("What lies in our power to do, lies in our power not to do.", "Aristotle"),
+        ("Much of the stress that people feel doesn’t come from having too much to do. It comes from not finishing what they started.", "David Allen (paraphrasing the source)"),
+        ("If you don't pay appropriate attention to what has your attention, it will take more of your attention than it deserves.", "David Allen"),
+        ("Things rarely get stuck because of lack of time. They get stuck because the doing of them has not been defined.", "David Allen"),
+        ("You can do anything, but not everything.", "David Allen"),
+        ("The hurrier I go, the behinder I get.", "Lewis Carroll"),
+        ("Amateurs sit and wait for inspiration; the rest of us just get up and go to work.", "Stephen King")
     ]
 
     
