@@ -2953,6 +2953,8 @@ j_song_zou_san2 = {
 ### Helper Functions ###
 ########################
 
+### LOGGING ###
+
 def get_current_timestamp():
     """
     Get the current timestamp as a formatted string.
@@ -3029,6 +3031,8 @@ def log_message(log_entry, log_file="error_log.txt"):
     log_to_console(log_entry)
     write_to_file(log_file, log_entry)
 
+
+### LOADING BACKGROUNDS ###
 
 def get_image_files(folder_path):
     """
@@ -3115,6 +3119,8 @@ def select_random_background(folder_path):
 
     return os.path.join(folder_path, selected_image)
 
+
+### WINDOW MANAGEMENT ###
 
 def calculate_center_position(screen_width, 
                               screen_height, 
@@ -3261,109 +3267,6 @@ def bring_window_to_front():
         log_message(log_entry)
 
 
-def load_image(icon_path):
-    """
-    Load an image from the specified file path.
-
-    Parameters:
-        icon_path (str): Path to the icon file.
-
-    Returns:
-        pygame.Surface: The loaded image surface.
-
-    Raises:
-        FileNotFoundError: If the file is not found.
-        pygame.error: If Pygame fails to load the image.
-    """
-    return pygame.image.load(icon_path)
-
-
-def set_window_icon(icon):
-    """
-    Set the Pygame window icon.
-
-    Parameters:
-        icon (pygame.Surface): The loaded image surface to use as the icon.
-    """
-    pygame.display.set_icon(icon)
-
-
-def log_icon_error(error_message):
-    """
-    Log an error related to setting the window or taskbar icon.
-
-    Parameters:
-        error_message (str): The error message to log.
-    """
-    log_entry = create_log_message(error_message)
-    log_message(log_entry)
-
-
-def load_and_set_icons(icon_path):
-    """
-    Load and set both the window and taskbar icons.
-
-    Parameters:
-        icon_path (str): Path to the .ico file to use for both the window and taskbar icons.
-    """
-    try:
-        # Load and set the window icon
-        icon = load_image(icon_path)
-        set_window_icon(icon)
-
-    except (FileNotFoundError, ValueError, pygame.error, OSError) as e:
-        log_icon_error(f"Failed to set icons: {e}")
-    
-    
-def initialize_pygame_core():
-    """
-    Initialize Pygame's core modules (excluding optional ones like mixer).
-
-    Raises:
-        pygame.error: If Pygame fails to initialize.
-    """
-    try:
-        pygame.init()
-    except pygame.error as e:
-        raise RuntimeError(f"Error initializing Pygame core: {e}")
-
-
-def initialize_pygame_mixer():
-    """
-    Initialize Pygame's mixer module for sound.
-
-    Raises:
-        pygame.error: If Pygame mixer fails to initialize.
-    """
-    try:
-        pygame.mixer.init()
-    except pygame.error as e:
-        raise RuntimeError(f"Error initializing Pygame mixer: {e}")
-
-
-def log_and_exit_on_error(error_message):
-    """
-    Log an error message and gracefully exit the program.
-
-    Parameters:
-        error_message (str): The error message to log.
-    """
-    log_entry = create_log_message(error_message)
-    log_message(log_entry)
-    sys.exit(1)
-
-
-def initialize_pygame():
-    """
-    Initialize Pygame and its modules, logging errors and exiting on failure.
-    """
-    try:
-        initialize_pygame_core()
-        initialize_pygame_mixer()
-    except RuntimeError as e:
-        log_and_exit_on_error(str(e))
-
-
 def get_display_info():
     """
     Get the display information using Pygame.
@@ -3503,6 +3406,113 @@ def load_resolution_from_options(available_resolutions, default_resolution):
         return get_resolution_from_options(options, available_resolutions, default_resolution)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
         return handle_resolution_error(e, available_resolutions, default_resolution)
+    
+    
+### WINDOW ICON ###
+
+def load_image(icon_path):
+    """
+    Load an image from the specified file path.
+
+    Parameters:
+        icon_path (str): Path to the icon file.
+
+    Returns:
+        pygame.Surface: The loaded image surface.
+
+    Raises:
+        FileNotFoundError: If the file is not found.
+        pygame.error: If Pygame fails to load the image.
+    """
+    return pygame.image.load(icon_path)
+
+
+def set_window_icon(icon):
+    """
+    Set the Pygame window icon.
+
+    Parameters:
+        icon (pygame.Surface): The loaded image surface to use as the icon.
+    """
+    pygame.display.set_icon(icon)
+
+
+def log_icon_error(error_message):
+    """
+    Log an error related to setting the window or taskbar icon.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_entry = create_log_message(error_message)
+    log_message(log_entry)
+
+
+def load_and_set_icons(icon_path):
+    """
+    Load and set both the window and taskbar icons.
+
+    Parameters:
+        icon_path (str): Path to the .ico file to use for both the window and taskbar icons.
+    """
+    try:
+        # Load and set the window icon
+        icon = load_image(icon_path)
+        set_window_icon(icon)
+
+    except (FileNotFoundError, ValueError, pygame.error, OSError) as e:
+        log_icon_error(f"Failed to set icons: {e}")
+    
+
+### PYGAME INITIALIZATION ###   
+
+def initialize_pygame_core():
+    """
+    Initialize Pygame's core modules (excluding optional ones like mixer).
+
+    Raises:
+        pygame.error: If Pygame fails to initialize.
+    """
+    try:
+        pygame.init()
+    except pygame.error as e:
+        raise RuntimeError(f"Error initializing Pygame core: {e}")
+
+
+def initialize_pygame_mixer():
+    """
+    Initialize Pygame's mixer module for sound.
+
+    Raises:
+        pygame.error: If Pygame mixer fails to initialize.
+    """
+    try:
+        pygame.mixer.init()
+    except pygame.error as e:
+        raise RuntimeError(f"Error initializing Pygame mixer: {e}")
+
+
+def log_and_exit_on_error(error_message):
+    """
+    Log an error message and gracefully exit the program.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_entry = create_log_message(error_message)
+    log_message(log_entry)
+    sys.exit(1)
+
+
+def initialize_pygame():
+    """
+    Initialize Pygame and its modules, logging errors and exiting on failure.
+    """
+    try:
+        initialize_pygame_core()
+        initialize_pygame_mixer()
+    except RuntimeError as e:
+        log_and_exit_on_error(str(e))
 
 
 ##############################################
@@ -3548,28 +3558,92 @@ pygame.mixer.set_num_channels(16)
 ### Database Functions ###
 ##########################
 
+# def check_database_initialization():
+#     """
+#     Check if the 'learniverse.db' database exists. If not, create it.
+#     Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
+#     Handle errors by logging them.
+#     """
+#     try:
+#         # Check if the database file exists; create if it doesn't
+#         if not os.path.isfile(DB_NAME):
+#             log_message(create_log_message(f"Database '{DB_NAME}' not found. Creating and initializing tables..."))
+#             create_database_and_initialize_tables()
+#         else:
+#             log_message(create_log_message(f"Database '{DB_NAME}' found. Verifying tables and inserting lessons..."))
+#             verify_and_initialize_database()
+
+#     except sqlite3.Error as e:
+#         log_message(create_log_message(f"Database error during initialization: {e}"))
+#         sys.exit(1)
+
+#     except Exception as e:
+#         log_message(create_log_message(f"Unexpected error during initialization: {e}"))
+#         sys.exit(1)
 def check_database_initialization():
     """
-    Check if the 'learniverse.db' database exists. If not, create it.
-    Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
-    Handle errors by logging them.
+    Check and initialize the database.
+    Ensure the database file and tables exist, handling errors appropriately.
     """
     try:
-        # Check if the database file exists; create if it doesn't
-        if not os.path.isfile(DB_NAME):
-            log_message(create_log_message(f"Database '{DB_NAME}' not found. Creating and initializing tables..."))
-            create_database_and_initialize_tables()
+        if not database_exists():
+            handle_missing_database()
         else:
-            log_message(create_log_message(f"Database '{DB_NAME}' found. Verifying tables and inserting lessons..."))
-            verify_and_initialize_database()
-
+            handle_existing_database()
     except sqlite3.Error as e:
-        log_message(create_log_message(f"Database error during initialization: {e}"))
-        sys.exit(1)
-
+        handle_database_error(f"Database error during initialization: {e}")
     except Exception as e:
-        log_message(create_log_message(f"Unexpected error during initialization: {e}"))
-        sys.exit(1)
+        handle_unexpected_error(f"Unexpected error during initialization: {e}")
+
+
+def database_exists():
+    """
+    Check if the database file exists.
+
+    Returns:
+        bool: True if the database file exists, False otherwise.
+    """
+    return os.path.isfile(DB_NAME)
+
+
+def handle_missing_database():
+    """
+    Handle the case where the database file is missing.
+    Log the action and initialize the database with required tables.
+    """
+    log_message(create_log_message(f"Database '{DB_NAME}' not found. Creating and initializing tables..."))
+    create_database_and_initialize_tables()
+
+
+def handle_existing_database():
+    """
+    Handle the case where the database file exists.
+    Log the action, verify tables, and initialize lessons if needed.
+    """
+    log_message(create_log_message(f"Database '{DB_NAME}' found. Verifying tables and inserting lessons..."))
+    verify_and_initialize_database()
+
+
+def handle_database_error(error_message):
+    """
+    Handle a database-related error by logging it and exiting.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_message(create_log_message(error_message))
+    sys.exit(1)
+
+
+def handle_unexpected_error(error_message):
+    """
+    Handle an unexpected error by logging it and exiting.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_message(create_log_message(error_message))
+    sys.exit(1)
 
 
 def create_database_and_initialize_tables():
