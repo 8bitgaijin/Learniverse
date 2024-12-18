@@ -2955,45 +2955,6 @@ j_song_zou_san2 = {
 ### Helper Functions ###
 ########################
 
-# def create_log_message(message):
-#     """
-#     Create a log message with a current timestamp.
-
-#     This is a pure function that generates a string formatted with a timestamp 
-#     and the provided message. The timestamp is in the format YYYY-MM-DD HH:MM:SS.
-
-#     Parameters:
-#         message (str): The log message to be included after the timestamp.
-
-#     Returns:
-#         str: The log message formatted with a timestamp.
-#     """
-#     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     return f"[{timestamp}] {message}"
-
-
-# def log_message(log_entry):
-#     """
-#     Log a message to both the console and the error_log.txt file with UTF-8 encoding.
-
-#     This function handles logging by printing the log entry to the console and 
-#     appending it to a file named 'error_log.txt'. It handles any file I/O errors 
-#     gracefully by logging the failure to the console.
-
-#     Parameters:
-#         log_entry (str): The log message to be printed and saved.
-#     """
-#     # Print the log entry to the console
-#     print(log_entry)
-
-#     try:
-#         # Attempt to open the log file with UTF-8 encoding and write the log entry
-#         log_file_path = "error_log.txt"
-#         with open(log_file_path, "a", encoding="utf-8") as error_file:
-#             error_file.write(log_entry + "\n")
-#     except (IOError, OSError) as e:
-#         # If an error occurs, print an error message to the console
-#         print(f"Failed to log message to file '{log_file_path}': {e}")
 def get_current_timestamp():
     """
     Get the current timestamp as a formatted string.
@@ -3071,79 +3032,6 @@ def log_message(log_entry, log_file="error_log.txt"):
     write_to_file(log_file, log_entry)
 
 
-# def list_images_in_folder(folder_path):
-#     """
-#     List all image files in the specified folder.
-
-#     This function scans the provided folder for image files with common image 
-#     extensions (such as .png, .jpg, .jpeg, and .bmp) and returns a list of 
-#     matching file names.
-
-#     Parameters:
-#         folder_path (str): The path to the folder containing images.
-
-#     Returns:
-#         list: A list of image file names in the specified folder. Returns an 
-#         empty list if no image files are found.
-#     """
-#     try:
-#         # List all image files in the folder
-#         image_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
-#         image_files = [f for f in os.listdir(folder_path) 
-#                        if f.lower().endswith(image_extensions)]
-#         return image_files
-#     except OSError as e:
-#         # Log an error if there is an issue accessing the folder
-#         log_entry = create_log_message(f"File operation error while listing images: {e}")
-#         log_message(log_entry)
-#         return []
-
-
-# def select_random_image_from_list(image_list):
-#     """
-#     Select a random image from a provided list of image files.
-
-#     This function takes a list of image file names and selects one at random.
-
-#     Parameters:
-#         image_list (list): A list of image file names to select from.
-
-#     Returns:
-#         str: The randomly selected image file name, or None if the list is empty.
-#     """
-#     if not image_list:
-#         return None
-
-#     return random.choice(image_list)
-
-
-# def select_random_background(folder_path):
-#     """
-#     Select a random background image from the specified folder.
-
-#     This function lists the image files in the specified folder and selects 
-#     one at random. If no image files are found, it returns None.
-
-#     Parameters:
-#         folder_path (str): The path to the folder containing background images.
-
-#     Returns:
-#         str: The file path of the randomly selected image, or None if no image 
-#         files are found or an error occurs during the selection process.
-#     """
-#     # Get a list of all images in the folder
-#     image_files = list_images_in_folder(folder_path)
-
-#     # Select a random image from the list
-#     selected_image = select_random_image_from_list(image_files)
-
-#     if selected_image:
-#         return os.path.join(folder_path, selected_image)
-#     else:
-#         # Log an error if no image files were found
-#         log_entry = create_log_message(f"No image files found in folder: {folder_path}")
-#         log_message(log_entry)
-#         return None
 def get_image_files(folder_path):
     """
     Get a list of image files in the specified folder.
@@ -3230,44 +3118,6 @@ def select_random_background(folder_path):
     return os.path.join(folder_path, selected_image)
 
 
-# def calculate_center_position(screen_width, screen_height, window_width, window_height):
-#     """Calculate the center position of a window given screen and window dimensions."""
-#     window_x = (screen_width - window_width) // 2
-#     window_y = (screen_height - window_height) // 2
-#     return window_x, window_y
-
-
-# def center_window(width, height):
-#     """Centers the Pygame window on the screen.
-
-#     Parameters:
-#         width (int): The width of the window.
-#         height (int): The height of the window.
-
-#     This function sets the environment variable `SDL_VIDEO_WINDOW_POS` 
-#     to center the Pygame window on the user's screen.
-#     """
-#     try:
-#         # Clear existing window position to avoid residual settings
-#         if 'SDL_VIDEO_WINDOW_POS' in os.environ:
-#             del os.environ['SDL_VIDEO_WINDOW_POS']
-
-#         # Get screen dimensions
-#         user32 = ctypes.windll.user32
-#         screen_width = user32.GetSystemMetrics(0)
-#         screen_height = user32.GetSystemMetrics(1)
-
-#         # Get calculated center position
-#         window_x, window_y = calculate_center_position(
-#             screen_width, screen_height, width, height
-#         )
-
-#         # Set environment variable for window position
-#         os.environ['SDL_VIDEO_WINDOW_POS'] = f"{window_x},{window_y}"
-
-#     except AttributeError as err:
-#         log_entry = create_log_message(f"Failed to center window: {err}")
-#         log_message(log_entry)
 def calculate_center_position(screen_width, screen_height, window_width, window_height):
     """
     Calculate the center position of a window given screen and window dimensions.
@@ -3344,35 +3194,6 @@ def center_window(width, height):
     set_window_position(window_x, window_y)
 
 
-# def bring_window_to_front():
-#     """Bring the Pygame window to the front of all other windows.
-    
-#     This function works only on Windows platforms. It uses ctypes to interact
-#     with the Windows API to bring the Pygame window to the foreground and set focus.
-#     """
-#     # Platform check for Windows-specific functionality
-#     if sys.platform != "win32":
-#         log_entry = create_log_message("Bring to front is only supported on Windows.")
-#         log_message(log_entry)
-#         return
-
-#     try:
-#         # Get the Pygame window handle
-#         hwnd = pygame.display.get_wm_info().get('window')
-
-#         if hwnd is None:
-#             raise ValueError("Unable to get the window handle.")
-
-#         # Use ctypes to bring the window to the front
-#         ctypes.windll.user32.SetForegroundWindow(hwnd)
-#         ctypes.windll.user32.SetFocus(hwnd)
-
-#     except (AttributeError, ValueError, ctypes.WinError) as e:
-#         # Handle AttributeError if 'window' info is missing
-#         # Handle ValueError if hwnd is None
-#         # Handle ctypes.WinError if ctypes call fails
-#         log_entry = create_log_message(f"Failed to bring window to front: {e}")
-#         log_message(log_entry)
 def is_windows_platform():
     """
     Check if the platform is Windows.
@@ -3439,41 +3260,122 @@ def bring_window_to_front():
         log_message(log_entry)
 
 
-
-def load_and_set_window_icon(icon_path):
+def load_image(icon_path):
     """
-    Try to load and set the window icon from the specified file.
+    Load an image from the specified file path.
 
     Parameters:
         icon_path (str): Path to the icon file.
+
+    Returns:
+        pygame.Surface: The loaded image surface.
+
+    Raises:
+        FileNotFoundError: If the file is not found.
+        pygame.error: If Pygame fails to load the image.
+    """
+    return pygame.image.load(icon_path)
+
+
+def set_window_icon(icon):
+    """
+    Set the Pygame window icon.
+
+    Parameters:
+        icon (pygame.Surface): The loaded image surface to use as the icon.
+    """
+    pygame.display.set_icon(icon)
+
+
+def log_icon_error(error_message):
+    """
+    Log an error related to setting the window or taskbar icon.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_entry = create_log_message(error_message)
+    log_message(log_entry)
+
+
+def load_and_set_icons(icon_path):
+    """
+    Load and set both the window and taskbar icons.
+
+    Parameters:
+        icon_path (str): Path to the .ico file to use for both the window and taskbar icons.
     """
     try:
-        # Load the window icon
-        icon = pygame.image.load(icon_path)
-        pygame.display.set_icon(icon)
-    except FileNotFoundError as e:
-        log_entry = create_log_message(f"Icon file not found: {e}")
-        log_message(log_entry)
-    except pygame.error as e:
-        log_entry = create_log_message(f"Failed to load icon: {e}")
-        log_message(log_entry)
-        
-    
-def initialize_pygame():
-    """
-    Initialize Pygame and its modules.
+        # Load and set the window icon
+        icon = load_image(icon_path)
+        set_window_icon(icon)
 
-    This function initializes Pygame's main modules and handles any errors that occur,
-    logging them and gracefully exiting the program if necessary.
+    except (FileNotFoundError, ValueError, pygame.error, OSError) as e:
+        log_icon_error(f"Failed to set icons: {e}")
+    
+    
+# def initialize_pygame():
+#     """
+#     Initialize Pygame and its modules.
+
+#     This function initializes Pygame's main modules and handles any errors that occur,
+#     logging them and gracefully exiting the program if necessary.
+#     """
+#     try:
+#         pygame.init()
+#         pygame.mixer.init()
+#     except pygame.error as e:
+#         log_entry = create_log_message(f"Error initializing Pygame: {e}")
+#         log_message(log_entry)
+#         sys.exit(1)
+def initialize_pygame_core():
+    """
+    Initialize Pygame's core modules (excluding optional ones like mixer).
+
+    Raises:
+        pygame.error: If Pygame fails to initialize.
     """
     try:
         pygame.init()
+    except pygame.error as e:
+        raise RuntimeError(f"Error initializing Pygame core: {e}")
+
+
+def initialize_pygame_mixer():
+    """
+    Initialize Pygame's mixer module for sound.
+
+    Raises:
+        pygame.error: If Pygame mixer fails to initialize.
+    """
+    try:
         pygame.mixer.init()
     except pygame.error as e:
-        log_entry = create_log_message(f"Error initializing Pygame: {e}")
-        log_message(log_entry)
-        sys.exit(1)
-        
+        raise RuntimeError(f"Error initializing Pygame mixer: {e}")
+
+
+def log_and_exit_on_error(error_message):
+    """
+    Log an error message and gracefully exit the program.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_entry = create_log_message(error_message)
+    log_message(log_entry)
+    sys.exit(1)
+
+
+def initialize_pygame():
+    """
+    Initialize Pygame and its modules, logging errors and exiting on failure.
+    """
+    try:
+        initialize_pygame_core()
+        initialize_pygame_mixer()
+    except RuntimeError as e:
+        log_and_exit_on_error(str(e))
+
 
 def get_max_display_resolution():
     """Get the maximum display resolution from the system."""
@@ -3530,7 +3432,7 @@ def load_resolution_from_options(available_resolutions, default_resolution):
 ### Pygame Initialization and Window Setup ###
 ##############################################
 
-load_and_set_window_icon('assets/images/Learniverse.ico')
+load_and_set_icons('assets/images/Learniverse.ico')
 
 initialize_pygame()
 
