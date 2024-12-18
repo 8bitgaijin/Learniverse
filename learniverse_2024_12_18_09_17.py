@@ -2949,8 +2949,6 @@ j_song_zou_san2 = {
 }
 
 
-
-
 ########################
 ### Helper Functions ###
 ########################
@@ -3118,9 +3116,12 @@ def select_random_background(folder_path):
     return os.path.join(folder_path, selected_image)
 
 
-def calculate_center_position(screen_width, screen_height, window_width, window_height):
+def calculate_center_position(screen_width, 
+                              screen_height, 
+                              window_width, 
+                              window_height):
     """
-    Calculate the center position of a window given screen and window dimensions.
+    Calculate the window center position from screen and window dimensions.
 
     Parameters:
         screen_width (int): The width of the screen.
@@ -4470,19 +4471,6 @@ def was_last_session_incomplete_today(student_name):
 ### Font Functions ###
 ######################
 
-# def get_dynamic_font_size():
-#     """
-#     Calculate the dynamic font size based on the current screen resolution.
-
-#     Returns:
-#         int: The adjusted font size based on the scaling factor.
-#     """
-#     # Calculate scaling factor based on resolution
-#     scale_factor = min(WIDTH / BASE_RESOLUTION[0], HEIGHT / BASE_RESOLUTION[1])
-#     # Adjust the font size
-#     dynamic_font_size = int(BASE_FONT_SIZE * scale_factor)
-    
-#     return dynamic_font_size
 def calculate_scale_factor(current_resolution, base_resolution):
     """
     Calculate the scaling factor based on the current resolution and base resolution.
@@ -4526,19 +4514,6 @@ def get_dynamic_font_size():
     return adjust_font_size(BASE_FONT_SIZE, scale_factor)
 
 
-# def init_fonts():
-#     font_size = get_dynamic_font_size()  # Dynamically adjust the size
-
-#     # Initialize English font
-#     if os.path.isfile(current_font_name_or_path):
-#         english_font = pygame.font.Font(current_font_name_or_path, font_size)
-#     else:
-#         english_font = pygame.font.SysFont(current_font_name_or_path, font_size)
-
-#     # Initialize Japanese font (assuming MS Gothic for Japanese text)
-#     japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", font_size)
-
-#     return english_font, japanese_font  # Return both fonts
 def get_font_size():
     """
     Get the dynamically adjusted font size based on resolution.
@@ -4595,92 +4570,6 @@ def init_fonts():
     return english_font, japanese_font
 
 
-# def get_filtered_fonts():
-#     # List of known problematic fonts to exclude (alphabetized)
-#     excluded_fonts = {
-#         'amiriquranregular', 
-#         'bookshelfsymbol7', 
-#         'codicon', 
-#         'codicon0035', 
-#         'dejavumathtexgyreregular', 
-#         'elusiveicons', 
-#         'elusiveicons-webfont', 
-#         'elusiveicons-webfont-2.0', 
-#         'extra', 
-#         'fontawesome47webfont', 
-#         'fontawesome5brandswebfont', 
-#         'fontawesome5brandswebfont5154', 
-#         'fontawesome5regularwebfont', 
-#         'fontawesome5regularwebfont5154', 
-#         'fontawesome5solidwebfont', 
-#         'fontawesome5solidwebfont5154', 
-#         'goudystout', 
-#         'holomdl2assets', 
-#         'lucidasanstypewriteroblique', 
-#         'lucidasanstypewriterregular', 
-#         'materialdesignicons5webfont', 
-#         'materialdesignicons5webfont5955', 
-#         'materialdesignicons6webfont', 
-#         'materialdesignicons6webfont6996', 
-#         'miriamclm', 
-#         'miriamclmbook', 
-#         'miriammonoclmbookoblique', 
-#         'msoutlook', 
-#         'msreferencespecialty', 
-#         'opensymbol', 
-#         'phosphor', 
-#         'phosphor-1.3.0', 
-#         'playbill', 
-#         'pmingliuextb', 
-#         'remixicon', 
-#         'remixicon250', 
-#         'sansserifcollection', 
-#         'segoeuiemoji', 
-#         'segoeuisymbol', 
-#         'segoefluenticons', 
-#         'segoemdl2assets', 
-#         'segmdl2', 
-#         'symbol', 
-#         'webdings', 
-#         'widelatin', 
-#         'wingdings', 
-#         'wingdings2', 
-#         'wingdings3'
-#     }
-
-#     # List fonts available through Pygame
-#     pygame_fonts = pygame.font.get_fonts()
-    
-#     filtered_fonts = []
-#     fallback_font = "arial"  # Define a safe fallback font
-    
-#     for font_name in sorted(pygame_fonts):
-#         try:
-#             # Check if the font should be excluded based on the list
-#             if any(excluded in font_name for excluded in excluded_fonts):
-#                 continue
-
-#             # Attempt to use the font, which will validate if it's working
-#             pygame.font.SysFont(font_name, 12)  # Check font by loading it with small size
-#             filtered_fonts.append(font_name)
-
-#         except FileNotFoundError:
-#             # Log error for missing font
-#             log_entry = create_log_message(f"Font not found and excluded: {font_name}")
-#             log_message(log_entry)
-
-#         except Exception as e:
-#             # Catch any other issues and log them without crashing
-#             log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
-#             log_message(log_entry)
-    
-#     # Ensure we have at least one valid font, fallback to 'arial' if necessary
-#     if not filtered_fonts:
-#         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
-#         log_message(log_entry)
-#         filtered_fonts = [fallback_font]
-
-#     return filtered_fonts
 def get_excluded_fonts():
     """
     Return a set of known problematic fonts to exclude.
