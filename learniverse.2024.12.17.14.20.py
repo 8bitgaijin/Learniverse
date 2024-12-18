@@ -3314,20 +3314,6 @@ def load_and_set_icons(icon_path):
         log_icon_error(f"Failed to set icons: {e}")
     
     
-# def initialize_pygame():
-#     """
-#     Initialize Pygame and its modules.
-
-#     This function initializes Pygame's main modules and handles any errors that occur,
-#     logging them and gracefully exiting the program if necessary.
-#     """
-#     try:
-#         pygame.init()
-#         pygame.mixer.init()
-#     except pygame.error as e:
-#         log_entry = create_log_message(f"Error initializing Pygame: {e}")
-#         log_message(log_entry)
-#         sys.exit(1)
 def initialize_pygame_core():
     """
     Initialize Pygame's core modules (excluding optional ones like mixer).
@@ -3377,10 +3363,71 @@ def initialize_pygame():
         log_and_exit_on_error(str(e))
 
 
+# def get_max_display_resolution():
+#     """Get the maximum display resolution from the system."""
+#     info = pygame.display.Info()
+#     return info.current_w, info.current_h
+def get_display_info():
+    """
+    Get the display information using Pygame.
+
+    Returns:
+        pygame.display.Info: The Pygame display information object.
+    """
+    return pygame.display.Info()
+
+
+def extract_display_resolution(display_info):
+    """
+    Extract the display resolution from a Pygame display info object.
+
+    Parameters:
+        display_info (pygame.display.Info): The Pygame display info object.
+
+    Returns:
+        tuple: A tuple containing (width, height) of the display resolution.
+    """
+    return display_info.current_w, display_info.current_h
+
+
 def get_max_display_resolution():
-    """Get the maximum display resolution from the system."""
-    info = pygame.display.Info()
-    return info.current_w, info.current_h
+    """
+    Get the maximum display resolution from the system.
+
+    Returns:
+        tuple: A tuple containing (width, height) of the display resolution.
+    """
+    display_info = get_display_info()
+    return extract_display_resolution(display_info)
+
+
+# def filter_available_resolutions(max_resolution, resolutions):
+#     """
+#     Filter available resolutions to match the current display.
+
+#     Parameters:
+#         max_resolution (tuple): Maximum resolution of the user's display.
+#         resolutions (list): List of possible resolutions.
+
+#     Returns:
+#         list: A list of resolutions that fit within the user's display.
+#     """
+#     return [
+#         res for res in resolutions
+#         if res[0] <= max_resolution[0] and res[1] <= max_resolution[1]
+#     ]
+def is_resolution_within_limit(resolution, max_resolution):
+    """
+    Check if a resolution is within the maximum resolution limits.
+
+    Parameters:
+        resolution (tuple): A resolution (width, height) to check.
+        max_resolution (tuple): Maximum resolution (width, height).
+
+    Returns:
+        bool: True if the resolution fits within the max resolution, False otherwise.
+    """
+    return resolution[0] <= max_resolution[0] and resolution[1] <= max_resolution[1]
 
 
 def filter_available_resolutions(max_resolution, resolutions):
@@ -3394,10 +3441,7 @@ def filter_available_resolutions(max_resolution, resolutions):
     Returns:
         list: A list of resolutions that fit within the user's display.
     """
-    return [
-        res for res in resolutions
-        if res[0] <= max_resolution[0] and res[1] <= max_resolution[1]
-    ]
+    return [res for res in resolutions if is_resolution_within_limit(res, max_resolution)]
 
 
 def load_resolution_from_options(available_resolutions, default_resolution):
