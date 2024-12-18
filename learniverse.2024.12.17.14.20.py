@@ -3343,40 +3343,101 @@ def center_window(width, height):
 
     set_window_position(window_x, window_y)
 
-        
+
+# def bring_window_to_front():
+#     """Bring the Pygame window to the front of all other windows.
+    
+#     This function works only on Windows platforms. It uses ctypes to interact
+#     with the Windows API to bring the Pygame window to the foreground and set focus.
+#     """
+#     # Platform check for Windows-specific functionality
+#     if sys.platform != "win32":
+#         log_entry = create_log_message("Bring to front is only supported on Windows.")
+#         log_message(log_entry)
+#         return
+
+#     try:
+#         # Get the Pygame window handle
+#         hwnd = pygame.display.get_wm_info().get('window')
+
+#         if hwnd is None:
+#             raise ValueError("Unable to get the window handle.")
+
+#         # Use ctypes to bring the window to the front
+#         ctypes.windll.user32.SetForegroundWindow(hwnd)
+#         ctypes.windll.user32.SetFocus(hwnd)
+
+#     except (AttributeError, ValueError, ctypes.WinError) as e:
+#         # Handle AttributeError if 'window' info is missing
+#         # Handle ValueError if hwnd is None
+#         # Handle ctypes.WinError if ctypes call fails
+#         log_entry = create_log_message(f"Failed to bring window to front: {e}")
+#         log_message(log_entry)
+def is_windows_platform():
+    """
+    Check if the platform is Windows.
+
+    Returns:
+        bool: True if the platform is Windows, False otherwise.
+    """
+    return sys.platform == "win32"
 
 
+def get_pygame_window_handle():
+    """
+    Retrieve the Pygame window handle.
+
+    Returns:
+        int: The window handle (HWND) if successful.
+
+    Raises:
+        ValueError: If unable to retrieve the window handle.
+    """
+    hwnd = pygame.display.get_wm_info().get('window')
+    if hwnd is None:
+        raise ValueError("Unable to get the window handle.")
+    return hwnd
+
+
+def focus_window_by_handle(hwnd):
+    """
+    Bring the specified window to the front and set focus.
+
+    Parameters:
+        hwnd (int): The window handle to bring to the front.
+
+    Raises:
+        ctypes.WinError: If the Windows API call fails.
+    """
+    ctypes.windll.user32.SetForegroundWindow(hwnd)
+    ctypes.windll.user32.SetFocus(hwnd)
+
+
+def log_unsupported_platform():
+    """
+    Log a message for unsupported platforms.
+    """
+    log_entry = create_log_message("Bring to front is only supported on Windows.")
+    log_message(log_entry)
 
 
 def bring_window_to_front():
-    """Bring the Pygame window to the front of all other windows.
-    
-    This function works only on Windows platforms. It uses ctypes to interact
-    with the Windows API to bring the Pygame window to the foreground and set focus.
     """
-    # Platform check for Windows-specific functionality
-    if sys.platform != "win32":
-        log_entry = create_log_message("Bring to front is only supported on Windows.")
-        log_message(log_entry)
+    Bring the Pygame window to the front of all other windows.
+
+    This function works only on Windows platforms and uses the Windows API.
+    """
+    if not is_windows_platform():
+        log_unsupported_platform()
         return
 
     try:
-        # Get the Pygame window handle
-        hwnd = pygame.display.get_wm_info().get('window')
-
-        if hwnd is None:
-            raise ValueError("Unable to get the window handle.")
-
-        # Use ctypes to bring the window to the front
-        ctypes.windll.user32.SetForegroundWindow(hwnd)
-        ctypes.windll.user32.SetFocus(hwnd)
-
+        hwnd = get_pygame_window_handle()
+        focus_window_by_handle(hwnd)
     except (AttributeError, ValueError, ctypes.WinError) as e:
-        # Handle AttributeError if 'window' info is missing
-        # Handle ValueError if hwnd is None
-        # Handle ctypes.WinError if ctypes call fails
         log_entry = create_log_message(f"Failed to bring window to front: {e}")
         log_message(log_entry)
+
 
 
 def load_and_set_window_icon(icon_path):
