@@ -3363,10 +3363,6 @@ def initialize_pygame():
         log_and_exit_on_error(str(e))
 
 
-# def get_max_display_resolution():
-#     """Get the maximum display resolution from the system."""
-#     info = pygame.display.Info()
-#     return info.current_w, info.current_h
 def get_display_info():
     """
     Get the display information using Pygame.
@@ -3401,21 +3397,6 @@ def get_max_display_resolution():
     return extract_display_resolution(display_info)
 
 
-# def filter_available_resolutions(max_resolution, resolutions):
-#     """
-#     Filter available resolutions to match the current display.
-
-#     Parameters:
-#         max_resolution (tuple): Maximum resolution of the user's display.
-#         resolutions (list): List of possible resolutions.
-
-#     Returns:
-#         list: A list of resolutions that fit within the user's display.
-#     """
-#     return [
-#         res for res in resolutions
-#         if res[0] <= max_resolution[0] and res[1] <= max_resolution[1]
-#     ]
 def is_resolution_within_limit(resolution, max_resolution):
     """
     Check if a resolution is within the maximum resolution limits.
@@ -3444,6 +3425,66 @@ def filter_available_resolutions(max_resolution, resolutions):
     return [res for res in resolutions if is_resolution_within_limit(res, max_resolution)]
 
 
+def read_options_file(file_path):
+    """
+    Read and parse the options file.
+
+    Parameters:
+        file_path (str): Path to the options file.
+
+    Returns:
+        dict: Parsed options from the file.
+
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        json.JSONDecodeError: If the file content is not valid JSON.
+    """
+    with open(file_path, "r") as file:
+        return json.load(file)
+
+
+def get_resolution_from_options(options, available_resolutions, default_resolution):
+    """
+    Extract the resolution index from options and validate it.
+
+    Parameters:
+        options (dict): The parsed options.
+        available_resolutions (list): List of available resolutions.
+        default_resolution (tuple): Default resolution to fall back on.
+
+    Returns:
+        tuple: The resolution and its index (resolution, index).
+    """
+    try:
+        current_resolution_index = options.get(
+            "current_resolution_index",
+            available_resolutions.index(default_resolution)
+        )
+        return available_resolutions[current_resolution_index], current_resolution_index
+    except (IndexError, ValueError):
+        # Fall back to default if the index is invalid
+        default_index = available_resolutions.index(default_resolution)
+        return default_resolution, default_index
+
+
+def handle_resolution_error(error, available_resolutions, default_resolution):
+    """
+    Log an error and return the default resolution and index.
+
+    Parameters:
+        error (Exception): The exception that occurred.
+        available_resolutions (list): List of available resolutions.
+        default_resolution (tuple): Default resolution to fall back on.
+
+    Returns:
+        tuple: The resolution and its index (resolution, index).
+    """
+    log_entry = create_log_message(f"Error loading options.json: {error}")
+    log_message(log_entry)
+    default_index = available_resolutions.index(default_resolution)
+    return default_resolution, default_index
+
+
 def load_resolution_from_options(available_resolutions, default_resolution):
     """
     Load the current resolution from the options file if available.
@@ -3457,20 +3498,11 @@ def load_resolution_from_options(available_resolutions, default_resolution):
         int: The index of the selected resolution.
     """
     try:
-        with open("options.json", "r") as file:
-            options = json.load(file)
-            current_resolution_index = options.get(
-                "current_resolution_index",
-                available_resolutions.index(default_resolution)
-            )
-            return available_resolutions[current_resolution_index], current_resolution_index
+        options = read_options_file("options.json")
+        return get_resolution_from_options(options, available_resolutions, default_resolution)
     except (FileNotFoundError, ValueError, json.JSONDecodeError) as e:
-        # Log error and default to the specified resolution
-        log_entry = create_log_message(f"Error loading options.json: {e}")
-        log_message(log_entry)
-        default_index = available_resolutions.index(default_resolution)
-        return default_resolution, default_index
-        
+        return handle_resolution_error(e, available_resolutions, default_resolution)
+
 
 ##############################################
 ### Pygame Initialization and Window Setup ###
@@ -4438,120 +4470,295 @@ def was_last_session_incomplete_today(student_name):
 ### Font Functions ###
 ######################
 
+# def get_dynamic_font_size():
+#     """
+#     Calculate the dynamic font size based on the current screen resolution.
+
+#     Returns:
+#         int: The adjusted font size based on the scaling factor.
+#     """
+#     # Calculate scaling factor based on resolution
+#     scale_factor = min(WIDTH / BASE_RESOLUTION[0], HEIGHT / BASE_RESOLUTION[1])
+#     # Adjust the font size
+#     dynamic_font_size = int(BASE_FONT_SIZE * scale_factor)
+    
+#     return dynamic_font_size
+def calculate_scale_factor(current_resolution, base_resolution):
+    """
+    Calculate the scaling factor based on the current resolution and base resolution.
+
+    Parameters:
+        current_resolution (tuple): The current screen resolution (width, height).
+        base_resolution (tuple): The base resolution for scaling (width, height).
+
+    Returns:
+        float: The scaling factor.
+    """
+    return min(current_resolution[0] / base_resolution[0], current_resolution[1] / base_resolution[1])
+
+
+def adjust_font_size(base_font_size, scale_factor):
+    """
+    Adjust the font size based on the scaling factor.
+
+    Parameters:
+        base_font_size (int): The base font size.
+        scale_factor (float): The scaling factor for adjustment.
+
+    Returns:
+        int: The dynamically adjusted font size.
+    """
+    return int(base_font_size * scale_factor)
+
+
 def get_dynamic_font_size():
     """
     Calculate the dynamic font size based on the current screen resolution.
 
+    Uses global variables WIDTH, HEIGHT, BASE_RESOLUTION, and BASE_FONT_SIZE.
+
     Returns:
         int: The adjusted font size based on the scaling factor.
     """
-    # Calculate scaling factor based on resolution
-    scale_factor = min(WIDTH / BASE_RESOLUTION[0], HEIGHT / BASE_RESOLUTION[1])
+    # Get the scaling factor
+    scale_factor = calculate_scale_factor((WIDTH, HEIGHT), BASE_RESOLUTION)
     # Adjust the font size
-    dynamic_font_size = int(BASE_FONT_SIZE * scale_factor)
-    
-    return dynamic_font_size
+    return adjust_font_size(BASE_FONT_SIZE, scale_factor)
+
+
+# def init_fonts():
+#     font_size = get_dynamic_font_size()  # Dynamically adjust the size
+
+#     # Initialize English font
+#     if os.path.isfile(current_font_name_or_path):
+#         english_font = pygame.font.Font(current_font_name_or_path, font_size)
+#     else:
+#         english_font = pygame.font.SysFont(current_font_name_or_path, font_size)
+
+#     # Initialize Japanese font (assuming MS Gothic for Japanese text)
+#     japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", font_size)
+
+#     return english_font, japanese_font  # Return both fonts
+def get_font_size():
+    """
+    Get the dynamically adjusted font size based on resolution.
+
+    Returns:
+        int: The calculated font size.
+    """
+    return get_dynamic_font_size()
+
+
+def load_english_font(font_name_or_path, font_size):
+    """
+    Load the English font, dynamically checking if it's a file or a system font.
+
+    Parameters:
+        font_name_or_path (str): Path to the font file or system font name.
+        font_size (int): The size of the font.
+
+    Returns:
+        pygame.font.Font: The initialized font object.
+    """
+    if os.path.isfile(font_name_or_path):
+        return pygame.font.Font(font_name_or_path, font_size)
+    return pygame.font.SysFont(font_name_or_path, font_size)
+
+
+def load_japanese_font(font_size):
+    """
+    Load the Japanese font with a specific path to MS Gothic.
+
+    Parameters:
+        font_size (int): The size of the font.
+
+    Returns:
+        pygame.font.Font: The initialized Japanese font object.
+    """
+    japanese_font_path = "C:/Windows/Fonts/msgothic.ttc"
+    return pygame.font.Font(japanese_font_path, font_size)
 
 
 def init_fonts():
-    font_size = get_dynamic_font_size()  # Dynamically adjust the size
+    """
+    Initialize English and Japanese fonts.
 
-    # Initialize English font
-    if os.path.isfile(current_font_name_or_path):
-        english_font = pygame.font.Font(current_font_name_or_path, font_size)
-    else:
-        english_font = pygame.font.SysFont(current_font_name_or_path, font_size)
+    Returns:
+        tuple: A tuple containing the English and Japanese font objects.
+    """
+    font_size = get_font_size()  # Determine dynamic font size
 
-    # Initialize Japanese font (assuming MS Gothic for Japanese text)
-    japanese_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", font_size)
+    # Load English and Japanese fonts
+    english_font = load_english_font(current_font_name_or_path, font_size)
+    japanese_font = load_japanese_font(font_size)
 
-    return english_font, japanese_font  # Return both fonts
+    return english_font, japanese_font
+
+
+# def get_filtered_fonts():
+#     # List of known problematic fonts to exclude (alphabetized)
+#     excluded_fonts = {
+#         'amiriquranregular', 
+#         'bookshelfsymbol7', 
+#         'codicon', 
+#         'codicon0035', 
+#         'dejavumathtexgyreregular', 
+#         'elusiveicons', 
+#         'elusiveicons-webfont', 
+#         'elusiveicons-webfont-2.0', 
+#         'extra', 
+#         'fontawesome47webfont', 
+#         'fontawesome5brandswebfont', 
+#         'fontawesome5brandswebfont5154', 
+#         'fontawesome5regularwebfont', 
+#         'fontawesome5regularwebfont5154', 
+#         'fontawesome5solidwebfont', 
+#         'fontawesome5solidwebfont5154', 
+#         'goudystout', 
+#         'holomdl2assets', 
+#         'lucidasanstypewriteroblique', 
+#         'lucidasanstypewriterregular', 
+#         'materialdesignicons5webfont', 
+#         'materialdesignicons5webfont5955', 
+#         'materialdesignicons6webfont', 
+#         'materialdesignicons6webfont6996', 
+#         'miriamclm', 
+#         'miriamclmbook', 
+#         'miriammonoclmbookoblique', 
+#         'msoutlook', 
+#         'msreferencespecialty', 
+#         'opensymbol', 
+#         'phosphor', 
+#         'phosphor-1.3.0', 
+#         'playbill', 
+#         'pmingliuextb', 
+#         'remixicon', 
+#         'remixicon250', 
+#         'sansserifcollection', 
+#         'segoeuiemoji', 
+#         'segoeuisymbol', 
+#         'segoefluenticons', 
+#         'segoemdl2assets', 
+#         'segmdl2', 
+#         'symbol', 
+#         'webdings', 
+#         'widelatin', 
+#         'wingdings', 
+#         'wingdings2', 
+#         'wingdings3'
+#     }
+
+#     # List fonts available through Pygame
+#     pygame_fonts = pygame.font.get_fonts()
+    
+#     filtered_fonts = []
+#     fallback_font = "arial"  # Define a safe fallback font
+    
+#     for font_name in sorted(pygame_fonts):
+#         try:
+#             # Check if the font should be excluded based on the list
+#             if any(excluded in font_name for excluded in excluded_fonts):
+#                 continue
+
+#             # Attempt to use the font, which will validate if it's working
+#             pygame.font.SysFont(font_name, 12)  # Check font by loading it with small size
+#             filtered_fonts.append(font_name)
+
+#         except FileNotFoundError:
+#             # Log error for missing font
+#             log_entry = create_log_message(f"Font not found and excluded: {font_name}")
+#             log_message(log_entry)
+
+#         except Exception as e:
+#             # Catch any other issues and log them without crashing
+#             log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
+#             log_message(log_entry)
+    
+#     # Ensure we have at least one valid font, fallback to 'arial' if necessary
+#     if not filtered_fonts:
+#         log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
+#         log_message(log_entry)
+#         filtered_fonts = [fallback_font]
+
+#     return filtered_fonts
+def get_excluded_fonts():
+    """
+    Return a set of known problematic fonts to exclude.
+
+    Returns:
+        set: A set of font names to exclude.
+    """
+    return {
+        'amiriquranregular', 'bookshelfsymbol7', 'codicon', 'codicon0035',
+        'dejavumathtexgyreregular', 'elusiveicons', 'elusiveicons-webfont',
+        'elusiveicons-webfont-2.0', 'extra', 'fontawesome47webfont',
+        'fontawesome5brandswebfont', 'fontawesome5brandswebfont5154',
+        'fontawesome5regularwebfont', 'fontawesome5regularwebfont5154',
+        'fontawesome5solidwebfont', 'fontawesome5solidwebfont5154',
+        'goudystout', 'holomdl2assets', 'lucidasanstypewriteroblique',
+        'lucidasanstypewriterregular', 'materialdesignicons5webfont',
+        'materialdesignicons5webfont5955', 'materialdesignicons6webfont',
+        'materialdesignicons6webfont6996', 'miriamclm', 'miriamclmbook',
+        'miriammonoclmbookoblique', 'msoutlook', 'msreferencespecialty',
+        'opensymbol', 'phosphor', 'phosphor-1.3.0', 'playbill',
+        'pmingliuextb', 'remixicon', 'remixicon250', 'sansserifcollection',
+        'segoeuiemoji', 'segoeuisymbol', 'segoefluenticons', 'segoemdl2assets',
+        'segmdl2', 'symbol', 'webdings', 'widelatin', 'wingdings',
+        'wingdings2', 'wingdings3'
+    }
+
+
+def is_valid_font(font_name, excluded_fonts):
+    """
+    Check if a font is valid and not in the exclusion list.
+
+    Parameters:
+        font_name (str): Name of the font to check.
+        excluded_fonts (set): Set of excluded font names.
+
+    Returns:
+        bool: True if the font is valid, False otherwise.
+    """
+    if any(excluded in font_name for excluded in excluded_fonts):
+        return False
+
+    try:
+        # Validate the font by loading it with a small size
+        pygame.font.SysFont(font_name, 12)
+        return True
+    except FileNotFoundError:
+        log_error(f"Font not found and excluded: {font_name}")
+    except Exception as e:
+        log_error(f"Skipping font {font_name} due to error: {e}")
+    return False
+
+
+def log_error(message):
+    """
+    Log an error message.
+
+    Parameters:
+        message (str): The error message to log.
+    """
+    log_entry = create_log_message(message)
+    log_message(log_entry)
 
 
 def get_filtered_fonts():
-    # List of known problematic fonts to exclude (alphabetized)
-    excluded_fonts = {
-        'amiriquranregular', 
-        'bookshelfsymbol7', 
-        'codicon', 
-        'codicon0035', 
-        'dejavumathtexgyreregular', 
-        'elusiveicons', 
-        'elusiveicons-webfont', 
-        'elusiveicons-webfont-2.0', 
-        'extra', 
-        'fontawesome47webfont', 
-        'fontawesome5brandswebfont', 
-        'fontawesome5brandswebfont5154', 
-        'fontawesome5regularwebfont', 
-        'fontawesome5regularwebfont5154', 
-        'fontawesome5solidwebfont', 
-        'fontawesome5solidwebfont5154', 
-        'goudystout', 
-        'holomdl2assets', 
-        'lucidasanstypewriteroblique', 
-        'lucidasanstypewriterregular', 
-        'materialdesignicons5webfont', 
-        'materialdesignicons5webfont5955', 
-        'materialdesignicons6webfont', 
-        'materialdesignicons6webfont6996', 
-        'miriamclm', 
-        'miriamclmbook', 
-        'miriammonoclmbookoblique', 
-        'msoutlook', 
-        'msreferencespecialty', 
-        'opensymbol', 
-        'phosphor', 
-        'phosphor-1.3.0', 
-        'playbill', 
-        'pmingliuextb', 
-        'remixicon', 
-        'remixicon250', 
-        'sansserifcollection', 
-        'segoeuiemoji', 
-        'segoeuisymbol', 
-        'segoefluenticons', 
-        'segoemdl2assets', 
-        'segmdl2', 
-        'symbol', 
-        'webdings', 
-        'widelatin', 
-        'wingdings', 
-        'wingdings2', 
-        'wingdings3'
-    }
+    """
+    Get a list of valid fonts after excluding known problematic ones.
 
-    # List fonts available through Pygame
+    Returns:
+        list: A list of valid font names.
+    """
+    excluded_fonts = get_excluded_fonts()
     pygame_fonts = pygame.font.get_fonts()
-    
-    filtered_fonts = []
-    fallback_font = "arial"  # Define a safe fallback font
-    
-    for font_name in sorted(pygame_fonts):
-        try:
-            # Check if the font should be excluded based on the list
-            if any(excluded in font_name for excluded in excluded_fonts):
-                continue
+    filtered_fonts = [font for font in sorted(pygame_fonts) if is_valid_font(font, excluded_fonts)]
 
-            # Attempt to use the font, which will validate if it's working
-            pygame.font.SysFont(font_name, 12)  # Check font by loading it with small size
-            filtered_fonts.append(font_name)
-
-        except FileNotFoundError:
-            # Log error for missing font
-            log_entry = create_log_message(f"Font not found and excluded: {font_name}")
-            log_message(log_entry)
-
-        except Exception as e:
-            # Catch any other issues and log them without crashing
-            log_entry = create_log_message(f"Skipping font {font_name} due to error: {e}")
-            log_message(log_entry)
-    
-    # Ensure we have at least one valid font, fallback to 'arial' if necessary
+    # Fallback if no valid fonts are found
     if not filtered_fonts:
-        log_entry = create_log_message("No valid fonts found, falling back to 'arial'.")
-        log_message(log_entry)
-        filtered_fonts = [fallback_font]
+        log_error("No valid fonts found, falling back to 'arial'.")
+        filtered_fonts = ["arial"]
 
     return filtered_fonts
 
