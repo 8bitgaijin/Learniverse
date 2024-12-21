@@ -3602,15 +3602,6 @@ def handle_existing_database():
     verify_and_initialize_database()
 
 
-# def handle_database_error(error_message):
-#     """
-#     Handle a database-related error by logging it and exiting.
-
-#     Parameters:
-#         error_message (str): The error message to log.
-#     """
-#     log_message(create_log_message(error_message))
-#     sys.exit(1)
 def log_database_error(error_message):
     """
     Log a database-related error.
@@ -3815,62 +3806,6 @@ def handle_table_initialization_error(error, connection):
     connection.rollback()
 
 
-# def insert_lessons(cursor, connection):
-#     """Insert default lessons into the lessons table if they don't already exist."""
-    # lessons = [
-    #     ("Rainbow Numbers", "A math game to master mental arithmetic"),
-    #     ("Hiragana", "A lesson to master the Japanese hiragana characters"),
-    #     ("Katakana", "A lesson to master the Japanese katakana characters"),
-    #     ("Single Digit Addition", "Single Digit Addition"),
-    #     ("Single Digit Subtraction", "Single Digit Subtraction"),
-    #     ("Single Digit Multiplication", "Single Digit Multiplication"),
-    #     ("Double Digit Addition", "Double Digit Addition"),
-    #     ("Triple Digit Addition", "Triple Digit Addition"),
-    #     ("Quad Digit Addition", "Quad Digit Addition"),
-    #     ("Double Digit Subtraction", "Double Digit Subtraction"),
-    #     ("Triple Digit Subtraction", "Triple Digit Subtraction"),
-    #     ("Quad Digit Subtraction", "Quad Digit Subtraction"),
-    #     ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
-    #     ("Double Digit Multiplication", "Double Digit Multiplication"),
-    #     ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
-    #     ("Lowest Common Denominator", "Lowest Common Denominator"),
-    #     ("Basic Geometric Shapes", "Basic Geometric Shapes"),
-    #     ("Subtraction Borrowing", "Subtraction Borrowing"),
-    #     ("Japanese Colors", "Japanese Colors"),
-    #     ("Japanese Body Parts", "Japanese Body Parts"),
-    #     ("Japanese Adjectives", "Japanese Adjectives"),
-    #     ("Japanese Animals", "Japanese Animals"),
-    #     ("Japanese Family", "Japanese Family"),
-    #     ("Japanese Fruits", "Japanese Fruits"),
-    #     ("Japanese Greetings", "Japanese Greetings"),
-    #     ("One Piece Vocab", "One Piece Vocab"),
-    #     ("Japanese Self Introduction", "Japanese Self Introduction"),
-    #     ("Japanese Nouns", "Japanese Nouns"),
-    #     ("Japanese Time", "Japanese Time"),
-    #     ("Japanese Vegtables", "Japanese Vegtables"),
-    #     ("Japanese Verbs", "Japanese Verbs"),
-    #     ("Japanese Song Sanpo", "Japanese Song Sanpo"),
-    #     ("Japanese Song Zou-san", "Japanese Song Zou-san")
-    # ]
-
-#     try:
-#         for title, description in lessons:
-#             # Check if the lesson already exists, case-insensitive check
-#             cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
-#             result = cursor.fetchone()
-
-#             if not result:  # If no result, insert the lesson
-#                 cursor.execute('''
-#                     INSERT INTO lessons (title, description)
-#                     VALUES (?, ?)
-#                 ''', (title, description))
-
-#                 # Commit after every insert to ensure changes are saved
-#                 connection.commit()
-
-#     except sqlite3.Error as e:
-#         log_entry = create_log_message(f"Error inserting lessons: {e}")
-#         log_message(log_entry)
 def insert_lessons(cursor, connection):
     """
     Insert default lessons into the lessons table if they don't already exist.
@@ -3978,54 +3913,6 @@ def handle_lesson_insertion_error(error):
     log_message(log_entry)
 
 
-# def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
-#     """
-#     Add a new student to the database.
-
-#     This function inserts a new student into the 'students' table of the 'learniverse.db' database.
-#     It records the student's name, age, and email, and commits the transaction.
-
-#     Parameters:
-#         name (str): The name of the student. This is a required field and must be provided.
-#         age (Optional[int]): The age of the student. This is optional, and can be None if not provided.
-#         email (Optional[str]): The email address of the student. This is optional, and can be None if not provided.
-
-#     Returns:
-#         Optional[int]: The ID of the newly added student if the insertion was successful.
-#         Returns None if there was an error during the insertion.
-
-#     Logs:
-#         Logs an attempt to add the student, whether the addition was successful, and the student's ID.
-#         Logs any error encountered during the insertion process.
-
-#     Example:
-#         add_student("Alice", 10, "alice@example.com")
-#         -> Returns the ID of the new student, e.g., 1.
-
-#     In case of an error (e.g., database is unavailable or insertion fails), logs the error and returns None.
-#     """
-#     log_message(create_log_message(f"Attempting to add student '{name}'..."))
-    
-#     try:
-#         with sqlite3.connect('learniverse.db') as connection:
-#             cursor = connection.cursor()
-#             cursor.execute('''
-#                 INSERT INTO students (name, age, email)
-#                 VALUES (?, ?, ?)
-#             ''', (name, age, email))
-
-#             student_id = cursor.lastrowid
-#             connection.commit()
-
-#             log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
-#             log_message(log_entry)
-
-#             return student_id
-
-#     except sqlite3.Error as e:
-#         log_entry = create_log_message(f"Error adding student '{name}': {e}")
-#         log_message(log_entry)
-        # return None
 def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
     """
     Add a new student to the database and log the operation.
@@ -4110,32 +3997,6 @@ def handle_student_insertion_error(name: str, error: sqlite3.Error):
     log_message(log_entry)
 
 
-# def get_students() -> List[Tuple[int, str, int, str]]:
-#     """
-#     Retrieve a list of students from the database.
-
-#     Returns:
-#         List[Tuple[int, str, int, str]]: A list of tuples, each representing a student.
-#         The tuple structure is as follows:
-#             - int: Student ID (Primary Key)
-#             - str: Student name
-#             - int: Student age (can be None if not provided)
-#             - str: Student email (can be None if not provided)
-
-#     In case of an error, an empty list is returned.
-#     """
-
-#     try:
-#         with sqlite3.connect('learniverse.db') as connection:
-#             cursor = connection.cursor()
-#             cursor.execute("SELECT * FROM students")
-#             student_list = cursor.fetchall()
-
-#         return student_list
-
-#     except sqlite3.Error as e:
-#         log_message(create_log_message(f"Error retrieving students: {e}"))
-#         return []
 def get_students() -> List[Tuple[int, str, int, str]]:
     """
     Retrieve a list of students from the database.
@@ -4178,18 +4039,6 @@ def fetch_all(cursor, query: str, params: Optional[Tuple] = None) -> List[Tuple]
     return cursor.fetchall()
 
 
-# def handle_database_error(action: str, error: sqlite3.Error):
-#     """
-#     Handle database-related errors by logging them.
-
-#     Parameters:
-#         action (str): The action being performed when the error occurred.
-#         error (sqlite3.Error): The database error that occurred.
-#     """
-#     log_entry = create_log_message(f"Error {action}: {error}")
-#     log_message(log_entry)
-
-
 def convert_timestamp_to_string(timestamp: float) -> str:
     """Convert a Unix timestamp to a human-readable datetime string."""
     return datetime.fromtimestamp(timestamp).strftime(DATETIME_FORMAT)
@@ -4203,6 +4052,56 @@ def calculate_session_metrics(start_time: float, end_time: float, total_question
     return total_time, avg_time_per_question, percent_correct
 
 
+# def add_session_lesson(session_id: int, lesson_id: int, start_time: float, end_time: float, 
+#                        total_questions: int, questions_correct: int) -> Optional[int]:
+#     """
+#     Add a new record to the session_lessons table with detailed lesson data.
+
+#     Parameters:
+#         session_id (int): The ID of the session.
+#         lesson_id (int): The ID of the lesson.
+#         start_time (float): Unix timestamp representing the start time.
+#         end_time (float): Unix timestamp representing the end time.
+#         total_questions (int): The total number of questions asked in the lesson.
+#         questions_correct (int): The total number of correct answers.
+
+#     Returns:
+#         Optional[int]: The ID of the new session lesson record, or None if an error occurs.
+#     """
+#     log_message(create_log_message("Adding lesson to session in session_lessons table."))
+#     try:
+#         with sqlite3.connect('learniverse.db') as connection:
+#             cursor = connection.cursor()
+
+#             # Convert timestamps
+#             start_time_str = convert_timestamp_to_string(start_time)
+#             end_time_str = convert_timestamp_to_string(end_time)
+
+#             # Calculate metrics
+#             total_time, avg_time_per_question, percent_correct = calculate_session_metrics(
+#                 start_time, end_time, total_questions, questions_correct
+#             )
+
+#             # Insert the lesson record into session_lessons
+#             cursor.execute('''
+#                 INSERT INTO session_lessons (session_id, lesson_id, start_time, end_time, total_time, 
+#                                              questions_asked, questions_correct, avg_time_per_question, percent_correct)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (session_id, lesson_id, start_time_str, end_time_str, total_time, total_questions, 
+#                   questions_correct, avg_time_per_question, percent_correct))
+
+#             connection.commit()
+#             session_lesson_id = cursor.lastrowid
+
+#             log_entry = create_log_message(f"Session lesson record added with ID: {session_lesson_id}")
+#             log_message(log_entry)
+
+#             return session_lesson_id
+
+#     except sqlite3.Error as e:
+#         log_entry = create_log_message(f"Error adding session lesson record: {e}")
+#         log_message(log_entry)
+#         return None
 def add_session_lesson(session_id: int, lesson_id: int, start_time: float, end_time: float, 
                        total_questions: int, questions_correct: int) -> Optional[int]:
     """
@@ -4220,39 +4119,89 @@ def add_session_lesson(session_id: int, lesson_id: int, start_time: float, end_t
         Optional[int]: The ID of the new session lesson record, or None if an error occurs.
     """
     log_message(create_log_message("Adding lesson to session in session_lessons table."))
+
     try:
-        with sqlite3.connect('learniverse.db') as connection:
-            cursor = connection.cursor()
-
-            # Convert timestamps
-            start_time_str = convert_timestamp_to_string(start_time)
-            end_time_str = convert_timestamp_to_string(end_time)
-
-            # Calculate metrics
-            total_time, avg_time_per_question, percent_correct = calculate_session_metrics(
-                start_time, end_time, total_questions, questions_correct
-            )
-
-            # Insert the lesson record into session_lessons
-            cursor.execute('''
-                INSERT INTO session_lessons (session_id, lesson_id, start_time, end_time, total_time, 
-                                             questions_asked, questions_correct, avg_time_per_question, percent_correct)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (session_id, lesson_id, start_time_str, end_time_str, total_time, total_questions, 
-                  questions_correct, avg_time_per_question, percent_correct))
-
-            connection.commit()
-            session_lesson_id = cursor.lastrowid
-
-            log_entry = create_log_message(f"Session lesson record added with ID: {session_lesson_id}")
-            log_message(log_entry)
-
-            return session_lesson_id
-
+        session_lesson_data = prepare_session_lesson_data(
+            session_id, lesson_id, start_time, end_time, total_questions, questions_correct
+        )
+        session_lesson_id = insert_session_lesson(session_lesson_data)
+        log_successful_insertion(session_lesson_id)
+        return session_lesson_id
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error adding session lesson record: {e}")
-        log_message(log_entry)
+        handle_session_lesson_error(e)
         return None
+
+
+def prepare_session_lesson_data(session_id: int, lesson_id: int, start_time: float, end_time: float, 
+                                total_questions: int, questions_correct: int) -> Tuple:
+    """
+    Prepare the data for inserting a session lesson record.
+
+    Parameters:
+        session_id (int): The ID of the session.
+        lesson_id (int): The ID of the lesson.
+        start_time (float): Unix timestamp representing the start time.
+        end_time (float): Unix timestamp representing the end time.
+        total_questions (int): The total number of questions asked in the lesson.
+        questions_correct (int): The total number of correct answers.
+
+    Returns:
+        Tuple: A tuple containing all the values needed for the database insertion.
+    """
+    start_time_str = convert_timestamp_to_string(start_time)
+    end_time_str = convert_timestamp_to_string(end_time)
+    total_time, avg_time_per_question, percent_correct = calculate_session_metrics(
+        start_time, end_time, total_questions, questions_correct
+    )
+
+    return (session_id, lesson_id, start_time_str, end_time_str, total_time, 
+            total_questions, questions_correct, avg_time_per_question, percent_correct)
+
+
+def insert_session_lesson(data: Tuple) -> int:
+    """
+    Insert a session lesson record into the database.
+
+    Parameters:
+        data (Tuple): The data for the session lesson record.
+
+    Returns:
+        int: The ID of the newly inserted session lesson record.
+    """
+    connection, cursor = get_database_connection()
+    try:
+        cursor.execute('''
+            INSERT INTO session_lessons (session_id, lesson_id, start_time, end_time, total_time, 
+                                         questions_asked, questions_correct, avg_time_per_question, percent_correct)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', data)
+        connection.commit()
+        return cursor.lastrowid
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def log_successful_insertion(session_lesson_id: int):
+    """
+    Log the successful insertion of a session lesson record.
+
+    Parameters:
+        session_lesson_id (int): The ID of the newly inserted session lesson record.
+    """
+    log_entry = create_log_message(f"Session lesson record added with ID: {session_lesson_id}")
+    log_message(log_entry)
+
+
+def handle_session_lesson_error(error: sqlite3.Error):
+    """
+    Handle errors encountered during session lesson insertion.
+
+    Parameters:
+        error (sqlite3.Error): The database error that occurred.
+    """
+    log_entry = create_log_message(f"Error adding session lesson record: {error}")
+    log_message(log_entry)
 
 
 def get_student_id_by_name(student_name: str) -> Optional[int]:
