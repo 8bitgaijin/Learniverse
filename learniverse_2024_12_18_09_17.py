@@ -3602,6 +3602,25 @@ def handle_existing_database():
     verify_and_initialize_database()
 
 
+# def handle_database_error(error_message):
+#     """
+#     Handle a database-related error by logging it and exiting.
+
+#     Parameters:
+#         error_message (str): The error message to log.
+#     """
+#     log_message(create_log_message(error_message))
+#     sys.exit(1)
+def log_database_error(error_message):
+    """
+    Log a database-related error.
+
+    Parameters:
+        error_message (str): The error message to log.
+    """
+    log_message(create_log_message(error_message))
+
+
 def handle_database_error(error_message):
     """
     Handle a database-related error by logging it and exiting.
@@ -3609,7 +3628,7 @@ def handle_database_error(error_message):
     Parameters:
         error_message (str): The error message to log.
     """
-    log_message(create_log_message(error_message))
+    log_database_error(error_message)
     sys.exit(1)
 
 
@@ -3959,56 +3978,164 @@ def handle_lesson_insertion_error(error):
     log_message(log_entry)
 
 
+# def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
+#     """
+#     Add a new student to the database.
+
+#     This function inserts a new student into the 'students' table of the 'learniverse.db' database.
+#     It records the student's name, age, and email, and commits the transaction.
+
+#     Parameters:
+#         name (str): The name of the student. This is a required field and must be provided.
+#         age (Optional[int]): The age of the student. This is optional, and can be None if not provided.
+#         email (Optional[str]): The email address of the student. This is optional, and can be None if not provided.
+
+#     Returns:
+#         Optional[int]: The ID of the newly added student if the insertion was successful.
+#         Returns None if there was an error during the insertion.
+
+#     Logs:
+#         Logs an attempt to add the student, whether the addition was successful, and the student's ID.
+#         Logs any error encountered during the insertion process.
+
+#     Example:
+#         add_student("Alice", 10, "alice@example.com")
+#         -> Returns the ID of the new student, e.g., 1.
+
+#     In case of an error (e.g., database is unavailable or insertion fails), logs the error and returns None.
+#     """
+#     log_message(create_log_message(f"Attempting to add student '{name}'..."))
+    
+#     try:
+#         with sqlite3.connect('learniverse.db') as connection:
+#             cursor = connection.cursor()
+#             cursor.execute('''
+#                 INSERT INTO students (name, age, email)
+#                 VALUES (?, ?, ?)
+#             ''', (name, age, email))
+
+#             student_id = cursor.lastrowid
+#             connection.commit()
+
+#             log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
+#             log_message(log_entry)
+
+#             return student_id
+
+#     except sqlite3.Error as e:
+#         log_entry = create_log_message(f"Error adding student '{name}': {e}")
+#         log_message(log_entry)
+        # return None
 def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
     """
-    Add a new student to the database.
-
-    This function inserts a new student into the 'students' table of the 'learniverse.db' database.
-    It records the student's name, age, and email, and commits the transaction.
+    Add a new student to the database and log the operation.
 
     Parameters:
-        name (str): The name of the student. This is a required field and must be provided.
-        age (Optional[int]): The age of the student. This is optional, and can be None if not provided.
-        email (Optional[str]): The email address of the student. This is optional, and can be None if not provided.
+        name (str): The name of the student.
+        age (Optional[int]): The age of the student.
+        email (Optional[str]): The email address of the student.
 
     Returns:
-        Optional[int]: The ID of the newly added student if the insertion was successful.
-        Returns None if there was an error during the insertion.
-
-    Logs:
-        Logs an attempt to add the student, whether the addition was successful, and the student's ID.
-        Logs any error encountered during the insertion process.
-
-    Example:
-        add_student("Alice", 10, "alice@example.com")
-        -> Returns the ID of the new student, e.g., 1.
-
-    In case of an error (e.g., database is unavailable or insertion fails), logs the error and returns None.
+        Optional[int]: The ID of the newly added student, or None if the insertion failed.
     """
     log_message(create_log_message(f"Attempting to add student '{name}'..."))
-    
+
     try:
-        with sqlite3.connect('learniverse.db') as connection:
-            cursor = connection.cursor()
-            cursor.execute('''
-                INSERT INTO students (name, age, email)
-                VALUES (?, ?, ?)
-            ''', (name, age, email))
+        connection, cursor = get_database_connection()
+        student_id = insert_student(cursor, name, age, email)
+        connection.commit()
 
-            student_id = cursor.lastrowid
-            connection.commit()
-
-            log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
-            log_message(log_entry)
-
-            return student_id
-
+        log_successful_insertion(name, student_id)
+        return student_id
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error adding student '{name}': {e}")
-        log_message(log_entry)
+        handle_student_insertion_error(name, e)
         return None
+    finally:
+        cursor.close()
+        connection.close()
 
 
+def get_database_connection():
+    """
+    Open a database connection and return the connection and cursor.
+
+    Returns:
+        tuple: A tuple of (connection, cursor).
+    """
+    connection = sqlite3.connect('learniverse.db')
+    return connection, connection.cursor()
+
+
+def insert_student(cursor, name: str, age: Optional[int], email: Optional[str]) -> int:
+    """
+    Insert a student into the database.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        name (str): The name of the student.
+        age (Optional[int]): The age of the student.
+        email (Optional[str]): The email address of the student.
+
+    Returns:
+        int: The ID of the newly inserted student.
+    """
+    cursor.execute('''
+        INSERT INTO students (name, age, email)
+        VALUES (?, ?, ?)
+    ''', (name, age, email))
+    return cursor.lastrowid
+
+
+def log_successful_insertion(name: str, student_id: int):
+    """
+    Log a successful student insertion.
+
+    Parameters:
+        name (str): The name of the student.
+        student_id (int): The ID of the newly added student.
+    """
+    log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
+    log_message(log_entry)
+
+
+def handle_student_insertion_error(name: str, error: sqlite3.Error):
+    """
+    Handle errors encountered during student insertion.
+
+    Parameters:
+        name (str): The name of the student being added.
+        error (sqlite3.Error): The exception raised during the insertion.
+    """
+    log_entry = create_log_message(f"Error adding student '{name}': {error}")
+    log_message(log_entry)
+
+
+# def get_students() -> List[Tuple[int, str, int, str]]:
+#     """
+#     Retrieve a list of students from the database.
+
+#     Returns:
+#         List[Tuple[int, str, int, str]]: A list of tuples, each representing a student.
+#         The tuple structure is as follows:
+#             - int: Student ID (Primary Key)
+#             - str: Student name
+#             - int: Student age (can be None if not provided)
+#             - str: Student email (can be None if not provided)
+
+#     In case of an error, an empty list is returned.
+#     """
+
+#     try:
+#         with sqlite3.connect('learniverse.db') as connection:
+#             cursor = connection.cursor()
+#             cursor.execute("SELECT * FROM students")
+#             student_list = cursor.fetchall()
+
+#         return student_list
+
+#     except sqlite3.Error as e:
+#         log_message(create_log_message(f"Error retrieving students: {e}"))
+#         return []
 def get_students() -> List[Tuple[int, str, int, str]]:
     """
     Retrieve a list of students from the database.
@@ -4023,18 +4150,44 @@ def get_students() -> List[Tuple[int, str, int, str]]:
 
     In case of an error, an empty list is returned.
     """
-
     try:
-        with sqlite3.connect('learniverse.db') as connection:
-            cursor = connection.cursor()
-            cursor.execute("SELECT * FROM students")
-            student_list = cursor.fetchall()
-
+        connection, cursor = get_database_connection()
+        student_list = fetch_all(cursor, "SELECT * FROM students")
         return student_list
-
     except sqlite3.Error as e:
-        log_message(create_log_message(f"Error retrieving students: {e}"))
+        handle_database_error("retrieving students", e)
         return []
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def fetch_all(cursor, query: str, params: Optional[Tuple] = None) -> List[Tuple]:
+    """
+    Execute a SELECT query and fetch all results.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        query (str): The SQL query to execute.
+        params (Optional[Tuple]): Optional parameters for the query.
+
+    Returns:
+        List[Tuple]: The results of the query.
+    """
+    cursor.execute(query, params or ())
+    return cursor.fetchall()
+
+
+# def handle_database_error(action: str, error: sqlite3.Error):
+#     """
+#     Handle database-related errors by logging them.
+
+#     Parameters:
+#         action (str): The action being performed when the error occurred.
+#         error (sqlite3.Error): The database error that occurred.
+#     """
+#     log_entry = create_log_message(f"Error {action}: {error}")
+#     log_message(log_entry)
 
 
 def convert_timestamp_to_string(timestamp: float) -> str:
