@@ -3558,28 +3558,6 @@ pygame.mixer.set_num_channels(16)
 ### Database Functions ###
 ##########################
 
-# def check_database_initialization():
-#     """
-#     Check if the 'learniverse.db' database exists. If not, create it.
-#     Ensure the 'students', 'lessons', 'sessions', and 'session_lessons' tables are set up.
-#     Handle errors by logging them.
-#     """
-#     try:
-#         # Check if the database file exists; create if it doesn't
-#         if not os.path.isfile(DB_NAME):
-#             log_message(create_log_message(f"Database '{DB_NAME}' not found. Creating and initializing tables..."))
-#             create_database_and_initialize_tables()
-#         else:
-#             log_message(create_log_message(f"Database '{DB_NAME}' found. Verifying tables and inserting lessons..."))
-#             verify_and_initialize_database()
-
-#     except sqlite3.Error as e:
-#         log_message(create_log_message(f"Database error during initialization: {e}"))
-#         sys.exit(1)
-
-#     except Exception as e:
-#         log_message(create_log_message(f"Unexpected error during initialization: {e}"))
-#         sys.exit(1)
 def check_database_initialization():
     """
     Check and initialize the database.
@@ -3660,160 +3638,325 @@ def create_database_and_initialize_tables():
 
 def verify_and_initialize_database():
     """
-    Verify that the database tables are set up properly, and initialize them if not.
-    Insert lessons if they are missing.
+    Verify that the database tables are set up properly and initialize them if not.
+    Ensure lessons are present in the database.
     """
     try:
         connection, cursor = get_database_cursor()
 
-        # Check if 'students' table exists
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='students';")
-        if cursor.fetchone():
-            log_message(create_log_message("'students' table found. Database is ready."))
-        else:
+        if not verify_table_exists(cursor, "students"):
             log_message(create_log_message("'students' table not found. Initializing tables..."))
             _initialize_tables(cursor, connection)
+        else:
+            log_message(create_log_message("'students' table found. Database is ready."))
 
-        # Ensure lessons are present in the 'lessons' table
-        insert_lessons(cursor, connection)
-
+        ensure_lessons_exist(cursor, connection)
     finally:
         cursor.close()
         connection.close()
+
+
+def verify_table_exists(cursor, table_name):
+    """
+    Check if a specific table exists in the database.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        table_name (str): The name of the table to verify.
+
+    Returns:
+        bool: True if the table exists, False otherwise.
+    """
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
+    return cursor.fetchone() is not None
+
+
+def ensure_lessons_exist(cursor, connection):
+    """
+    Ensure lessons are present in the 'lessons' table. If not, insert them.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        connection (sqlite3.Connection): The database connection.
+    """
+    log_message(create_log_message("Ensuring lessons are present in the database..."))
+    insert_lessons(cursor, connection)
         
 
 def _initialize_tables(cursor, connection):
-    """Initialize the required tables and insert lessons if they don't exist."""
+    """
+    Initialize the required database tables and insert lessons.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        connection (sqlite3.Connection): The database connection.
+    """
     try:
-        # Create the necessary tables if they don't already exist
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS students (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                age INTEGER,
-                email TEXT UNIQUE
-            )
-        ''')
+        # Create all necessary tables
+        create_students_table(cursor)
+        create_lessons_table(cursor)
+        create_sessions_table(cursor)
+        create_session_lessons_table(cursor)
+        create_student_lesson_progress_table(cursor)
 
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS lessons (
-                lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                description TEXT
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS sessions (
-                session_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                student_id INTEGER NOT NULL,
-                start_time TIMESTAMP,  -- No DEFAULT here
-                end_time TIMESTAMP,
-                total_time REAL,
-                total_questions INTEGER,
-                total_correct INTEGER,
-                avg_time_per_question REAL,
-                FOREIGN KEY (student_id) REFERENCES students(id)
-            )
-        ''')
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS session_lessons (
-                session_lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id INTEGER NOT NULL,
-                lesson_id INTEGER NOT NULL,
-                start_time TIMESTAMP,
-                end_time TIMESTAMP,
-                total_time REAL,
-                questions_asked INTEGER,
-                questions_correct INTEGER,
-                avg_time_per_question REAL,
-                percent_correct REAL,
-                FOREIGN KEY (session_id) REFERENCES sessions(session_id),
-                FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
-            )
-        ''')
-
-        # New table for tracking individual student levels per lesson
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS student_lesson_progress (
-                student_lesson_progress_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                student_id INTEGER NOT NULL,
-                lesson_id INTEGER NOT NULL,
-                student_level INTEGER DEFAULT 1,
-                FOREIGN KEY (student_id) REFERENCES students(id),
-                FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
-            )
-        ''')
-
-        # Insert lessons 
+        # Insert lessons into the database
         insert_lessons(cursor, connection)
 
-        # Commit the changes
+        # Commit changes
         connection.commit()
-        
+
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error initializing tables: {e}")
-        log_message(log_entry)
-        connection.rollback()
+        handle_table_initialization_error(e, connection)
 
 
+def create_students_table(cursor):
+    """Create the 'students' table."""
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS students (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            age INTEGER,
+            email TEXT UNIQUE
+        )
+    ''')
+
+
+def create_lessons_table(cursor):
+    """Create the 'lessons' table."""
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS lessons (
+            lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT
+        )
+    ''')
+
+
+def create_sessions_table(cursor):
+    """Create the 'sessions' table."""
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sessions (
+            session_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            start_time TIMESTAMP, 
+            end_time TIMESTAMP,
+            total_time REAL,
+            total_questions INTEGER,
+            total_correct INTEGER,
+            avg_time_per_question REAL,
+            FOREIGN KEY (student_id) REFERENCES students(id)
+        )
+    ''')
+
+
+def create_session_lessons_table(cursor):
+    """Create the 'session_lessons' table."""
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS session_lessons (
+            session_lesson_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER NOT NULL,
+            lesson_id INTEGER NOT NULL,
+            start_time TIMESTAMP,
+            end_time TIMESTAMP,
+            total_time REAL,
+            questions_asked INTEGER,
+            questions_correct INTEGER,
+            avg_time_per_question REAL,
+            percent_correct REAL,
+            FOREIGN KEY (session_id) REFERENCES sessions(session_id),
+            FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
+        )
+    ''')
+
+
+def create_student_lesson_progress_table(cursor):
+    """Create the 'student_lesson_progress' table."""
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS student_lesson_progress (
+            student_lesson_progress_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            student_id INTEGER NOT NULL,
+            lesson_id INTEGER NOT NULL,
+            student_level INTEGER DEFAULT 1,
+            FOREIGN KEY (student_id) REFERENCES students(id),
+            FOREIGN KEY (lesson_id) REFERENCES lessons(lesson_id)
+        )
+    ''')
+
+
+def handle_table_initialization_error(error, connection):
+    """
+    Handle errors during table initialization.
+
+    Parameters:
+        error (sqlite3.Error): The error that occurred.
+        connection (sqlite3.Connection): The database connection.
+    """
+    log_entry = create_log_message(f"Error initializing tables: {error}")
+    log_message(log_entry)
+    connection.rollback()
+
+
+# def insert_lessons(cursor, connection):
+#     """Insert default lessons into the lessons table if they don't already exist."""
+    # lessons = [
+    #     ("Rainbow Numbers", "A math game to master mental arithmetic"),
+    #     ("Hiragana", "A lesson to master the Japanese hiragana characters"),
+    #     ("Katakana", "A lesson to master the Japanese katakana characters"),
+    #     ("Single Digit Addition", "Single Digit Addition"),
+    #     ("Single Digit Subtraction", "Single Digit Subtraction"),
+    #     ("Single Digit Multiplication", "Single Digit Multiplication"),
+    #     ("Double Digit Addition", "Double Digit Addition"),
+    #     ("Triple Digit Addition", "Triple Digit Addition"),
+    #     ("Quad Digit Addition", "Quad Digit Addition"),
+    #     ("Double Digit Subtraction", "Double Digit Subtraction"),
+    #     ("Triple Digit Subtraction", "Triple Digit Subtraction"),
+    #     ("Quad Digit Subtraction", "Quad Digit Subtraction"),
+    #     ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
+    #     ("Double Digit Multiplication", "Double Digit Multiplication"),
+    #     ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
+    #     ("Lowest Common Denominator", "Lowest Common Denominator"),
+    #     ("Basic Geometric Shapes", "Basic Geometric Shapes"),
+    #     ("Subtraction Borrowing", "Subtraction Borrowing"),
+    #     ("Japanese Colors", "Japanese Colors"),
+    #     ("Japanese Body Parts", "Japanese Body Parts"),
+    #     ("Japanese Adjectives", "Japanese Adjectives"),
+    #     ("Japanese Animals", "Japanese Animals"),
+    #     ("Japanese Family", "Japanese Family"),
+    #     ("Japanese Fruits", "Japanese Fruits"),
+    #     ("Japanese Greetings", "Japanese Greetings"),
+    #     ("One Piece Vocab", "One Piece Vocab"),
+    #     ("Japanese Self Introduction", "Japanese Self Introduction"),
+    #     ("Japanese Nouns", "Japanese Nouns"),
+    #     ("Japanese Time", "Japanese Time"),
+    #     ("Japanese Vegtables", "Japanese Vegtables"),
+    #     ("Japanese Verbs", "Japanese Verbs"),
+    #     ("Japanese Song Sanpo", "Japanese Song Sanpo"),
+    #     ("Japanese Song Zou-san", "Japanese Song Zou-san")
+    # ]
+
+#     try:
+#         for title, description in lessons:
+#             # Check if the lesson already exists, case-insensitive check
+#             cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
+#             result = cursor.fetchone()
+
+#             if not result:  # If no result, insert the lesson
+#                 cursor.execute('''
+#                     INSERT INTO lessons (title, description)
+#                     VALUES (?, ?)
+#                 ''', (title, description))
+
+#                 # Commit after every insert to ensure changes are saved
+#                 connection.commit()
+
+#     except sqlite3.Error as e:
+#         log_entry = create_log_message(f"Error inserting lessons: {e}")
+#         log_message(log_entry)
 def insert_lessons(cursor, connection):
-    """Insert default lessons into the lessons table if they don't already exist."""
-    lessons = [
-        ("Rainbow Numbers", "A math game to master mental arithmetic"),
-        ("Hiragana", "A lesson to master the Japanese hiragana characters"),
-        ("Katakana", "A lesson to master the Japanese katakana characters"),
-        ("Single Digit Addition", "Single Digit Addition"),
-        ("Single Digit Subtraction", "Single Digit Subtraction"),
-        ("Single Digit Multiplication", "Single Digit Multiplication"),
-        ("Double Digit Addition", "Double Digit Addition"),
-        ("Triple Digit Addition", "Triple Digit Addition"),
-        ("Quad Digit Addition", "Quad Digit Addition"),
-        ("Double Digit Subtraction", "Double Digit Subtraction"),
-        ("Triple Digit Subtraction", "Triple Digit Subtraction"),
-        ("Quad Digit Subtraction", "Quad Digit Subtraction"),
-        ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
-        ("Double Digit Multiplication", "Double Digit Multiplication"),
-        ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
-        ("Lowest Common Denominator", "Lowest Common Denominator"),
-        ("Basic Geometric Shapes", "Basic Geometric Shapes"),
-        ("Subtraction Borrowing", "Subtraction Borrowing"),
-        ("Japanese Colors", "Japanese Colors"),
-        ("Japanese Body Parts", "Japanese Body Parts"),
-        ("Japanese Adjectives", "Japanese Adjectives"),
-        ("Japanese Animals", "Japanese Animals"),
-        ("Japanese Family", "Japanese Family"),
-        ("Japanese Fruits", "Japanese Fruits"),
-        ("Japanese Greetings", "Japanese Greetings"),
-        ("One Piece Vocab", "One Piece Vocab"),
-        ("Japanese Self Introduction", "Japanese Self Introduction"),
-        ("Japanese Nouns", "Japanese Nouns"),
-        ("Japanese Time", "Japanese Time"),
-        ("Japanese Vegtables", "Japanese Vegtables"),
-        ("Japanese Verbs", "Japanese Verbs"),
-        ("Japanese Song Sanpo", "Japanese Song Sanpo"),
-        ("Japanese Song Zou-san", "Japanese Song Zou-san")
-    ]
+    """
+    Insert default lessons into the lessons table if they don't already exist.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        connection (sqlite3.Connection): The database connection.
+    """
+    lessons = get_default_lessons()
 
     try:
         for title, description in lessons:
-            # Check if the lesson already exists, case-insensitive check
-            cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
-            result = cursor.fetchone()
-
-            if not result:  # If no result, insert the lesson
-                cursor.execute('''
-                    INSERT INTO lessons (title, description)
-                    VALUES (?, ?)
-                ''', (title, description))
-
-                # Commit after every insert to ensure changes are saved
-                connection.commit()
+            if not lesson_exists(cursor, title):
+                add_lesson(cursor, title, description)
+        
+        # Commit all changes after inserting lessons
+        connection.commit()
 
     except sqlite3.Error as e:
-        log_entry = create_log_message(f"Error inserting lessons: {e}")
-        log_message(log_entry)
+        handle_lesson_insertion_error(e)
+
+
+def get_default_lessons():
+    """
+    Get a list of default lessons.
+
+    Returns:
+        list: A list of tuples containing lesson titles and descriptions.
+    """
+    return [
+            ("Rainbow Numbers", "A math game to master mental arithmetic"),
+            ("Hiragana", "A lesson to master the Japanese hiragana characters"),
+            ("Katakana", "A lesson to master the Japanese katakana characters"),
+            ("Single Digit Addition", "Single Digit Addition"),
+            ("Single Digit Subtraction", "Single Digit Subtraction"),
+            ("Single Digit Multiplication", "Single Digit Multiplication"),
+            ("Double Digit Addition", "Double Digit Addition"),
+            ("Triple Digit Addition", "Triple Digit Addition"),
+            ("Quad Digit Addition", "Quad Digit Addition"),
+            ("Double Digit Subtraction", "Double Digit Subtraction"),
+            ("Triple Digit Subtraction", "Triple Digit Subtraction"),
+            ("Quad Digit Subtraction", "Quad Digit Subtraction"),
+            ("Single by Double Digit Multiplication", "Single by Double Digit Multiplication"),
+            ("Double Digit Multiplication", "Double Digit Multiplication"),
+            ("Single Denominator Fraction Addition", "Single Denominator Fraction Addition"),
+            ("Lowest Common Denominator", "Lowest Common Denominator"),
+            ("Basic Geometric Shapes", "Basic Geometric Shapes"),
+            ("Subtraction Borrowing", "Subtraction Borrowing"),
+            ("Japanese Colors", "Japanese Colors"),
+            ("Japanese Body Parts", "Japanese Body Parts"),
+            ("Japanese Adjectives", "Japanese Adjectives"),
+            ("Japanese Animals", "Japanese Animals"),
+            ("Japanese Family", "Japanese Family"),
+            ("Japanese Fruits", "Japanese Fruits"),
+            ("Japanese Greetings", "Japanese Greetings"),
+            ("One Piece Vocab", "One Piece Vocab"),
+            ("Japanese Self Introduction", "Japanese Self Introduction"),
+            ("Japanese Nouns", "Japanese Nouns"),
+            ("Japanese Time", "Japanese Time"),
+            ("Japanese Vegtables", "Japanese Vegtables"),
+            ("Japanese Verbs", "Japanese Verbs"),
+            ("Japanese Song Sanpo", "Japanese Song Sanpo"),
+            ("Japanese Song Zou-san", "Japanese Song Zou-san")
+    ]
+
+
+def lesson_exists(cursor, title):
+    """
+    Check if a lesson exists in the database (case-insensitive).
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        title (str): The title of the lesson to check.
+
+    Returns:
+        bool: True if the lesson exists, False otherwise.
+    """
+    cursor.execute('SELECT 1 FROM lessons WHERE LOWER(title) = ?', (title.lower(),))
+    return cursor.fetchone() is not None
+
+
+def add_lesson(cursor, title, description):
+    """
+    Add a lesson to the database.
+
+    Parameters:
+        cursor (sqlite3.Cursor): The database cursor.
+        title (str): The title of the lesson.
+        description (str): The description of the lesson.
+    """
+    cursor.execute('''
+        INSERT INTO lessons (title, description)
+        VALUES (?, ?)
+    ''', (title, description))
+
+
+def handle_lesson_insertion_error(error):
+    """
+    Handle errors during lesson insertion.
+
+    Parameters:
+        error (sqlite3.Error): The error that occurred.
+    """
+    log_entry = create_log_message(f"Error inserting lessons: {error}")
+    log_message(log_entry)
 
 
 def add_student(name: str, age: Optional[int] = None, email: Optional[str] = None) -> Optional[int]:
