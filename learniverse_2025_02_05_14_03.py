@@ -3457,7 +3457,9 @@ def load_and_set_icons(icon_path):
     """
     try:
         # Load and set the window icon
-        icon = load_image(icon_path)
+        # icon =  (icon_path)
+        icon = load_image(icon_path)  # Load the image as a Surface
+
         set_window_icon(icon)
 
     except (FileNotFoundError, ValueError, pygame.error, OSError) as e:
@@ -3973,18 +3975,6 @@ def insert_student(cursor, name: str, age: Optional[int], email: Optional[str]) 
         VALUES (?, ?, ?)
     ''', (name, age, email))
     return cursor.lastrowid
-
-
-# def log_successful_insertion(name: str, student_id: int):
-#     """
-#     Log a successful student insertion.
-
-#     Parameters:
-#         name (str): The name of the student.
-#         student_id (int): The ID of the newly added student.
-#     """
-#     log_entry = create_log_message(f"Student '{name}' added with ID: {student_id}")
-#     log_message(log_entry)
 
 
 def handle_student_insertion_error(name: str, error: sqlite3.Error):
@@ -6715,40 +6705,59 @@ def bonus_game_cat_pong():
 
     # Control Display Phase
     controls_displayed = False
+    
+    # Initialize bouncing text variables
+    text_x, text_y = WIDTH // 2 - int(175 * scale_factor), HEIGHT // 2
+    text_dx, text_dy = random.choice([-10, 10]), random.choice([-10, 10])
+    text_dx *= scale_factor
+    text_dy *= scale_factor
 
     while not controls_displayed:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
+    
         # Draw the background
         if background:
             draw_background(background)
         else:
             screen.fill(screen_color)
-
+    
         # Render the controls
         draw_text("Controls:", font, text_color, 0, HEIGHT * 0.2, center=True, enable_shadow=True)
         draw_text("W = Move Up", font, text_color, 0, HEIGHT * 0.4, center=True, enable_shadow=True)
         draw_text("S = Move Down", font, text_color, 0, HEIGHT * 0.6, center=True, enable_shadow=True)
-
-        # Render the bouncing "Bonus Stage!" text
+    
+        # Update bouncing text position
+        text_x += text_dx
+        text_y += text_dy
+    
+        # Check for collisions with screen edges
         text_surface = font.render("Bonus Stage!", True, text_color)
-        screen.blit(text_surface, (WIDTH // 2 - text_surface.get_width() // 2, HEIGHT // 2))
-
-        # Draw the "Continue..." button below the controls
+        text_width, text_height = text_surface.get_size()
+        
+        if text_x <= 0 or text_x >= WIDTH - text_width:
+            text_dx = -text_dx
+        if text_y <= 0 or text_y >= HEIGHT - text_height:
+            text_dy = -text_dy
+    
+        # Draw the bouncing "Bonus Stage!" text
+        screen.blit(text_surface, (text_x, text_y))
+    
+        # Draw the "Continue..." button
         continue_rect = draw_continue_button()
         pygame.display.flip()
-
+    
         # Check for "Continue..." button click
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
                 if check_continue_click(mouse_pos, continue_rect):
                     controls_displayed = True
-
+    
         clock.tick(60)
+
 
     try:
         while running:
@@ -7696,7 +7705,7 @@ def random_quote_display():
             text_color,
             x=0,
             y=HEIGHT * 0.1,  # Adjust position for quote
-            max_width=WIDTH * 0.9,
+            max_width=WIDTH * 0.95,
             center=True,
             enable_shadow=True,
             shadow_color=shadow_color
@@ -7709,7 +7718,7 @@ def random_quote_display():
             text_color,
             x=0,
             y=HEIGHT * 0.8,  # Adjust position for author
-            max_width=WIDTH * 0.9,
+            max_width=WIDTH * 0.95,
             center=True,
             enable_shadow=True,
             shadow_color=shadow_color
@@ -10983,11 +10992,11 @@ def single_denominator_addition_intro(session_id):
 
     # Draw the main instructional text
     draw_text(
-        "Let's work on Fraction Addition!",
+        "Let's work on Fraction Addition with the same denominator!",
         font,
         text_color,
         x=0,
-        y=HEIGHT * 0.4,
+        y=HEIGHT * 0.1,
         max_width=WIDTH * 0.95,
         center=True,
         enable_shadow=True
@@ -13717,11 +13726,11 @@ def main_menu():
                     return "options_menu"  # Return to indicate transitioning to options menu
                 elif explanation_rect.collidepoint(event.pos):
                     return "learniverse_explanation"  # Return to indicate transitioning to explanation
-            # elif event.type == pygame.KEYDOWN:
-            #     if event.key == pygame.K_b:  # Check if the 'b' key is pressed
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_b:  # Check if the 'b' key is pressed
                     # Skip directly to the bonus game for debug
                     # bonus_game_tuna_tower()
-                    # bonus_game_cat_pong()
+                    bonus_game_cat_pong()
                     # bonus_game_falling_fish()
                     # bonus_game_no_fish()
                     # bonus_game_fat_tuna() 
