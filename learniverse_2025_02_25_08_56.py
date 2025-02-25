@@ -7825,7 +7825,6 @@ def warm_up_math(session_id):
         tuple: A summary of the session with total questions, total correct answers,
                and average response time across all lessons.
     """
-    # Debug
     log_message(create_log_message("Warm up math begins."))
     
     math_lessons = [
@@ -8006,7 +8005,6 @@ def generate_rainbow_number_problem():
 def rainbow_numbers(session_id):
     global current_student
     
-    # Debug
     log_message(create_log_message("Rainbow numbers begins."))
     
     # Initialize the clock for controlling frame rate
@@ -8845,8 +8843,7 @@ def single_digit_addition(session_id):
 def double_digit_addition(session_id):
     """Presents a double-digit addition quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
-    
-    # Debug
+
     log_message(create_log_message("Double digit addition begins."))
 
     # Initialize the clock for frame rate control
@@ -9652,7 +9649,6 @@ def double_digit_subtraction(session_id):
     """Presents a double-digit subtraction quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
     
-    # Debug
     log_message(create_log_message("Double digit subtraction begins."))
 
     # Retrieve the lesson_id for Double Digit Subtraction
@@ -10362,7 +10358,6 @@ def single_digit_multiplication(session_id):
     """Presents a single-digit multiplication quiz with random numbers and updates the session results."""
     global current_student  # Access the global current student
 
-    # Debug
     log_message(create_log_message("Single digit multiplication begins."))
     
     # Retrieve the lesson_id for Single Digit Multiplication
@@ -13992,14 +13987,14 @@ def session_manager():
                        
                        # "japanese_animals_quiz",             #JP
                        # "japanese_body_parts_teach",         #JP
-                       # "japanese_colors_teach",              #JP
+                       "japanese_colors_teach",              #JP
                        # "japanese_adjectives_teach",         #JP
                        # "japanese_animals_teach",            #JP
                        # "japanese_colors_quiz",              #JP
                        
                        # "japanese_fruits_teach",             #JP
                        # "japanese_fruits_quiz",              #JP
-                       # "japanese_colors_teach",             #JP
+                       
                        # "japanese_colors_quiz",             #JP
                        # "japanese_song_sanpo_teach",         #JP
                        # "john_3_16",                         #ENG
@@ -17292,7 +17287,7 @@ def vocab_teach(session_id, lesson_title):
     global screen_color, text_color, shadow_color, WIDTH, HEIGHT, current_font_name_or_path  # Access theme-related globals
 
     # Set the wait time in milliseconds
-    wait_time = 5000
+    wait_time = 2500
 
     # Get the student's current level for the lesson title
     student_level = get_student_progress(session_id, lesson_title)
@@ -17303,9 +17298,9 @@ def vocab_teach(session_id, lesson_title):
         return
 
     # Font initialization for furigana and translation
-    furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 50)
+    furigana_font = pygame.font.Font("C:/Windows/Fonts/msgothic.ttc", 75)
     
-    translation_font_size = 50
+    translation_font_size = 100
     if os.path.isfile(current_font_name_or_path):
         translation_font = pygame.font.Font(current_font_name_or_path, translation_font_size)
     else:
